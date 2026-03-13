@@ -8,6 +8,7 @@ export interface UserData {
   avatarUrl: string | null;
   displayName: string;
   isPremium: boolean;
+  whatsappLinked: boolean;
   onboardingSetupCompleted: boolean;
   onboardingDailyCompleted: boolean;
   onboardingMonthlyCompleted: boolean;
@@ -39,6 +40,13 @@ export async function getUserData(): Promise<UserData | null> {
     .eq("id", user.id)
     .single();
 
+  // Check if user has a WhatsApp link (uses RLS — authenticated users can read own records)
+  const { data: whatsappLink } = await supabase
+    .from("bot_whatsapp_links")
+    .select("id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+
   // Compute display name with fallback logic
   let displayName = "Usuário";
   if (user.user_metadata?.name) {
@@ -56,6 +64,7 @@ export async function getUserData(): Promise<UserData | null> {
     name: user.user_metadata?.name || null,
     avatarUrl: user.user_metadata?.avatar_url || null,
     displayName: displayName,
+    whatsappLinked: !!whatsappLink,
     onboardingSetupCompleted: profile?.onboarding_setup_completed ?? false,
     onboardingDailyCompleted: profile?.onboarding_daily_completed ?? false,
     onboardingMonthlyCompleted: profile?.onboarding_monthly_completed ?? false,
