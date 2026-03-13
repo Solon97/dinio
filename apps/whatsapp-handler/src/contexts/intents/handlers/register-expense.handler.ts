@@ -36,17 +36,23 @@ export async function handleRegisterExpense(
   context: IntentContext,
   reply: ReplyFunction,
 ): Promise<void> {
-  const { previousState, previousOperation } = context;
+  const { previousState, previousOperation, interactiveReplyId } = context;
   const pendingData = previousOperation?.data as PendingExpenseData | undefined;
 
-  if (previousState && !!pendingData) {
-    return handleFlowStep(intent, context, reply, previousState.step, pendingData);
+  if (!!previousState && !!pendingData && interactiveReplyId) {
+    return handleInteractiveReply(
+      intent,
+      context,
+      reply,
+      previousState.step,
+      pendingData,
+    );
   }
 
   return startNewExpenseFlow(intent, context, reply);
 }
 
-async function handleFlowStep(
+async function handleInteractiveReply(
   intent: ParsedIntent,
   context: IntentContext,
   reply: ReplyFunction,
@@ -57,44 +63,12 @@ async function handleFlowStep(
     return handleCardSelection(pendingData, context, reply);
   }
 
-  if (previousStep === STEP_AWAITING_CONFIRMATION) {
-    if (context.interactiveReplyId === CONFIRM_BUTTON_ID) {
-      return persistExpense(pendingData, context, reply);
-    }
-    return handleConfirmationEdit(intent, pendingData, context, reply);
+  if (
+    previousStep === STEP_AWAITING_CONFIRMATION &&
+    context.interactiveReplyId === CONFIRM_BUTTON_ID
+  ) {
+    return persistExpense(pendingData, context, reply);
   }
-}
-
-// ---------------------------------------------------------------------------
-// Step: field edit during awaiting_confirmation (user sent text, not button)
-// ---------------------------------------------------------------------------
-
-async function handleConfirmationEdit(
-  intent: ParsedIntent,
-  pendingData: PendingExpenseData,
-  context: IntentContext,
-  reply: ReplyFunction,
-): Promise<void> {
-  const updated: PendingExpenseData = { ...pendingData };
-
-  if (intent.amount != null && intent.amount > 0) {
-    updated.amountInReais = intent.amount;
-  }
-  if (intent.description) {
-    updated.description = intent.description.trim();
-  }
-  if (intent.category) {
-    updated.category = mapIntentCategoryToApiCategory(intent.category);
-  }
-  if (intent.paymentType) {
-    updated.paymentType = intent.paymentType;
-    if (intent.paymentType === "debito") {
-      delete updated.card;
-      delete updated.invoiceDueMonthId;
-    }
-  }
-
-  await transitionToConfirmation(updated, context, reply);
 }
 
 // ---------------------------------------------------------------------------
