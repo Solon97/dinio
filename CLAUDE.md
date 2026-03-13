@@ -14,20 +14,22 @@ Dinio is built around the idea that financial control should be simple, human, a
 
 ## Monorepo Structure
 
-This repository contains two independent services and one shared package:
+This repository is a pnpm + Turborepo monorepo. It contains two independent services and one shared package:
 
 | Folder | Description |
 |---|---|
-| `dinio-web-app/` | The main Next.js web application — core product experience |
-| `dinio-whatsapp-handler/` | Fastify service for WhatsApp integration via the Meta Graph API |
-| `dinio-shared/` | Shared TypeScript utilities published to GitHub Packages as `@solon97/dinio-shared` |
+| `apps/web-app/` | The main Next.js web application — core product experience |
+| `apps/whatsapp-handler/` | Fastify service for WhatsApp integration via the Meta Graph API |
+| `packages/shared/` | Shared TypeScript utilities published to GitHub Packages as `@solon97/dinio-shared` |
+
+Root files: `pnpm-workspace.yaml`, `turbo.json`, `package.json`.
 
 ---
 
 ## When To Use Each Set Of Instructions
 
-### Working on `dinio-web-app/`
-If the task involves any of the following, follow the instructions in `dinio-web-app/.github/copilot-instructions.md`:
+### Working on `apps/web-app/`
+If the task involves any of the following, follow the instructions in `apps/web-app/.github/copilot-instructions.md`:
 - Next.js pages, layouts, or API routes
 - React components (dashboard, marketing, shared)
 - Supabase data access or authentication
@@ -36,10 +38,10 @@ If the task involves any of the following, follow the instructions in `dinio-web
 - BudgetContext or any frontend state management
 - Monetary conversion between reais and cents
 - Tailwind / DaisyUI styling
-- Unit tests under `dinio-web-app/` or E2E tests with Playwright
+- Unit tests under `apps/web-app/` or E2E tests with Playwright
 
-### Working on `dinio-whatsapp-handler/`
-If the task involves any of the following, follow the instructions in `dinio-whatsapp-handler/.github/copilot-instructions.md`:
+### Working on `apps/whatsapp-handler/`
+If the task involves any of the following, follow the instructions in `apps/whatsapp-handler/.github/copilot-instructions.md`:
 - WhatsApp webhook handling
 - Fastify routes or plugins
 - AI-powered intent parsing from natural language messages
@@ -47,15 +49,15 @@ If the task involves any of the following, follow the instructions in `dinio-wha
 - WhatsApp message formatting and UX
 - Integration between WhatsApp and the Dinio main app API
 
-### Working on `dinio-shared/`
-If the task involves invoice cycle calculations, month ID arithmetic, or any logic that must be consistent across both services, edit `dinio-shared/` directly.
-After changes: bump `version` in `dinio-shared/package.json`, run `npm run build`, push a `v*` tag to trigger the GitHub Actions publish. Both consuming services must update their installed version.
+### Working on `packages/shared/`
+If the task involves invoice cycle calculations, month ID arithmetic, or any logic that must be consistent across both services, edit `packages/shared/` directly.
+After changes: run `pnpm build` inside `packages/shared/`. Both consuming services reference it via `workspace:*` and pick up changes immediately — no publish or version bump needed.
 
 ---
 
 ## dinio-shared Package
 
-`dinio-shared` is a TypeScript utility package published to GitHub Packages. Both services import it via the alias `dinio-shared`.
+`dinio-shared` is a local workspace package (`packages/shared/`). Both services import it via the alias `dinio-shared` using `workspace:*` — no external registry involved.
 
 ### Purpose
 
@@ -87,11 +89,9 @@ Centralises logic that must behave identically in both services — primarily in
 
 Sub-entry `'dinio-shared/invoice-cycle'` re-exports all of the above.
 
-### Publishing
-- Registry: GitHub Packages (`https://npm.pkg.github.com`)
-- Build: `npm run build` (tsc) inside `dinio-shared/`
-- Release: push a `v*` tag — GitHub Actions publishes automatically
-- Consumers require `GITHUB_TOKEN` in their environment to install the package
+### Build
+- Run `pnpm build` (tsc) inside `packages/shared/` after any source change
+- Consuming apps resolve the package locally via the pnpm workspace — no publish step needed
 
 ---
 
@@ -102,3 +102,23 @@ Regardless of which service you are working in:
 - Financial logic is always the most critical path — correctness takes precedence over everything else.
 - Both services are production systems used by real users. Treat changes with care.
 - Follow the SOLID principles and clean code conventions described in each service's own instructions file.
+
+---
+
+## Mandatory: Keep Instructions Up to Date
+
+**After completing any task, you must update the relevant instruction files if the task introduced changes to architecture, conventions, file structure, or workflows.**
+
+Files to keep current:
+- `CLAUDE.md` (root) and `.github/copilot-instructions.md` (root) — monorepo structure, shared package, cross-service conventions
+- `apps/web-app/CLAUDE.md` and `apps/web-app/.github/copilot-instructions.md` — web app architecture, patterns, pitfalls
+- `apps/whatsapp-handler/CLAUDE.md` and `apps/whatsapp-handler/.github/copilot-instructions.md` — WhatsApp service architecture, flows, pitfalls
+- `packages/shared/README.md` — shared package publishing and development workflow
+
+When to update:
+- New architectural pattern or layer introduced
+- New convention established (naming, file placement, data flow)
+- Existing convention changed or removed
+- New pitfall discovered during the task
+- File structure changed
+- Build, test, or deploy workflow changed

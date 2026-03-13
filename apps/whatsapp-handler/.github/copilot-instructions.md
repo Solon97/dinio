@@ -175,7 +175,7 @@
 
 ### Rules
 - Never re-implement invoice cycle or month ID logic — always use `dinio-shared`.
-- If a needed function is missing, add it to `dinio-shared/`, publish a new version, and update the installed version here before using it.
+- If a needed function is missing, add it to `packages/shared/` and run `pnpm build` there — changes are available immediately via workspace.
 
 ## Common Pitfalls
 - Treating WhatsApp as a replacement for the main app instead of a complementary channel.
