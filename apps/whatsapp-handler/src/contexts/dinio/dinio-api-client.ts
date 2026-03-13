@@ -36,6 +36,16 @@ export interface GetCreditCardsResponse {
   creditCards: BotCreditCard[]
 }
 
+export interface BotAgendaItem {
+  name: string
+  /** null for credit card invoices where the total is not yet known */
+  amountCents: number | null
+}
+
+export interface BotAgendaResponse {
+  items: BotAgendaItem[]
+}
+
 interface ErrorBody {
   error?: string
   code?: string
@@ -173,5 +183,19 @@ export async function simulateExpense(input: SimulateExpenseInput): Promise<Simu
       amount: toCents(input.amountInReais),
       description: input.description,
     }),
+  })
+}
+
+/**
+ * Fetches the financial commitments (agenda items) due on the given date.
+ *
+ * @param userId - UUID of the user
+ * @param date   - Optional date in YYYY-MM-DD format. Defaults to today in São Paulo when omitted.
+ */
+export async function getAgenda(userId: string, date?: string): Promise<BotAgendaResponse> {
+  const params = new URLSearchParams({ user_id: userId })
+  if (date) params.set('date', date)
+  return requestJson<BotAgendaResponse>(`/api/bot/agenda?${params.toString()}`, {
+    method: 'GET',
   })
 }

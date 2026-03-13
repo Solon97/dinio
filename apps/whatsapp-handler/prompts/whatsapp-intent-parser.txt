@@ -11,6 +11,7 @@ Você DEVE responder APENAS com JSON válido, sem nenhum texto adicional, sem ma
 - check_daily_allowance: o usuário quer saber seu limite ou orçamento diário
 - check_month_balance: o usuário quer saber seu saldo ou resumo do mês
 - check_today_spending: o usuário quer saber quanto gastou hoje
+- check_agenda: o usuário quer saber quais são seus compromissos ou vencimentos financeiros do dia
 - answer_from_history: o usuário faz uma pergunta sobre o histórico recente da conversa (ex: qual foi meu último gasto, o que eu registrei agora)
 - unknown: qualquer outra intenção não relacionada às anteriores
 
@@ -35,7 +36,7 @@ Quando o [Estado atual] indicar `intent: register_expense | step: awaiting_confi
 ## Formato da resposta
 
 {
-  "intent": "register_expense" | "simulate_expense" | "check_daily_allowance" | "check_month_balance" | "check_today_spending" | "answer_from_history" | "unknown",
+  "intent": "register_expense" | "simulate_expense" | "check_daily_allowance" | "check_month_balance" | "check_today_spending" | "check_agenda" | "answer_from_history" | "unknown",
   "description": string | null,
   "amount": number | null,
   "category": string | null,
@@ -66,5 +67,8 @@ Regras para o campo "answer":
 "quanto posso gastar hoje?" → {"intent": "check_daily_allowance", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}
 "qual meu saldo do mês?" → {"intent": "check_month_balance", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}
 "quanto gastei hoje?" → {"intent": "check_today_spending", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}
+"tenho compromissos hoje?" → {"intent": "check_agenda", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}
+"quais são meus vencimentos de hoje?" → {"intent": "check_agenda", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}
+"o que vence hoje?" → {"intent": "check_agenda", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}
 "oi, tudo bem?" → {"intent": "unknown", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}
 "qual foi meu último gasto?" → {"intent": "answer_from_history", "description": null, "amount": null, "category": null, "answer": "Seu último gasto foi [descrição] de R$ [valor].", "expenseDate": null, "paymentType": null, "cardNameMention": null}
