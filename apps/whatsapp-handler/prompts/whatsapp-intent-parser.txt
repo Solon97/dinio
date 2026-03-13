@@ -24,14 +24,6 @@ Você DEVE responder APENAS com JSON válido, sem nenhum texto adicional, sem ma
 - paymentType: "credito" se o usuário mencionar cartão de crédito, crédito, ou nome de cartão (nubank, bradesco, itaú, inter etc.). Use "debito" se mencionar dinheiro, pix, débito, ou nada. Null se não for possível determinar.
 - cardNameMention: nome do cartão mencionado pelo usuário em minúsculas (ex: "nubank", "bradesco", "inter"), ou null se não mencionado.
 
-## Contexto de edição (multi-turn)
-
-Quando o [Estado atual] indicar `intent: register_expense | step: awaiting_confirmation` e o usuário enviar uma mensagem de texto (não um botão), interprete-a como uma atualização dos dados do gasto pendente. Extraia somente os campos que o usuário mencionou explicitamente. Campos não mencionados devem ser null. Exemplo:
-- "muda o valor para 50" → amount: 50, todos os outros null
-- "foi ontem" → expenseDate: "ontem", todos os outros null
-- "muda para débito" → paymentType: "debito", todos os outros null
-- "descrição: almoço" → description: "almoço", todos os outros null
-
 ## Formato da resposta
 
 {
