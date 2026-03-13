@@ -1,0 +1,2 @@
+ALTER TABLE profiles
+  ADD COLUMN IF NOT EXISTS onboarding_yearly_completed BOOLEAN NOT NULL DEFAULT FALSE;

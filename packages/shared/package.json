@@ -1,0 +1,38 @@
+{
+  "name": "@solon97/dinio-shared",
+  "version": "1.0.3",
+  "description": "Shared utilities for Dinio services (web app and WhatsApp handler)",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./invoice-cycle": {
+      "require": "./dist/invoice-cycle/index.js",
+      "import": "./dist/invoice-cycle/index.js",
+      "types": "./dist/invoice-cycle/index.d.ts",
+      "default": "./dist/invoice-cycle/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Solon97/dinio.git",
+    "directory": "dinio-shared"
+  },
+  "scripts": {
+    "build": "tsc"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.2"
+  }
+}

@@ -1,0 +1,2 @@
+export PATH="/home/solon97/n/bin:$PATH"
+npm run test
