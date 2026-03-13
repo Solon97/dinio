@@ -108,7 +108,7 @@ export async function routeMessage(
   // -------------------------------------------------------------------------
   const hasActiveFlow = !!session.state;
   const isInteractiveReply = !!message.interactiveReplyId;
-
+  reply(JSON.stringify({ hasActiveFlow, isInteractiveReply }));
   if (!hasActiveFlow && !isInteractiveReply && !isMessageRelevant(message.text, log)) {
     await handleUnknown(reply);
     log.info(
@@ -148,7 +148,7 @@ export async function routeMessage(
     const intentContext = buildIntentContext(session, message.text);
     intent = await parseIntent(intentContext);
   }
-
+  reply(JSON.stringify({ intent }));
   log.info({ intent }, "intent parsed");
 
   // Clear previous operation state before dispatch so handlers start with a
