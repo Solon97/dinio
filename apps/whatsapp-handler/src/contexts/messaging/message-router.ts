@@ -20,7 +20,6 @@ import {
 } from "../session/contextBuilder";
 import { sendTextMessage } from "../whatsapp/whatsapp-client";
 import { isMessageRelevant } from "./relevance-filter";
-import { format } from "node:path";
 
 const LINK_MESSAGE_PREFIX = [
   "Oi! Eu sou o Dinio 👋",
