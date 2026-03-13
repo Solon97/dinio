@@ -34,6 +34,16 @@
 - If you add a monetary field, update the matching config in `types/monetary.ts`.
 - Temporary wizard IDs use `temp-{timestamp}-{random}` and are resolved server-side.
 
+## Supabase Directory
+
+The `supabase/` directory (migrations, `config.toml`, snippets) lives at the **monorepo root**, not inside `apps/web-app/`. Run Supabase CLI commands from the monorepo root:
+
+```bash
+supabase link --project-ref <PROJECT_ID>
+supabase db push
+supabase migration new <name>
+```
+
 ## Next.js 15 And Supabase Rules
 - Always `await` Next.js async APIs in server code: `headers()`, `cookies()`, `params`.
 - Dynamic route params must be typed as Promise and awaited.

@@ -1,13 +1,15 @@
-name: Deploy + Supabase Migrations
+name: Supabase Migrations
 
 on:
   push:
     branches:
       - main
       - develop
+    paths:
+      - 'supabase/**'
 
 jobs:
-  deploy:
+  migrate:
     runs-on: ubuntu-latest
     permissions:
       actions: write

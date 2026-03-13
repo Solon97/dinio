@@ -21,8 +21,19 @@ This repository is a pnpm + Turborepo monorepo. It contains two independent serv
 | `apps/web-app/` | The main Next.js web application — core product experience |
 | `apps/whatsapp-handler/` | Fastify service for WhatsApp integration via the Meta Graph API |
 | `packages/shared/` | Shared TypeScript utilities published to GitHub Packages as `@solon97/dinio-shared` |
+| `supabase/` | Supabase CLI config (`config.toml`), database migrations, and SQL snippets — shared infrastructure |
 
 Root files: `pnpm-workspace.yaml`, `turbo.json`, `package.json`.
+
+## CI/CD
+
+### Supabase Migrations — `.github/workflows/supabase-migrations.yml`
+
+- Runs on push to `main` or `develop`, **only when files inside `supabase/` change** (`paths: supabase/**`).
+- Changes to `apps/web-app/`, `apps/whatsapp-handler/`, or `packages/` do **not** trigger this workflow.
+- Environments: `main` → `Production`, `develop` → `Preview`.
+- Secrets required: `SUPABASE_ACCESS_TOKEN`, `SUPABASE_DB_PASSWORD`, `SUPABASE_PROJECT_ID`.
+- After `supabase db push`, notifies Vercel via `vercel/repository-dispatch/actions/status@v1`.
 
 ---
 
