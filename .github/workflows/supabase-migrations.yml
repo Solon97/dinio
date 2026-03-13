@@ -29,8 +29,8 @@ jobs:
         with:
           version: latest
 
-      - run: supabase link --project-ref $SUPABASE_PROJECT_ID --debug
-      - run: supabase db push
+      - run: supabase link --project-ref $SUPABASE_PROJECT_ID --password $SUPABASE_DB_PASSWORD
+      - run: supabase db push --password $SUPABASE_DB_PASSWORD
 
       - name: 'notify vercel'
         uses: 'vercel/repository-dispatch/actions/status@v1'
