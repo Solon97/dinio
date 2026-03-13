@@ -36,38 +36,65 @@ export async function handleRegisterExpense(
   context: IntentContext,
   reply: ReplyFunction,
 ): Promise<void> {
-  const { interactiveReplyId, previousState, previousOperation } = context;
+  const { previousState, previousOperation } = context;
   const pendingData = previousOperation?.data as PendingExpenseData | undefined;
-  if (interactiveReplyId && !!pendingData) {
-    return handleInteractiveReply(
-      context,
-      reply,
-      previousState?.step ?? "",
-      interactiveReplyId,
-      pendingData,
-    );
+
+  if (previousState && !!pendingData) {
+    return handleFlowStep(intent, context, reply, previousState.step, pendingData);
   }
 
   return startNewExpenseFlow(intent, context, reply);
 }
 
-export async function handleInteractiveReply(
+async function handleFlowStep(
+  intent: ParsedIntent,
   context: IntentContext,
   reply: ReplyFunction,
   previousStep: string,
-  interactiveReplyId: string,
   pendingData: PendingExpenseData,
 ): Promise<void> {
   if (previousStep === STEP_CARD_SELECTION_REQUIRED) {
     return handleCardSelection(pendingData, context, reply);
   }
 
-  if (
-    previousStep === STEP_AWAITING_CONFIRMATION &&
-    interactiveReplyId === CONFIRM_BUTTON_ID
-  ) {
-    return persistExpense(pendingData, context, reply);
+  if (previousStep === STEP_AWAITING_CONFIRMATION) {
+    if (context.interactiveReplyId === CONFIRM_BUTTON_ID) {
+      return persistExpense(pendingData, context, reply);
+    }
+    return handleConfirmationEdit(intent, pendingData, context, reply);
   }
+}
+
+// ---------------------------------------------------------------------------
+// Step: field edit during awaiting_confirmation (user sent text, not button)
+// ---------------------------------------------------------------------------
+
+async function handleConfirmationEdit(
+  intent: ParsedIntent,
+  pendingData: PendingExpenseData,
+  context: IntentContext,
+  reply: ReplyFunction,
+): Promise<void> {
+  const updated: PendingExpenseData = { ...pendingData };
+
+  if (intent.amount != null && intent.amount > 0) {
+    updated.amountInReais = intent.amount;
+  }
+  if (intent.description) {
+    updated.description = intent.description.trim();
+  }
+  if (intent.category) {
+    updated.category = mapIntentCategoryToApiCategory(intent.category);
+  }
+  if (intent.paymentType) {
+    updated.paymentType = intent.paymentType;
+    if (intent.paymentType === "debito") {
+      delete updated.card;
+      delete updated.invoiceDueMonthId;
+    }
+  }
+
+  await transitionToConfirmation(updated, context, reply);
 }
 
 // ---------------------------------------------------------------------------
@@ -272,8 +299,6 @@ async function transitionToConfirmation(
   };
 
   const confirmationText = buildConfirmationText(pending);
-  context.logResponse(confirmationText);
-
   await sendButtonMessage(context.phone, confirmationText, [
     { id: CONFIRM_BUTTON_ID, title: CONFIRM_BUTTON_TITLE },
   ]);
@@ -299,8 +324,6 @@ async function transitionToCardSelection(
     "",
     "Selecione um dos cartões abaixo:",
   ].join("\n");
-
-  context.logResponse("Lista de cartões enviada para seleção.");
 
   await sendListMessage(context.phone, bodyText, "Ver cartões", [
     {

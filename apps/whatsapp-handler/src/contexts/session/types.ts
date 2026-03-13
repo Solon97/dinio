@@ -4,12 +4,8 @@ export const MAX_HISTORY_SIZE = 15
 /** Session TTL in seconds (24 hours). */
 export const SESSION_TTL_SECONDS = 24 * 60 * 60
 
-export type MessageRole = 'user' | 'assistant'
-
 /** A single entry in the conversation history window. */
 export interface HistoryMessage {
-  /** Message author. */
-  role: MessageRole
   /** Raw message text. */
   text: string
   /** Unix timestamp (ms). Stored as compact field name `ts` to reduce payload size. */

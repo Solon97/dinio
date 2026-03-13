@@ -62,10 +62,4 @@ export interface IntentContext {
    * sent, allowing the handler to identify the selection without LLM parsing.
    */
   interactiveReplyId: string | null
-  /**
-   * Allows handlers that send interactive messages (buttons, lists) to record
-   * a text representation that will be stored in the conversation history,
-   * without also sending a plain-text message to the user.
-   */
-  logResponse: (text: string) => void
 }

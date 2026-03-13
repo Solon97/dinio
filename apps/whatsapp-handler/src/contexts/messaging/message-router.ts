@@ -91,9 +91,7 @@ export async function routeMessage(
     return;
   }
 
-  let assistantResponse = "";
   const reply = async (text: string): Promise<void> => {
-    assistantResponse = text;
     await sendTextMessage(message.phone, text);
   };
 
@@ -168,15 +166,7 @@ export async function routeMessage(
   clearOperationState(session);
 
   // -------------------------------------------------------------------------
-  // Context passed to handlers, including the pre-clear snapshots and a
-  // logResponse callback for handlers that send interactive messages.
-  // -------------------------------------------------------------------------
-  const logResponse = (text: string): void => {
-    assistantResponse = text;
-  };
-
-  // -------------------------------------------------------------------------
-  // Dispatch: capture the handler's response text for history
+  // Dispatch
   // -------------------------------------------------------------------------
   await dispatchIntent(
     intent,
@@ -187,7 +177,6 @@ export async function routeMessage(
       previousState,
       previousOperation,
       interactiveReplyId: message.interactiveReplyId ?? null,
-      logResponse,
     },
     reply,
   );
@@ -196,10 +185,7 @@ export async function routeMessage(
   // -------------------------------------------------------------------------
   // Session: append turn and save — single write after processing
   // -------------------------------------------------------------------------
-  appendToHistory(session, "user", message.text);
-  if (assistantResponse) {
-    appendToHistory(session, "assistant", assistantResponse);
-  }
+  appendToHistory(session, message.text);
 
   await saveSession(message.phone, session);
 }
