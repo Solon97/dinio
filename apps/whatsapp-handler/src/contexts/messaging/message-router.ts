@@ -14,11 +14,13 @@ import {
   getSession,
   saveSession,
 } from "../session/chatSessionStore";
-import { buildIntentContext } from "../session/contextBuilder";
-import { sendTextMessage } from "../whatsapp/whatsapp-client";
 import {
-  isMessageRelevant
-} from "./relevance-filter";
+  buildIntentContext,
+  formatContextForPrompt,
+} from "../session/contextBuilder";
+import { sendTextMessage } from "../whatsapp/whatsapp-client";
+import { isMessageRelevant } from "./relevance-filter";
+import { format } from "node:path";
 
 const LINK_MESSAGE_PREFIX = [
   "Oi! Eu sou o Dinio 👋",
@@ -100,7 +102,7 @@ export async function routeMessage(
   // Session: single read before any processing
   // -------------------------------------------------------------------------
   const session = await getSession(message.phone);
-  
+
   // -------------------------------------------------------------------------
   // Relevance Filter: quick check before LLM processing.
   // Interactive replies (button/list selections) within an active flow are
@@ -109,7 +111,11 @@ export async function routeMessage(
   const hasActiveFlow = !!session.state;
   const isInteractiveReply = !!message.interactiveReplyId;
   reply(JSON.stringify({ hasActiveFlow, isInteractiveReply }));
-  if (!hasActiveFlow && !isInteractiveReply && !isMessageRelevant(message.text, log)) {
+  if (
+    !hasActiveFlow &&
+    !isInteractiveReply &&
+    !isMessageRelevant(message.text, log)
+  ) {
     await handleUnknown(reply);
     log.info(
       { messageId: message.messageId },
@@ -131,11 +137,11 @@ export async function routeMessage(
   // -------------------------------------------------------------------------
   let intent: ParsedIntent;
   const isRegisterExpenseInteractive =
-    isInteractiveReply && session.state?.intent === 'register_expense';
+    isInteractiveReply && session.state?.intent === "register_expense";
 
   if (isRegisterExpenseInteractive) {
     intent = {
-      intent: 'register_expense',
+      intent: "register_expense",
       description: null,
       amount: null,
       category: null,
@@ -146,6 +152,12 @@ export async function routeMessage(
     };
   } else {
     const intentContext = buildIntentContext(session, message.text);
+    reply(
+      JSON.stringify({
+        intentContext,
+        formattedContext: formatContextForPrompt(intentContext),
+      }),
+    );
     intent = await parseIntent(intentContext);
   }
   reply(JSON.stringify({ intent }));
