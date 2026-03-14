@@ -5,6 +5,8 @@ export type IntentType =
   | 'check_month_balance'
   | 'check_today_spending'
   | 'check_agenda'
+  | 'check_agenda_week'
+  | 'check_agenda_month'
   | 'answer_from_history'
   | 'unknown'
 
