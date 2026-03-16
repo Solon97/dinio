@@ -38,8 +38,8 @@ function buildItemList(
 export function buildAgendaMessage(items: BotAgendaItem[], hasOverdue = false): string {
   if (items.length === 0) {
     return hasOverdue
-      ? 'Nenhum compromisso financeiro para hoje.'
-      : ['Nenhum compromisso financeiro para hoje 😊', '', 'Aproveite o dia sem preocupações com vencimentos!'].join('\n')
+      ? 'Você não tem nenhum compromisso financeiro para hoje, mas há compromissos em atraso.'
+      : ['Você não tem nenhum compromisso financeiro para hoje 😊', '', 'Aproveite o dia sem preocupações com vencimentos!'].join('\n')
   }
 
   const count = items.length
@@ -59,8 +59,8 @@ export function buildAgendaMessage(items: BotAgendaItem[], hasOverdue = false): 
 export function buildWeekAgendaMessage(items: BotAgendaItem[], hasOverdue = false): string {
   if (items.length === 0) {
     return hasOverdue
-      ? 'Nenhum compromisso financeiro nesta semana.'
-      : ['Nenhum compromisso financeiro nesta semana 😊', '', 'Aproveite a semana sem preocupações com vencimentos!'].join('\n')
+      ? 'Você não tem nenhum compromisso financeiro nesta semana, mas há compromissos em atraso.'
+      : ['Você não tem nenhum compromisso financeiro nesta semana 😊', '', 'Aproveite a semana sem preocupações com vencimentos!'].join('\n')
   }
 
   const count = items.length
@@ -80,8 +80,8 @@ export function buildWeekAgendaMessage(items: BotAgendaItem[], hasOverdue = fals
 export function buildMonthAgendaMessage(items: BotAgendaItem[], hasOverdue = false): string {
   if (items.length === 0) {
     return hasOverdue
-      ? 'Nenhum compromisso financeiro este mês.'
-      : ['Nenhum compromisso financeiro este mês 😊', '', 'Aproveite o mês sem preocupações com vencimentos!'].join('\n')
+      ? 'Você não tem nenhum compromisso financeiro este mês, mas há compromissos em atraso.'
+      : ['Você não tem nenhum compromisso financeiro este mês 😊', '', 'Aproveite o mês sem preocupações com vencimentos!'].join('\n')
   }
 
   const count = items.length
@@ -157,7 +157,7 @@ export async function handleCheckAgendaWeek(
 export function buildOverdueMessage(items: BotAgendaItem[]): string {
   if (items.length === 0) {
     return [
-      'Nenhum compromisso em atraso 🎉',
+      'Você não tem nenhum compromisso em atraso 🎉',
       '',
       'Seus vencimentos estão todos em dia!',
     ].join('\n')
