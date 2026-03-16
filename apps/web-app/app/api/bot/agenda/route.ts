@@ -107,14 +107,15 @@ export async function GET(request: Request) {
     const monthId = toMonthId(date);
     const fixedExpenseRepo = new SupabaseFixedExpenseRepository(supabase);
     const expenses = await fixedExpenseRepo.findByUserAndMonth(userId, monthId);
-    const items = expenses
+    const toDateStr = (dueDay: number) =>
+      `${date.slice(0, 8)}${String(dueDay).padStart(2, "0")}`;
+    const paymentItems = expenses
       .filter((e) => !e.creditCardId && !e.paid && e.dueDay < todayDay)
-      .map((e) => ({
-        name: e.name,
-        amountCents: e.amount,
-        date: `${date.slice(0, 8)}${String(e.dueDay).padStart(2, "0")}`,
-      }));
-    return NextResponse.json({ items });
+      .map((e) => ({ name: e.name, amountCents: e.amount, date: toDateStr(e.dueDay) }));
+    const refundItems = expenses
+      .filter((e) => e.isRefundable && !e.refundIncomeId && e.dueDay < todayDay)
+      .map((e) => ({ name: e.name, amountCents: e.amount, date: toDateStr(e.dueDay), isRefund: true as const }));
+    return NextResponse.json({ items: [...paymentItems, ...refundItems] });
   }
 
   // For week/month: efficiently fetch all data in 2 queries then filter by day

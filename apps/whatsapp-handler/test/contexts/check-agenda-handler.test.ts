@@ -51,7 +51,7 @@ function makeReply(): { fn: ReplyFunction; calls: string[] } {
 describe('buildAgendaMessage', () => {
   it('returns empty-agenda message when items array is empty', () => {
     const msg = buildAgendaMessage([])
-    assert.ok(msg.includes('Nenhum compromisso'), `expected empty-agenda message, got: ${msg}`)
+    assert.ok(msg.includes('nenhum compromisso'), `expected empty-agenda message, got: ${msg}`)
   })
 
   it('includes the count and label "compromisso" for a single item', () => {
@@ -125,7 +125,7 @@ describe('buildAgendaMessage', () => {
 describe('buildWeekAgendaMessage', () => {
   it('returns empty-agenda message for empty items', () => {
     const msg = buildWeekAgendaMessage([])
-    assert.ok(msg.includes('Nenhum compromisso'), `expected empty-agenda message, got: ${msg}`)
+    assert.ok(msg.includes('nenhum compromisso'), `expected empty-agenda message, got: ${msg}`)
     assert.ok(msg.includes('semana'), `expected "semana" in: ${msg}`)
   })
 
@@ -175,7 +175,7 @@ describe('buildWeekAgendaMessage', () => {
 describe('buildMonthAgendaMessage', () => {
   it('returns empty-agenda message for empty items', () => {
     const msg = buildMonthAgendaMessage([])
-    assert.ok(msg.includes('Nenhum compromisso'), `expected empty-agenda message, got: ${msg}`)
+    assert.ok(msg.includes('nenhum compromisso'), `expected empty-agenda message, got: ${msg}`)
     assert.ok(msg.includes('mês'), `expected "mês" in: ${msg}`)
   })
 
@@ -258,7 +258,7 @@ describe('handleCheckAgenda', () => {
     await handleCheckAgenda(context, reply)
 
     assert.strictEqual(calls.length, 1)
-    assert.ok(calls[0].includes('Nenhum compromisso'), `unexpected reply: ${calls[0]}`)
+    assert.ok(calls[0].includes('nenhum compromisso'), `unexpected reply: ${calls[0]}`)
   })
 
   it('replies with agenda items when API returns commitments', async () => {

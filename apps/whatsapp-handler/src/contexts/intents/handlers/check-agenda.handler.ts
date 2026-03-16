@@ -101,19 +101,31 @@ export function buildMonthAgendaMessage(items: BotAgendaItem[], hasOverdue = fal
   ].join('\n')
 }
 
+function formatOverdueItemLine(item: BotAgendaItem): string {
+  const day = item.date ? parseInt(item.date.split('-')[2]) : null
+  const amountStr = item.amountCents !== null ? ` — ${formatCurrencyFromCents(item.amountCents)}` : ''
+  const dayStr = day ? ` (dia ${day})` : ''
+  return `• ${item.name}${amountStr}${dayStr}`
+}
+
 function buildOverdueAlert(items: BotAgendaItem[]): string | null {
   if (items.length === 0) return null
-  const count = items.length
-  const label = count === 1 ? 'compromisso em atraso' : 'compromissos em atraso'
-  const lines = items
-    .map((item) => {
-      const day = item.date ? parseInt(item.date.split('-')[2]) : null
-      const dayStr = day ? ` (venceu dia ${day})` : ''
-      const amountStr = item.amountCents !== null ? ` — ${formatCurrencyFromCents(item.amountCents)}` : ''
-      return `• ${item.name}${amountStr}${dayStr}`
-    })
-    .join('\n')
-  return [`⚠️ Você tem ${count} ${label}:`, '', lines].join('\n')
+
+  const payments = items.filter((i) => !i.isRefund)
+  const refunds = items.filter((i) => i.isRefund)
+  const sections: string[] = []
+
+  if (payments.length > 0) {
+    const label = payments.length === 1 ? 'compromisso em atraso' : 'compromissos em atraso'
+    sections.push([`⚠️ Você tem ${payments.length} ${label}:`, '', payments.map(formatOverdueItemLine).join('\n')].join('\n'))
+  }
+
+  if (refunds.length > 0) {
+    const label = refunds.length === 1 ? 'reembolso pendente' : 'reembolsos pendentes'
+    sections.push([`💰 Você tem ${refunds.length} ${label}:`, '', refunds.map(formatOverdueItemLine).join('\n')].join('\n'))
+  }
+
+  return sections.join('\n\n')
 }
 
 async function fetchOverdueAlert(userId: string): Promise<string | null> {
@@ -155,7 +167,10 @@ export async function handleCheckAgendaWeek(
 }
 
 export function buildOverdueMessage(items: BotAgendaItem[]): string {
-  if (items.length === 0) {
+  const payments = items.filter((i) => !i.isRefund)
+  const refunds = items.filter((i) => i.isRefund)
+
+  if (payments.length === 0 && refunds.length === 0) {
     return [
       'Você não tem nenhum compromisso em atraso 🎉',
       '',
@@ -163,24 +178,29 @@ export function buildOverdueMessage(items: BotAgendaItem[]): string {
     ].join('\n')
   }
 
-  const count = items.length
-  const label = count === 1 ? 'compromisso em atraso' : 'compromissos em atraso'
-  const lines = items
-    .map((item) => {
-      const day = item.date ? parseInt(item.date.split('-')[2]) : null
-      const dayStr = day ? ` (venceu dia ${day})` : ''
-      const amountStr = item.amountCents !== null ? ` — ${formatCurrencyFromCents(item.amountCents)}` : ''
-      return `• ${item.name}${amountStr}${dayStr}`
-    })
-    .join('\n')
+  const sections: string[] = []
 
-  return [
-    `⚠️ Você tem ${count} ${label}:`,
-    '',
-    lines,
-    '',
-    'Regularize o quanto antes para evitar juros e multas.',
-  ].join('\n')
+  if (payments.length > 0) {
+    const label = payments.length === 1 ? 'compromisso em atraso' : 'compromissos em atraso'
+    sections.push([
+      `⚠️ Você tem ${payments.length} ${label}:`,
+      '',
+      payments.map(formatOverdueItemLine).join('\n'),
+      '',
+      'Regularize o quanto antes para evitar juros e multas.',
+    ].join('\n'))
+  }
+
+  if (refunds.length > 0) {
+    const label = refunds.length === 1 ? 'reembolso pendente' : 'reembolsos pendentes'
+    sections.push([
+      `💰 Você tem ${refunds.length} ${label}:`,
+      '',
+      refunds.map(formatOverdueItemLine).join('\n'),
+    ].join('\n'))
+  }
+
+  return sections.join('\n\n')
 }
 
 export async function handleCheckAgendaOverdue(
