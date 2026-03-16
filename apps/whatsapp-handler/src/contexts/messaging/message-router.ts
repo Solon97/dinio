@@ -23,13 +23,24 @@ import { isMessageRelevant } from "./relevance-filter";
 
 const LINK_MESSAGE_PREFIX = [
   "Oi! Eu sou o Dinio 👋",
-  "Seu assistente para saber quanto pode gastar por dia.",
+  "Seu assistente financeiro pessoal, aqui no WhatsApp.",
   "",
+].join("\n");
+
+const LINK_MESSAGE_SUCCESS = [
+  LINK_MESSAGE_PREFIX,
   "Pra gente conversar por aqui, primeiro preciso conectar seu WhatsApp à sua conta.",
   "É rápido — leva menos de 1 minuto.",
   "",
   "Toque no link abaixo para fazer a conexão:",
-].join("\n");
+];
+
+const LINK_MESSAGE_ERROR = [
+  LINK_MESSAGE_PREFIX,
+  "Tive um problema para gerar seu link de conexão agora.",
+  "",
+  "Tente novamente em alguns instantes que deve funcionar.",
+];
 
 export async function routeMessage(
   message: IncomingMessage,
@@ -59,15 +70,8 @@ export async function routeMessage(
   if (!resolveResult.linked) {
     const link = resolveResult.link;
     const responseText = link
-      ? `${LINK_MESSAGE_PREFIX}\n\n${link}`
-      : [
-          "Oi! Eu sou o Dinio 👋",
-          "Seu assistente para saber quanto pode gastar por dia.",
-          "",
-          "Tive um problema para gerar seu link de conexão agora.",
-          "",
-          "Tente novamente em alguns instantes que deve funcionar.",
-        ].join("\n");
+      ? `${LINK_MESSAGE_SUCCESS}\n\n${link}`
+      : LINK_MESSAGE_ERROR.join("\n");
 
     await sendTextMessage(message.phone, responseText);
     log.info({ messageId: message.messageId }, "sent linking message");

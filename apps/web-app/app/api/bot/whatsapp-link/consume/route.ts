@@ -90,7 +90,7 @@ export async function POST(request: Request) {
   const tokenRow = tokenRowData as LinkTokenRow | null;
 
   if (!tokenRow) {
-    return NextResponse.json({ error: "Invalid token" }, { status: 400 });
+    return NextResponse.json({ error: "Token Inválido" }, { status: 400 });
   }
 
   const isExpired = new Date(tokenRow.expires_at).getTime() <= Date.now();
@@ -100,7 +100,7 @@ export async function POST(request: Request) {
       .delete()
       .eq("id", tokenRow.id);
 
-    return NextResponse.json({ error: "Token expired" }, { status: 400 });
+    return NextResponse.json({ error: "Token expirado. Por favor, envie uma nova mensagem pelo Whatsapp, para receber um novo link." }, { status: 400 });
   }
 
   const { data: existingLinkData, error: existingLinkError } =
@@ -122,7 +122,7 @@ export async function POST(request: Request) {
 
   if (existingLink && existingLink.user_id !== user.id) {
     return NextResponse.json(
-      { error: "Phone already linked to another account" },
+      { error: "Telefone já vinculado a outra conta." },
       { status: 409 },
     );
   }
@@ -148,7 +148,7 @@ export async function POST(request: Request) {
   if (existingUserLinkError) {
     console.error("Error checking existing user link", existingUserLinkError);
     return NextResponse.json(
-      { error: "Failed to link WhatsApp" },
+      { error: "Erro ao vincular WhatsApp" },
       { status: 500 },
     );
   }
@@ -160,7 +160,7 @@ export async function POST(request: Request) {
       .eq("id", tokenRow.id);
 
     return NextResponse.json(
-      { error: "User already linked to another phone" },
+      { error: "Usuário já vinculado a outro telefone." },
       { status: 409 },
     );
   }
