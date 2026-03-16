@@ -161,7 +161,7 @@ export default function AppHeader() {
                         ) : (
                           whatsappBotPhone && (
                             <a
-                              href={`https://wa.me/${whatsappBotPhone}`}
+                              href={`https://wa.me/${whatsappBotPhone}?text=${encodeURIComponent("Olá, quero vincular meu WhatsApp ao Dinio")}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-50 hover:text-teal-600 transition-colors"
