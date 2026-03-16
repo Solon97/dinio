@@ -40,6 +40,8 @@ export interface BotAgendaItem {
   name: string
   /** null for credit card invoices where the total is not yet known */
   amountCents: number | null
+  /** ISO date (YYYY-MM-DD). Present for week/month queries. */
+  date?: string
 }
 
 export interface BotAgendaResponse {
@@ -187,14 +189,21 @@ export async function simulateExpense(input: SimulateExpenseInput): Promise<Simu
 }
 
 /**
- * Fetches the financial commitments (agenda items) due on the given date.
+ * Fetches the financial commitments (agenda items) for the given period.
  *
  * @param userId - UUID of the user
- * @param date   - Optional date in YYYY-MM-DD format. Defaults to today in São Paulo when omitted.
+ * @param date   - Optional start date in YYYY-MM-DD format. Defaults to today in São Paulo when omitted.
+ * @param period - Optional period: 'day' (default), 'week' (next 7 days), or 'month' (remaining month).
+ *                 Items for 'week' and 'month' include a `date` field.
  */
-export async function getAgenda(userId: string, date?: string): Promise<BotAgendaResponse> {
+export async function getAgenda(
+  userId: string,
+  date?: string,
+  period?: 'day' | 'week' | 'month',
+): Promise<BotAgendaResponse> {
   const params = new URLSearchParams({ user_id: userId })
   if (date) params.set('date', date)
+  if (period && period !== 'day') params.set('period', period)
   return requestJson<BotAgendaResponse>(`/api/bot/agenda?${params.toString()}`, {
     method: 'GET',
   })
