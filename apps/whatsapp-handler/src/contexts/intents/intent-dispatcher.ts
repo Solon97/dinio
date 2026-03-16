@@ -4,6 +4,7 @@ import { handleSimulateExpense } from './handlers/simulate-expense.handler'
 import { handleCheckDailyAllowance } from './handlers/check-daily-allowance.handler'
 import { handleCheckMonthBalance } from './handlers/check-month-balance.handler'
 import { handleCheckTodaySpending } from './handlers/check-today-spending.handler'
+import { handleCheckAgenda, handleCheckAgendaWeek, handleCheckAgendaMonth } from './handlers/check-agenda.handler'
 import { handleAnswerFromHistory } from './handlers/answer-from-history.handler'
 import { handleUnknown } from './handlers/unknown.handler'
 
@@ -23,6 +24,12 @@ export async function dispatchIntent(
       return handleCheckMonthBalance(context, reply)
     case 'check_today_spending':
       return handleCheckTodaySpending(context, reply)
+    case 'check_agenda':
+      return handleCheckAgenda(context, reply)
+    case 'check_agenda_week':
+      return handleCheckAgendaWeek(context, reply)
+    case 'check_agenda_month':
+      return handleCheckAgendaMonth(context, reply)
     case 'answer_from_history':
       return handleAnswerFromHistory(intent, reply)
     case 'unknown':
