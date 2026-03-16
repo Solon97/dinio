@@ -9,8 +9,11 @@ export async function handleUnknown(reply: ReplyFunction): Promise<void> {
       "Tente me enviar algo como:",
       '• "Gastei 50 no uber"',
       '• "Quanto posso gastar hoje?"',
-      '• "Qual meu saldo?"',
+      '• "Qual meu saldo para o mês ?"',
       '• "Simula uma compra de 30 reais"',
+      '• "Tenho compromissos hoje?"',
+      '• "Tenho compromissos nesta semana?"',
+      '• "Tenho compromissos neste mês?"',
     ].join("\n"),
   );
 }
