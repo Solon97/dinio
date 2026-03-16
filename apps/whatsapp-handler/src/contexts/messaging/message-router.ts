@@ -14,11 +14,12 @@ import {
   getSession,
   saveSession,
 } from "../session/chatSessionStore";
-import { buildIntentContext } from "../session/contextBuilder";
-import { sendTextMessage } from "../whatsapp/whatsapp-client";
 import {
-  isMessageRelevant
-} from "./relevance-filter";
+  buildIntentContext,
+  formatContextForPrompt,
+} from "../session/contextBuilder";
+import { sendTextMessage } from "../whatsapp/whatsapp-client";
+import { isMessageRelevant } from "./relevance-filter";
 
 const LINK_MESSAGE_PREFIX = [
   "Oi! Eu sou o Dinio 👋",
@@ -90,9 +91,7 @@ export async function routeMessage(
     return;
   }
 
-  let assistantResponse = "";
   const reply = async (text: string): Promise<void> => {
-    assistantResponse = text;
     await sendTextMessage(message.phone, text);
   };
 
@@ -100,7 +99,7 @@ export async function routeMessage(
   // Session: single read before any processing
   // -------------------------------------------------------------------------
   const session = await getSession(message.phone);
-  
+
   // -------------------------------------------------------------------------
   // Relevance Filter: quick check before LLM processing.
   // Interactive replies (button/list selections) within an active flow are
@@ -108,8 +107,12 @@ export async function routeMessage(
   // -------------------------------------------------------------------------
   const hasActiveFlow = !!session.state;
   const isInteractiveReply = !!message.interactiveReplyId;
-
-  if (!hasActiveFlow && !isInteractiveReply && !isMessageRelevant(message.text, log)) {
+  reply(JSON.stringify({ hasActiveFlow, isInteractiveReply }));
+  if (
+    !hasActiveFlow &&
+    !isInteractiveReply &&
+    !isMessageRelevant(message.text, log)
+  ) {
     await handleUnknown(reply);
     log.info(
       { messageId: message.messageId },
@@ -131,11 +134,11 @@ export async function routeMessage(
   // -------------------------------------------------------------------------
   let intent: ParsedIntent;
   const isRegisterExpenseInteractive =
-    isInteractiveReply && session.state?.intent === 'register_expense';
+    isInteractiveReply && session.state?.intent === "register_expense";
 
   if (isRegisterExpenseInteractive) {
     intent = {
-      intent: 'register_expense',
+      intent: "register_expense",
       description: null,
       amount: null,
       category: null,
@@ -146,9 +149,15 @@ export async function routeMessage(
     };
   } else {
     const intentContext = buildIntentContext(session, message.text);
+    reply(
+      JSON.stringify({
+        intentContext,
+        formattedContext: formatContextForPrompt(intentContext),
+      }),
+    );
     intent = await parseIntent(intentContext);
   }
-
+  reply(JSON.stringify({ intent }));
   log.info({ intent }, "intent parsed");
 
   // Clear previous operation state before dispatch so handlers start with a
@@ -157,15 +166,7 @@ export async function routeMessage(
   clearOperationState(session);
 
   // -------------------------------------------------------------------------
-  // Context passed to handlers, including the pre-clear snapshots and a
-  // logResponse callback for handlers that send interactive messages.
-  // -------------------------------------------------------------------------
-  const logResponse = (text: string): void => {
-    assistantResponse = text;
-  };
-
-  // -------------------------------------------------------------------------
-  // Dispatch: capture the handler's response text for history
+  // Dispatch
   // -------------------------------------------------------------------------
   await dispatchIntent(
     intent,
@@ -176,7 +177,6 @@ export async function routeMessage(
       previousState,
       previousOperation,
       interactiveReplyId: message.interactiveReplyId ?? null,
-      logResponse,
     },
     reply,
   );
@@ -185,10 +185,7 @@ export async function routeMessage(
   // -------------------------------------------------------------------------
   // Session: append turn and save — single write after processing
   // -------------------------------------------------------------------------
-  appendToHistory(session, "user", message.text);
-  if (assistantResponse) {
-    appendToHistory(session, "assistant", assistantResponse);
-  }
+  appendToHistory(session, message.text);
 
   await saveSession(message.phone, session);
 }

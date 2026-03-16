@@ -56,7 +56,7 @@
 
 - **Invoice cycle logic**: always use `dinio-shared` — `computeInvoiceDueMonthIdForDate`, `getEffectiveClosingDay`, `formatMonthIdLabel`.
 - **Month ID arithmetic**: always use `dinio-shared` — `computeMonthId`, `addMonths`, `getCurrentMonthId`, etc.
-- Never re-implement invoice cycle or month ID logic locally. If a needed function is missing, add it to `dinio-shared/`, publish a new version, and update the dependency.
+- Never re-implement invoice cycle or month ID logic locally. If a needed function is missing, add it to `packages/shared/` and run `pnpm build` there — changes are available immediately via workspace.
 
 ## Key Reference Files
 - `docs/dashboard.md`

@@ -11,7 +11,8 @@
     "start": "fastify start -l info -a 0.0.0.0 dist/app.js",
     "test": "npm run build && tsc -p test/tsconfig.json && c8 node --test -r ts-node/register \"test/**/*.ts\"",
     "dev": "npm run build && concurrently -k -p \"[{name}]\" -n \"TypeScript,App\" -c \"yellow.bold,cyan.bold\" \"npm:watch:ts\" \"npm:dev:start\"",
-    "dev:start": "fastify start --ignore-watch=.ts$ -w -l info -P dist/app.js"
+    "dev:start": "fastify start --ignore-watch=.ts$ -w -l info -P dist/app.js",
+    "watch:ts": "tsc --watch"
   },
   "keywords": [],
   "author": "",

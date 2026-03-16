@@ -164,7 +164,7 @@ is called in `message-router.ts` before saving.
 
 ### Rule
 
-Never re-implement invoice cycle or month ID logic. If a needed function is missing from `dinio-shared`, add it there, publish a new version, and update the installed version here before using it.
+Never re-implement invoice cycle or month ID logic. If a needed function is missing, add it to `packages/shared/` and run `pnpm build` there — changes are available immediately via workspace.
 
 ---
 

@@ -39,7 +39,6 @@ function makeContext(
     previousState: null,
     previousOperation: null,
     interactiveReplyId: null,
-    logResponse: () => {},
     ...overrides,
   }
 }
