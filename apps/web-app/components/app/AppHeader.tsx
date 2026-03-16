@@ -9,19 +9,22 @@ import {
   CreditCard,
   Crown,
   LogOut,
+  MessageCircle,
   User as UserIcon,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Fragment, useState } from "react";
+import { toast } from "react-hot-toast";
 import NotificationBell from "@/components/app/notifications/NotificationBell";
 
 export default function AppHeader() {
   const router = useRouter();
   const supabase = createClient();
-  const { user } = useUser();
+  const { user, refetch } = useUser();
   const [isBillingLoading, setIsBillingLoading] = useState(false);
+  const [isUnlinkingWhatsapp, setIsUnlinkingWhatsapp] = useState(false);
 
   const handleBilling = async () => {
     setIsBillingLoading(true);
@@ -41,6 +44,21 @@ export default function AppHeader() {
     await supabase.auth.signOut();
     router.push("/signin");
   };
+
+  const handleUnlinkWhatsapp = async () => {
+    setIsUnlinkingWhatsapp(true);
+    try {
+      await apiClient.delete("/bot/whatsapp-link/unlink");
+      await refetch();
+    } catch (e) {
+      console.error("Error unlinking WhatsApp", e);
+      toast.error("Erro ao desvincular o WhatsApp. Tente novamente.");
+    } finally {
+      setIsUnlinkingWhatsapp(false);
+    }
+  };
+
+  const whatsappBotPhone = process.env.NEXT_PUBLIC_WHATSAPP_BOT_PHONE;
 
   return (
     <header className="w-full border-b border-slate-200 bg-white/50 backdrop-blur-sm sticky top-0 z-50">
@@ -125,6 +143,33 @@ export default function AppHeader() {
                               Gerenciar assinatura
                             </button>
                           </>
+                        )}
+
+                        {user.whatsappLinked ? (
+                          <button
+                            onClick={handleUnlinkWhatsapp}
+                            disabled={isUnlinkingWhatsapp}
+                            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-50 hover:text-rose-600 transition-colors disabled:opacity-50"
+                          >
+                            {isUnlinkingWhatsapp ? (
+                              <span className="loading loading-spinner loading-xs" />
+                            ) : (
+                              <MessageCircle size={16} />
+                            )}
+                            Desvincular WhatsApp
+                          </button>
+                        ) : (
+                          whatsappBotPhone && (
+                            <a
+                              href={`https://wa.me/${whatsappBotPhone}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-50 hover:text-teal-600 transition-colors"
+                            >
+                              <MessageCircle size={16} />
+                              Vincular WhatsApp
+                            </a>
+                          )
                         )}
 
                         <button
