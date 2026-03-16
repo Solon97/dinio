@@ -129,27 +129,29 @@ export async function routeMessage(
   // Short-circuit for interactive replies inside an active register_expense
   // flow — the handler resolves these directly from interactiveReplyId.
   // -------------------------------------------------------------------------
-  let intent: ParsedIntent;
+  let intents: ParsedIntent[];
   const isRegisterExpenseInteractive =
     isInteractiveReply && session.state?.intent === 'register_expense';
 
   if (isRegisterExpenseInteractive) {
-    intent = {
-      intent: 'register_expense',
-      description: null,
-      amount: null,
-      category: null,
-      answer: null,
-      expenseDate: null,
-      paymentType: null,
-      cardNameMention: null,
-    };
+    intents = [
+      {
+        intent: 'register_expense',
+        description: null,
+        amount: null,
+        category: null,
+        answer: null,
+        expenseDate: null,
+        paymentType: null,
+        cardNameMention: null,
+      },
+    ];
   } else {
     const intentContext = buildIntentContext(session, message.text);
-    intent = await parseIntent(intentContext);
+    intents = await parseIntent(intentContext);
   }
 
-  log.info({ intent }, "intent parsed");
+  log.info({ intents }, "intent(s) parsed");
 
   // Clear previous operation state before dispatch so handlers start with a
   // clean slate. Handlers that initiate a multi-step flow will re-set state
@@ -168,7 +170,7 @@ export async function routeMessage(
   // Dispatch: capture the handler's response text for history
   // -------------------------------------------------------------------------
   await dispatchIntent(
-    intent,
+    intents,
     {
       userId,
       phone: message.phone,

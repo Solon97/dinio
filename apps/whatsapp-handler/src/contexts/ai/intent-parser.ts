@@ -8,7 +8,7 @@ import {
 
 const PROMPT_FILE = 'whatsapp-intent-parser.txt'
 
-const ParsedIntentSchema = z.object({
+const SingleIntentSchema = z.object({
   intent: z.enum([
     'register_expense',
     'simulate_expense',
@@ -27,36 +27,47 @@ const ParsedIntentSchema = z.object({
   cardNameMention: z.string().nullable().optional().transform((v) => v ?? null),
 })
 
-const FALLBACK_INTENT: ParsedIntent = {
-  intent: 'unknown',
-  description: null,
-  amount: null,
-  category: null,
-  answer: null,
-  expenseDate: null,
-  paymentType: null,
-  cardNameMention: null,
-}
+const ParsedIntentArraySchema = z.object({
+  operations: z.array(SingleIntentSchema).min(1).max(10),
+})
+
+const FALLBACK_INTENTS: ParsedIntent[] = [
+  {
+    intent: 'unknown',
+    description: null,
+    amount: null,
+    category: null,
+    answer: null,
+    expenseDate: null,
+    paymentType: null,
+    cardNameMention: null,
+  },
+]
 
 /**
- * Detects the user's intent from the full conversation context.
+ * Detects the user's intent(s) from the full conversation context.
+ *
+ * A single message may contain multiple financial operations (e.g.
+ * "uber 28, pizza 45, mercado 120"). In that case the LLM returns all
+ * operations and this function returns an array with one element per
+ * detected operation.
  *
  * The LLM receives both the recent history window and the current message,
  * allowing it to resolve ambiguous follow-up messages (e.g. a bare number
  * sent after asking "how much do you want to spend?").
  *
- * Falls back to `unknown` on any error so the flow is never blocked.
+ * Falls back to `[unknown]` on any error so the flow is never blocked.
  */
 export async function parseIntent(
   context: IntentDetectionContext,
-): Promise<ParsedIntent> {
+): Promise<ParsedIntent[]> {
   try {
     const formattedInput = formatContextForPrompt(context)
     const raw = await callAI(formattedInput, PROMPT_FILE)
-    const parsed = ParsedIntentSchema.parse(JSON.parse(raw))
-    return parsed
+    const parsed = ParsedIntentArraySchema.parse(JSON.parse(raw))
+    return parsed.operations
   } catch (error) {
     console.error('Error parsing intent:', error)
-    return FALLBACK_INTENT
+    return FALLBACK_INTENTS
   }
 }
