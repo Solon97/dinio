@@ -271,7 +271,7 @@ describe('handleCheckAgenda', () => {
 
     await handleCheckAgenda(context, reply)
 
-    assert.strictEqual(calls.length, 1)
+    assert.strictEqual(calls.length, 2)
     assert.ok(calls[0].includes('2 compromissos'), `unexpected reply: ${calls[0]}`)
     assert.ok(calls[0].includes('Conta de luz'), `missing item name: ${calls[0]}`)
   })
@@ -352,7 +352,7 @@ describe('handleCheckAgendaWeek', () => {
 
     await handleCheckAgendaWeek(context, reply)
 
-    assert.strictEqual(calls.length, 1)
+    assert.strictEqual(calls.length, 2)
     assert.ok(calls[0].includes('nesta semana'), `expected "nesta semana" in: ${calls[0]}`)
     assert.ok(calls[0].includes('Conta de luz'), `missing item name: ${calls[0]}`)
   })
@@ -435,7 +435,7 @@ describe('handleCheckAgendaMonth', () => {
 
     await handleCheckAgendaMonth(context, reply)
 
-    assert.strictEqual(calls.length, 1)
+    assert.strictEqual(calls.length, 2)
     assert.ok(calls[0].includes('este mês'), `expected "este mês" in: ${calls[0]}`)
     assert.ok(calls[0].includes('Aluguel'), `missing item name: ${calls[0]}`)
   })

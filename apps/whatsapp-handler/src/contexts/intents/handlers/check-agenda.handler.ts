@@ -35,13 +35,11 @@ function buildItemList(
   return { lines, remaining }
 }
 
-export function buildAgendaMessage(items: BotAgendaItem[]): string {
+export function buildAgendaMessage(items: BotAgendaItem[], hasOverdue = false): string {
   if (items.length === 0) {
-    return [
-      'Nenhum compromisso financeiro para hoje 😊',
-      '',
-      'Aproveite o dia sem preocupações com vencimentos!',
-    ].join('\n')
+    return hasOverdue
+      ? 'Nenhum compromisso financeiro para hoje.'
+      : ['Nenhum compromisso financeiro para hoje 😊', '', 'Aproveite o dia sem preocupações com vencimentos!'].join('\n')
   }
 
   const count = items.length
@@ -58,13 +56,11 @@ export function buildAgendaMessage(items: BotAgendaItem[]): string {
   ].join('\n')
 }
 
-export function buildWeekAgendaMessage(items: BotAgendaItem[]): string {
+export function buildWeekAgendaMessage(items: BotAgendaItem[], hasOverdue = false): string {
   if (items.length === 0) {
-    return [
-      'Nenhum compromisso financeiro nesta semana 😊',
-      '',
-      'Aproveite a semana sem preocupações com vencimentos!',
-    ].join('\n')
+    return hasOverdue
+      ? 'Nenhum compromisso financeiro nesta semana.'
+      : ['Nenhum compromisso financeiro nesta semana 😊', '', 'Aproveite a semana sem preocupações com vencimentos!'].join('\n')
   }
 
   const count = items.length
@@ -81,13 +77,11 @@ export function buildWeekAgendaMessage(items: BotAgendaItem[]): string {
   ].join('\n')
 }
 
-export function buildMonthAgendaMessage(items: BotAgendaItem[]): string {
+export function buildMonthAgendaMessage(items: BotAgendaItem[], hasOverdue = false): string {
   if (items.length === 0) {
-    return [
-      'Nenhum compromisso financeiro este mês 😊',
-      '',
-      'Aproveite o mês sem preocupações com vencimentos!',
-    ].join('\n')
+    return hasOverdue
+      ? 'Nenhum compromisso financeiro este mês.'
+      : ['Nenhum compromisso financeiro este mês 😊', '', 'Aproveite o mês sem preocupações com vencimentos!'].join('\n')
   }
 
   const count = items.length
@@ -131,17 +125,14 @@ async function fetchOverdueAlert(userId: string): Promise<string | null> {
   }
 }
 
-function joinWithAlert(alert: string | null, message: string): string {
-  return alert ? `${alert}\n\n${message}` : message
-}
-
 export async function handleCheckAgenda(context: IntentContext, reply: ReplyFunction): Promise<void> {
   try {
     const [agenda, alert] = await Promise.all([
       getAgenda(context.userId),
       fetchOverdueAlert(context.userId),
     ])
-    await reply(joinWithAlert(alert, buildAgendaMessage(agenda.items)))
+    await reply(buildAgendaMessage(agenda.items, !!alert))
+    if (alert) await reply(alert)
   } catch (error) {
     await reply(resolveApiErrorMessage(error, 'status'))
   }
@@ -156,7 +147,8 @@ export async function handleCheckAgendaWeek(
       getAgenda(context.userId, undefined, 'week'),
       fetchOverdueAlert(context.userId),
     ])
-    await reply(joinWithAlert(alert, buildWeekAgendaMessage(agenda.items)))
+    await reply(buildWeekAgendaMessage(agenda.items, !!alert))
+    if (alert) await reply(alert)
   } catch (error) {
     await reply(resolveApiErrorMessage(error, 'status'))
   }
@@ -212,7 +204,8 @@ export async function handleCheckAgendaMonth(
       getAgenda(context.userId, undefined, 'month'),
       fetchOverdueAlert(context.userId),
     ])
-    await reply(joinWithAlert(alert, buildMonthAgendaMessage(agenda.items)))
+    await reply(buildMonthAgendaMessage(agenda.items, !!alert))
+    if (alert) await reply(alert)
   } catch (error) {
     await reply(resolveApiErrorMessage(error, 'status'))
   }
