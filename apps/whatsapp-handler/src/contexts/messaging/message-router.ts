@@ -16,19 +16,28 @@ import {
 } from "../session/chatSessionStore";
 import { buildIntentContext } from "../session/contextBuilder";
 import { sendTextMessage } from "../whatsapp/whatsapp-client";
-import {
-  isMessageRelevant
-} from "./relevance-filter";
+import { isMessageRelevant } from "./relevance-filter";
 
 const LINK_MESSAGE_PREFIX = [
   "Oi! Eu sou o Dinio 👋",
-  "Seu assistente para saber quanto pode gastar por dia.",
+  "Seu assistente financeiro pessoal, aqui no WhatsApp.",
   "",
+].join("\n");
+
+const LINK_MESSAGE_SUCCESS = [
+  LINK_MESSAGE_PREFIX,
   "Pra gente conversar por aqui, primeiro preciso conectar seu WhatsApp à sua conta.",
   "É rápido — leva menos de 1 minuto.",
   "",
   "Toque no link abaixo para fazer a conexão:",
-].join("\n");
+];
+
+const LINK_MESSAGE_ERROR = [
+  LINK_MESSAGE_PREFIX,
+  "Tive um problema para gerar seu link de conexão agora.",
+  "",
+  "Tente novamente em alguns instantes que deve funcionar.",
+];
 
 export async function routeMessage(
   message: IncomingMessage,
@@ -58,15 +67,8 @@ export async function routeMessage(
   if (!resolveResult.linked) {
     const link = resolveResult.link;
     const responseText = link
-      ? `${LINK_MESSAGE_PREFIX}\n\n${link}`
-      : [
-          "Oi! Eu sou o Dinio 👋",
-          "Seu assistente para saber quanto pode gastar por dia.",
-          "",
-          "Tive um problema para gerar seu link de conexão agora.",
-          "",
-          "Tente novamente em alguns instantes que deve funcionar.",
-        ].join("\n");
+      ? `${LINK_MESSAGE_SUCCESS}\n\n${link}`
+      : LINK_MESSAGE_ERROR.join("\n");
 
     await sendTextMessage(message.phone, responseText);
     log.info({ messageId: message.messageId }, "sent linking message");
@@ -90,9 +92,7 @@ export async function routeMessage(
     return;
   }
 
-  let assistantResponse = "";
   const reply = async (text: string): Promise<void> => {
-    assistantResponse = text;
     await sendTextMessage(message.phone, text);
   };
 
@@ -100,7 +100,7 @@ export async function routeMessage(
   // Session: single read before any processing
   // -------------------------------------------------------------------------
   const session = await getSession(message.phone);
-  
+
   // -------------------------------------------------------------------------
   // Relevance Filter: quick check before LLM processing.
   // Interactive replies (button/list selections) within an active flow are
@@ -109,7 +109,11 @@ export async function routeMessage(
   const hasActiveFlow = !!session.state;
   const isInteractiveReply = !!message.interactiveReplyId;
 
-  if (!hasActiveFlow && !isInteractiveReply && !isMessageRelevant(message.text, log)) {
+  if (
+    !hasActiveFlow &&
+    !isInteractiveReply &&
+    !isMessageRelevant(message.text, log)
+  ) {
     await handleUnknown(reply);
     log.info(
       { messageId: message.messageId },
@@ -131,12 +135,12 @@ export async function routeMessage(
   // -------------------------------------------------------------------------
   let intents: ParsedIntent[];
   const isRegisterExpenseInteractive =
-    isInteractiveReply && session.state?.intent === 'register_expense';
+    isInteractiveReply && session.state?.intent === "register_expense";
 
   if (isRegisterExpenseInteractive) {
     intents = [
       {
-        intent: 'register_expense',
+        intent: "register_expense",
         description: null,
         amount: null,
         category: null,
@@ -159,15 +163,7 @@ export async function routeMessage(
   clearOperationState(session);
 
   // -------------------------------------------------------------------------
-  // Context passed to handlers, including the pre-clear snapshots and a
-  // logResponse callback for handlers that send interactive messages.
-  // -------------------------------------------------------------------------
-  const logResponse = (text: string): void => {
-    assistantResponse = text;
-  };
-
-  // -------------------------------------------------------------------------
-  // Dispatch: capture the handler's response text for history
+  // Dispatch
   // -------------------------------------------------------------------------
   await dispatchIntent(
     intents,
@@ -178,7 +174,6 @@ export async function routeMessage(
       previousState,
       previousOperation,
       interactiveReplyId: message.interactiveReplyId ?? null,
-      logResponse,
     },
     reply,
   );
@@ -187,10 +182,7 @@ export async function routeMessage(
   // -------------------------------------------------------------------------
   // Session: append turn and save — single write after processing
   // -------------------------------------------------------------------------
-  appendToHistory(session, "user", message.text);
-  if (assistantResponse) {
-    appendToHistory(session, "assistant", assistantResponse);
-  }
+  appendToHistory(session, message.text);
 
   await saveSession(message.phone, session);
 }

@@ -26,7 +26,6 @@ function makeContext(overrides: Partial<IntentContext> = {}): IntentContext {
     previousState: null,
     previousOperation: null,
     interactiveReplyId: null,
-    logResponse: () => {},
     ...overrides,
   }
 }

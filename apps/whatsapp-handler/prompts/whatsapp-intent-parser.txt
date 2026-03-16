@@ -11,6 +11,10 @@ Você DEVE responder APENAS com JSON válido, sem nenhum texto adicional, sem ma
 - check_daily_allowance: o usuário quer saber seu limite ou orçamento diário
 - check_month_balance: o usuário quer saber seu saldo ou resumo do mês
 - check_today_spending: o usuário quer saber quanto gastou hoje
+- check_agenda: o usuário quer saber quais são seus compromissos ou vencimentos financeiros do dia
+- check_agenda_week: o usuário quer saber quais são seus compromissos ou vencimentos financeiros da semana
+- check_agenda_month: o usuário quer saber quais são seus compromissos ou vencimentos financeiros do mês
+- check_agenda_overdue: o usuário quer saber quais são seus compromissos ou vencimentos que estão em atraso (já venceram e não foram pagos)
 - answer_from_history: o usuário faz uma pergunta sobre o histórico recente da conversa (ex: qual foi meu último gasto, o que eu registrei agora)
 - unknown: qualquer outra intenção não relacionada às anteriores
 
@@ -20,7 +24,7 @@ Você DEVE responder APENAS com JSON válido, sem nenhum texto adicional, sem ma
 - amount: valor numérico em BRL (número, sem símbolo de moeda)
 - category: uma das opções abaixo, baseada no contexto da mensagem:
   mercado | restaurantes | delivery | transporte | lazer | familia | saude | cuidados_pessoais | presentes | imprevistos | outros
-- expenseDate: data do gasto. Use "hoje" se não mencionado. Use "ontem" ou "amanhã" quando o usuário mencionar explicitamente. Para datas específicas, converta para o formato YYYY-MM-DD. Exemplos: "ontem", "hoje", "amanhã", "2026-03-10".
+- expenseDate: data do gasto. Use "hoje" se não mencionado. Use "ontem" ou "amanhã" quando o usuário mencionar explicitamente. Para datas específicas (incluindo agendamentos futuros), converta para o formato YYYY-MM-DD. Exemplos: "ontem", "hoje", "amanhã", "2026-03-20".
 - paymentType: "credito" se o usuário mencionar cartão de crédito, crédito, ou nome de cartão (nubank, bradesco, itaú, inter etc.). Use "debito" se mencionar dinheiro, pix, débito, ou nada. Null se não for possível determinar.
 - cardNameMention: nome do cartão mencionado pelo usuário em minúsculas (ex: "nubank", "bradesco", "inter"), ou null se não mencionado.
 
@@ -41,12 +45,16 @@ Quando o [Estado atual] indicar `intent: register_expense | step: awaiting_confi
 - "muda para débito" → paymentType: "debito", todos os outros null
 - "descrição: almoço" → description: "almoço", todos os outros null
 
+## Agendamentos
+
+Quando o usuário mencionar que um gasto é agendado, futuro, ou usar expressões como "agende", "vou pagar", "tenho um gasto para", trate como `register_expense` normalmente, apenas definindo a data futura em `expenseDate` (formato YYYY-MM-DD). Nenhum campo adicional é necessário — não preencha "answer".
+
 ## Formato da resposta
 
 {
   "operations": [
     {
-      "intent": "register_expense" | "simulate_expense" | "check_daily_allowance" | "check_month_balance" | "check_today_spending" | "answer_from_history" | "unknown",
+      "intent": "register_expense" | "simulate_expense" | "check_daily_allowance" | "check_month_balance" | "check_today_spending" | "check_agenda" | "check_agenda_week" | "check_agenda_month" | "check_agenda_overdue" | "answer_from_history" | "unknown",
       "description": string | null,
       "amount": number | null,
       "category": string | null,
@@ -81,5 +89,10 @@ Regras para o campo "answer":
 "quanto posso gastar hoje?" → {"operations": [{"intent": "check_daily_allowance", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}]}
 "qual meu saldo do mês?" → {"operations": [{"intent": "check_month_balance", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}]}
 "quanto gastei hoje?" → {"operations": [{"intent": "check_today_spending", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}]}
+"tenho compromissos hoje?" → {"operations": [{"intent": "check_agenda", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}]}
+"o que vence essa semana?" → {"operations": [{"intent": "check_agenda_week", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}]}
+"tenho compromissos esse mês?" → {"operations": [{"intent": "check_agenda_month", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}]}
+"tenho compromissos em atraso?" → {"operations": [{"intent": "check_agenda_overdue", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}]}
 "oi, tudo bem?" → {"operations": [{"intent": "unknown", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}]}
 "qual foi meu último gasto?" → {"operations": [{"intent": "answer_from_history", "description": null, "amount": null, "category": null, "answer": "Seu último gasto foi [descrição] de R$ [valor].", "expenseDate": null, "paymentType": null, "cardNameMention": null}]}
+"tenho um gasto agendado para 20/03 de 150 no mercado" → {"operations": [{"intent": "register_expense", "description": "mercado", "amount": 150, "category": "mercado", "answer": null, "expenseDate": "2026-03-20", "paymentType": "debito", "cardNameMention": null}]}

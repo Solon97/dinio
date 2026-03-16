@@ -3,7 +3,6 @@ import { createHash } from 'node:crypto'
 import { decrypt, encrypt } from './encryption'
 import {
   type ChatSession,
-  type MessageRole,
   MAX_HISTORY_SIZE,
   SESSION_TTL_SECONDS,
 } from './types'
@@ -109,12 +108,8 @@ export async function saveSession(
  *
  * Mutates the session in place — call `saveSession()` afterwards to persist.
  */
-export function appendToHistory(
-  session: ChatSession,
-  role: MessageRole,
-  text: string,
-): void {
-  session.history.push({ role, text, ts: Date.now() })
+export function appendToHistory(session: ChatSession, text: string): void {
+  session.history.push({ text, ts: Date.now() })
   if (session.history.length > MAX_HISTORY_SIZE) {
     session.history = session.history.slice(-MAX_HISTORY_SIZE)
   }

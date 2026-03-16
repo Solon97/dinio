@@ -310,7 +310,6 @@ async function transitionToConfirmation(
   context.session.operation = { type: 'register_expense', data: pending as unknown as Record<string, unknown> }
 
   const confirmationText = buildConfirmationText(pending)
-  context.logResponse(confirmationText)
 
   await sendButtonMessage(context.phone, confirmationText, [
     { id: CONFIRM_BUTTON_ID, title: CONFIRM_BUTTON_TITLE },
@@ -331,8 +330,6 @@ async function transitionToCardSelection(
     '',
     'Selecione um dos cartões abaixo:',
   ].join('\n')
-
-  context.logResponse('Lista de cartões enviada para seleção.')
 
   await sendListMessage(context.phone, bodyText, 'Ver cartões', [
     {
