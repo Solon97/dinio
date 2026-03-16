@@ -54,18 +54,19 @@ const querySchema = z.object({
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/)
     .optional(),
-  period: z.enum(["day", "week", "month"]).default("day"),
+  period: z.enum(["day", "week", "month", "overdue"]).default("day"),
 });
 
 /**
- * GET /api/bot/agenda?user_id=<id>&date=<YYYY-MM-DD>&period=<day|week|month>
+ * GET /api/bot/agenda?user_id=<id>&date=<YYYY-MM-DD>&period=<day|week|month|overdue>
  *
  * Returns the financial commitments for the requested period:
- *   - day   (default): commitments due on the given date (defaults to today in São Paulo)
- *   - week  : commitments over the next 7 days starting from today
- *   - month : commitments for the remaining days of the current month
+ *   - day     (default): commitments due on the given date (defaults to today in São Paulo)
+ *   - week    : commitments over the next 7 days starting from today
+ *   - month   : commitments for the remaining days of the current month
+ *   - overdue : unpaid non-card fixed expenses from the current month whose due date has passed
  *
- * Items for week/month include a `date` field (YYYY-MM-DD) indicating when
+ * Items for week/month/overdue include a `date` field (YYYY-MM-DD) indicating when
  * the commitment is due. All monetary values are in cents.
  */
 export async function GET(request: Request) {
@@ -99,6 +100,21 @@ export async function GET(request: Request) {
   if (period === "day") {
     const context = await fetchBudgetContextForUser(supabase, userId, date);
     return NextResponse.json({ items: context.agendaItems });
+  }
+
+  if (period === "overdue") {
+    const todayDay = parseInt(date.split("-")[2]);
+    const monthId = toMonthId(date);
+    const fixedExpenseRepo = new SupabaseFixedExpenseRepository(supabase);
+    const expenses = await fixedExpenseRepo.findByUserAndMonth(userId, monthId);
+    const items = expenses
+      .filter((e) => !e.creditCardId && !e.paid && e.dueDay < todayDay)
+      .map((e) => ({
+        name: e.name,
+        amountCents: e.amount,
+        date: `${date.slice(0, 8)}${String(e.dueDay).padStart(2, "0")}`,
+      }));
+    return NextResponse.json({ items });
   }
 
   // For week/month: efficiently fetch all data in 2 queries then filter by day

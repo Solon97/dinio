@@ -199,7 +199,7 @@ export async function simulateExpense(input: SimulateExpenseInput): Promise<Simu
 export async function getAgenda(
   userId: string,
   date?: string,
-  period?: 'day' | 'week' | 'month',
+  period?: 'day' | 'week' | 'month' | 'overdue',
 ): Promise<BotAgendaResponse> {
   const params = new URLSearchParams({ user_id: userId })
   if (date) params.set('date', date)

@@ -282,7 +282,7 @@ describe('handleCheckAgenda', () => {
 
     await handleCheckAgenda(context, reply)
 
-    assert.strictEqual(getAgendaMock.mock.callCount(), 1)
+    assert.strictEqual(getAgendaMock.mock.callCount(), 2)
     const callArgs = (getAgendaMock.mock.calls[0] as unknown as { arguments: unknown[] }).arguments[0]
     assert.strictEqual(callArgs, 'abc-456')
   })
@@ -363,7 +363,7 @@ describe('handleCheckAgendaWeek', () => {
 
     await handleCheckAgendaWeek(context, reply)
 
-    assert.strictEqual(getAgendaMock.mock.callCount(), 1)
+    assert.strictEqual(getAgendaMock.mock.callCount(), 2)
     const args = (getAgendaMock.mock.calls[0] as unknown as { arguments: unknown[] }).arguments
     assert.strictEqual(args[0], 'xyz-789')
     assert.strictEqual(args[2], 'week')
@@ -446,7 +446,7 @@ describe('handleCheckAgendaMonth', () => {
 
     await handleCheckAgendaMonth(context, reply)
 
-    assert.strictEqual(getAgendaMock.mock.callCount(), 1)
+    assert.strictEqual(getAgendaMock.mock.callCount(), 2)
     const args = (getAgendaMock.mock.calls[0] as unknown as { arguments: unknown[] }).arguments
     assert.strictEqual(args[0], 'abc-month')
     assert.strictEqual(args[2], 'month')

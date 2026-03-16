@@ -107,10 +107,41 @@ export function buildMonthAgendaMessage(items: BotAgendaItem[]): string {
   ].join('\n')
 }
 
+function buildOverdueAlert(items: BotAgendaItem[]): string | null {
+  if (items.length === 0) return null
+  const count = items.length
+  const label = count === 1 ? 'compromisso em atraso' : 'compromissos em atraso'
+  const lines = items
+    .map((item) => {
+      const day = item.date ? parseInt(item.date.split('-')[2]) : null
+      const dayStr = day ? ` (venceu dia ${day})` : ''
+      const amountStr = item.amountCents !== null ? ` — ${formatCurrencyFromCents(item.amountCents)}` : ''
+      return `• ${item.name}${amountStr}${dayStr}`
+    })
+    .join('\n')
+  return [`⚠️ Você tem ${count} ${label}:`, '', lines].join('\n')
+}
+
+async function fetchOverdueAlert(userId: string): Promise<string | null> {
+  try {
+    const overdue = await getAgenda(userId, undefined, 'overdue')
+    return buildOverdueAlert(overdue.items)
+  } catch {
+    return null
+  }
+}
+
+function joinWithAlert(alert: string | null, message: string): string {
+  return alert ? `${alert}\n\n${message}` : message
+}
+
 export async function handleCheckAgenda(context: IntentContext, reply: ReplyFunction): Promise<void> {
   try {
-    const agenda = await getAgenda(context.userId)
-    await reply(buildAgendaMessage(agenda.items))
+    const [agenda, alert] = await Promise.all([
+      getAgenda(context.userId),
+      fetchOverdueAlert(context.userId),
+    ])
+    await reply(joinWithAlert(alert, buildAgendaMessage(agenda.items)))
   } catch (error) {
     await reply(resolveApiErrorMessage(error, 'status'))
   }
@@ -121,8 +152,52 @@ export async function handleCheckAgendaWeek(
   reply: ReplyFunction,
 ): Promise<void> {
   try {
-    const agenda = await getAgenda(context.userId, undefined, 'week')
-    await reply(buildWeekAgendaMessage(agenda.items))
+    const [agenda, alert] = await Promise.all([
+      getAgenda(context.userId, undefined, 'week'),
+      fetchOverdueAlert(context.userId),
+    ])
+    await reply(joinWithAlert(alert, buildWeekAgendaMessage(agenda.items)))
+  } catch (error) {
+    await reply(resolveApiErrorMessage(error, 'status'))
+  }
+}
+
+export function buildOverdueMessage(items: BotAgendaItem[]): string {
+  if (items.length === 0) {
+    return [
+      'Nenhum compromisso em atraso 🎉',
+      '',
+      'Seus vencimentos estão todos em dia!',
+    ].join('\n')
+  }
+
+  const count = items.length
+  const label = count === 1 ? 'compromisso em atraso' : 'compromissos em atraso'
+  const lines = items
+    .map((item) => {
+      const day = item.date ? parseInt(item.date.split('-')[2]) : null
+      const dayStr = day ? ` (venceu dia ${day})` : ''
+      const amountStr = item.amountCents !== null ? ` — ${formatCurrencyFromCents(item.amountCents)}` : ''
+      return `• ${item.name}${amountStr}${dayStr}`
+    })
+    .join('\n')
+
+  return [
+    `⚠️ Você tem ${count} ${label}:`,
+    '',
+    lines,
+    '',
+    'Regularize o quanto antes para evitar juros e multas.',
+  ].join('\n')
+}
+
+export async function handleCheckAgendaOverdue(
+  context: IntentContext,
+  reply: ReplyFunction,
+): Promise<void> {
+  try {
+    const agenda = await getAgenda(context.userId, undefined, 'overdue')
+    await reply(buildOverdueMessage(agenda.items))
   } catch (error) {
     await reply(resolveApiErrorMessage(error, 'status'))
   }
@@ -133,8 +208,11 @@ export async function handleCheckAgendaMonth(
   reply: ReplyFunction,
 ): Promise<void> {
   try {
-    const agenda = await getAgenda(context.userId, undefined, 'month')
-    await reply(buildMonthAgendaMessage(agenda.items))
+    const [agenda, alert] = await Promise.all([
+      getAgenda(context.userId, undefined, 'month'),
+      fetchOverdueAlert(context.userId),
+    ])
+    await reply(joinWithAlert(alert, buildMonthAgendaMessage(agenda.items)))
   } catch (error) {
     await reply(resolveApiErrorMessage(error, 'status'))
   }

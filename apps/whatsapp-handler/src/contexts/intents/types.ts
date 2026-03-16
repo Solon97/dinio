@@ -7,6 +7,7 @@ export type IntentType =
   | 'check_agenda'
   | 'check_agenda_week'
   | 'check_agenda_month'
+  | 'check_agenda_overdue'
   | 'answer_from_history'
   | 'unknown'
 
