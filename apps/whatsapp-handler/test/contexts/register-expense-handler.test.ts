@@ -573,7 +573,7 @@ describe('handleRegisterExpense', () => {
     assert.strictEqual(savedExpense.invoiceDueMonthId, 202604) // March 12 > closingDay 3 → April 2026
   })
 
-  it('re-sends the card list when user sends text instead of selecting from list', async () => {
+  it('starts a new expense flow when user sends text instead of selecting from list', async () => {
     const availableCards = [NUBANK_CARD, ITAU_CARD]
     const pendingExpense: PendingExpenseData = {
       description: 'mercado',
@@ -593,12 +593,14 @@ describe('handleRegisterExpense', () => {
       },
       session,
     )
-    const { fn: reply } = makeReply()
+    const { fn: reply, calls } = makeReply()
 
+    // Without amount, LLM-parsed intent starts a new flow and asks for the value
     await handleRegisterExpense(makeIntent({ description: 'nubank' }), context, reply)
 
-    assert.strictEqual(sendListMessageMock.mock.callCount(), 1, 'should re-send the card list')
-    assert.strictEqual(session.state?.step, 'card_selection_required')
+    assert.strictEqual(sendListMessageMock.mock.callCount(), 0, 'should not re-send card list')
+    assert.strictEqual(calls.length, 1, 'should reply asking for the value')
+    assert.ok(calls[0].includes('valor'), 'reply should mention value')
   })
 
   // -------------------------------------------------------------------------
@@ -673,7 +675,7 @@ describe('handleRegisterExpense', () => {
     assert.strictEqual(callArgs.invoiceDueMonthId, 202604)
   })
 
-  it('applies a field edit and re-sends confirmation when user sends text during awaiting_confirmation', async () => {
+  it('starts a new expense flow with the full LLM intent when user sends text during awaiting_confirmation', async () => {
     const pendingExpense: PendingExpenseData = {
       description: 'uber',
       amountInReais: 28,
@@ -693,9 +695,9 @@ describe('handleRegisterExpense', () => {
     )
     const { fn: reply } = makeReply()
 
-    // User edits the amount
+    // LLM extracted the full intent from the user's message — includes all fields it could identify
     await handleRegisterExpense(
-      makeIntent({ intent: 'register_expense', amount: 35 }),
+      makeIntent({ intent: 'register_expense', amount: 35, description: 'uber' }),
       context,
       reply,
     )
@@ -705,11 +707,11 @@ describe('handleRegisterExpense', () => {
     assert.strictEqual(session.state?.step, 'awaiting_confirmation', 'should remain in confirmation step')
 
     const savedExpense = session.operation?.data as unknown as PendingExpenseData
-    assert.strictEqual(savedExpense.amountInReais, 35, 'should update the amount')
-    assert.strictEqual(savedExpense.description, 'uber', 'should preserve unchanged fields')
+    assert.strictEqual(savedExpense.amountInReais, 35, 'should use updated amount from new intent')
+    assert.strictEqual(savedExpense.description, 'uber', 'should use description from new intent')
   })
 
-  it('clears card data and re-sends confirmation when user switches to debit during edit', async () => {
+  it('starts a fresh debit flow (no card data) when LLM returns a debit intent during awaiting_confirmation', async () => {
     const pendingExpense: PendingExpenseData = {
       description: 'mercado',
       amountInReais: 120,
@@ -731,19 +733,20 @@ describe('handleRegisterExpense', () => {
     )
     const { fn: reply } = makeReply()
 
+    // LLM returned all fields it could identify from the user's message + history
     await handleRegisterExpense(
-      makeIntent({ intent: 'register_expense', paymentType: 'debito' }),
+      makeIntent({ intent: 'register_expense', paymentType: 'debito', amount: 120, description: 'mercado', category: 'Mercado' }),
       context,
       reply,
     )
 
-    assert.strictEqual(sendButtonMessageMock.mock.callCount(), 1, 'should re-send confirmation')
+    assert.strictEqual(sendButtonMessageMock.mock.callCount(), 1, 'should send confirmation for new debit flow')
     assert.strictEqual(session.state?.step, 'awaiting_confirmation')
 
     const savedExpense = session.operation?.data as unknown as PendingExpenseData
-    assert.strictEqual(savedExpense.paymentType, 'debito', 'should update payment type')
-    assert.strictEqual(savedExpense.card, undefined, 'should clear card when switching to debit')
-    assert.strictEqual(savedExpense.invoiceDueMonthId, undefined, 'should clear invoice month when switching to debit')
+    assert.strictEqual(savedExpense.paymentType, 'debito', 'should use debit from new intent')
+    assert.strictEqual(savedExpense.card, undefined, 'fresh flow has no card')
+    assert.strictEqual(savedExpense.invoiceDueMonthId, undefined, 'fresh flow has no invoice month')
   })
 
   it('does NOT call registerExpense when user sends plain text "sim" (without button click)', async () => {

@@ -15,8 +15,7 @@ import {
   saveSession,
 } from "../session/chatSessionStore";
 import {
-  buildIntentContext,
-  formatContextForPrompt,
+  buildIntentContext
 } from "../session/contextBuilder";
 import { sendTextMessage } from "../whatsapp/whatsapp-client";
 import { isMessageRelevant } from "./relevance-filter";

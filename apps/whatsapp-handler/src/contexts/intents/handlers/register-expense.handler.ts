@@ -41,7 +41,6 @@ export async function handleRegisterExpense(
 
   if (!!previousState && !!pendingData && interactiveReplyId) {
     return handleInteractiveReply(
-      intent,
       context,
       reply,
       previousState.step,
@@ -53,7 +52,6 @@ export async function handleRegisterExpense(
 }
 
 async function handleInteractiveReply(
-  intent: ParsedIntent,
   context: IntentContext,
   reply: ReplyFunction,
   previousStep: string,
@@ -128,7 +126,7 @@ async function startNewExpenseFlow(
     return;
   }
 
-  await transitionToConfirmation(pendingExpense, context, reply);
+  await transitionToConfirmation(pendingExpense, context);
 }
 
 // ---------------------------------------------------------------------------
@@ -170,14 +168,14 @@ async function resolveCardForExpense(
         matched.dueDay,
         matched.closingDay,
       );
-      await transitionToConfirmation(pendingExpense, context, reply);
+      await transitionToConfirmation(pendingExpense, context);
       return;
     }
   }
 
   // No match or ambiguous — ask user to pick from list
   pendingExpense.availableCards = cards;
-  await transitionToCardSelection(pendingExpense, context, reply);
+  await transitionToCardSelection(pendingExpense, context);
 }
 
 // ---------------------------------------------------------------------------
@@ -194,7 +192,7 @@ async function handleCardSelection(
 
   if (!interactiveReplyId) {
     // User sent text instead of selecting from list — re-send the list
-    await transitionToCardSelection(pendingData, context, reply);
+    await transitionToCardSelection(pendingData, context);
     return;
   }
 
@@ -203,7 +201,7 @@ async function handleCardSelection(
     await reply(
       "Não reconheci essa seleção 🤔 Escolha um dos cartões da lista abaixo.",
     );
-    await transitionToCardSelection(pendingData, context, reply);
+    await transitionToCardSelection(pendingData, context);
     return;
   }
 
@@ -217,7 +215,7 @@ async function handleCardSelection(
     ),
   };
 
-  await transitionToConfirmation(updatedExpense, context, reply);
+  await transitionToConfirmation(updatedExpense, context);
 }
 
 // ---------------------------------------------------------------------------
@@ -261,7 +259,6 @@ async function persistExpense(
 async function transitionToConfirmation(
   pending: PendingExpenseData,
   context: IntentContext,
-  reply: ReplyFunction,
 ): Promise<void> {
   context.session.state = {
     intent: "register_expense",
@@ -281,7 +278,6 @@ async function transitionToConfirmation(
 async function transitionToCardSelection(
   pending: PendingExpenseData,
   context: IntentContext,
-  _reply: ReplyFunction,
 ): Promise<void> {
   context.session.state = {
     intent: "register_expense",
