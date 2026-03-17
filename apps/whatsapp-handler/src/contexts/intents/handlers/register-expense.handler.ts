@@ -101,7 +101,7 @@ async function startNewExpenseFlow(
     return;
   }
 
-  const description = (intent.description ?? "gasto").trim();
+  const description = capitalizeFirst((intent.description ?? "gasto").trim());
   const category = mapIntentCategoryToApiCategory(intent.category);
   const paymentType = inferPaymentType(
     intent.paymentType,

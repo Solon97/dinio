@@ -53,7 +53,7 @@ export async function handleRegisterMultipleExpenses(
   const pendingItems: PendingExpenseData[] = []
 
   for (const intent of intents) {
-    const description = (intent.description ?? 'gasto').trim()
+    const description = capitalizeFirst((intent.description ?? 'gasto').trim())
     const amountInReais = intent.amount ?? 0
 
     if (amountInReais <= 0) continue
