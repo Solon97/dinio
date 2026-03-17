@@ -15,12 +15,15 @@ const registerExpenseSchema = z
       .string()
       .min(3, "Description must be at least 3 characters")
       .max(120, "Description must be at most 120 characters"),
-    // Amount in cents, positive integer
+    // Amount in cents — positive for expenses, negative for refunds; must not be zero.
     amount: z
       .number()
       .int()
-      .positive()
-      .max(99999999, "Amount exceeds maximum of R$ 999.999,99"),
+      .refine((v) => v !== 0, "Amount must not be zero")
+      .refine(
+        (v) => Math.abs(v) <= 99999999,
+        "Amount exceeds maximum of R$ 999.999,99",
+      ),
     category: z.enum(VALID_CATEGORIES as [string, ...string[]]).default("Outros"),
     // Optional date (YYYY-MM-DD); defaults to today when omitted
     date: z
