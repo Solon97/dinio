@@ -1,6 +1,10 @@
 import { ParsedIntent, IntentContext, ReplyFunction } from './types'
 import { handleRegisterExpense } from './handlers/register-expense.handler'
-import { handleRegisterMultipleExpenses } from './handlers/register-multiple-expenses.handler'
+import {
+  handleBulkExpenseConfirmation,
+  handleRegisterMultipleExpenses,
+  STEP_BULK_AWAITING_CONFIRMATION,
+} from './handlers/register-multiple-expenses.handler'
 import { handleSimulateExpense } from './handlers/simulate-expense.handler'
 import { handleCheckDailyAllowance } from './handlers/check-daily-allowance.handler'
 import { handleCheckMonthBalance } from './handlers/check-month-balance.handler'
@@ -47,6 +51,9 @@ async function dispatchSingle(
 ): Promise<void> {
   switch (intent.intent) {
     case 'register_expense':
+      if (context.previousState?.step === STEP_BULK_AWAITING_CONFIRMATION) {
+        return handleBulkExpenseConfirmation(context, reply)
+      }
       return handleRegisterExpense(intent, context, reply)
     case 'simulate_expense':
       return handleSimulateExpense(intent, context, reply)

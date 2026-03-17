@@ -35,6 +35,11 @@ export interface ParsedIntent {
    * The handler normalises and matches it against the user's cards.
    */
   cardNameMention: string | null
+  /**
+   * True when the user is registering a refund (received money back).
+   * The handler will negate the amount before sending to the API.
+   */
+  isRefund: boolean | null
 }
 
 export type ReplyFunction = (message: string) => Promise<void>

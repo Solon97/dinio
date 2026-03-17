@@ -212,12 +212,27 @@ export function formatMonthIdForDisplay(monthId: number): string {
 
 /**
  * Builds the multi-line confirmation text shown to the user before saving the
- * expense. This is the body of the WhatsApp button message.
+ * expense or refund. This is the body of the WhatsApp button message.
  */
 export function buildConfirmationText(pending: PendingExpenseData): string {
   const amountFormatted = formatCurrencyBRL(pending.amountInReais)
   const dateFormatted = formatDateForDisplay(pending.date)
   const categoryDisplay = categoryWithEmoji(pending.category)
+
+  if (pending.isRefund) {
+    const lines: string[] = [
+      'Vou registrar esse reembolso 💚',
+      '',
+      `📝 Nome: ${capitalizeFirst(pending.description)}`,
+      `💰 Valor: ${amountFormatted}`,
+      `🗂️ Categoria: ${categoryDisplay}`,
+      `📅 Data: ${dateFormatted}`,
+      '',
+      'Tudo certo? Confirme abaixo 👇',
+    ]
+    return lines.join('\n')
+  }
+
   const paymentLabel = pending.paymentType === 'credito' ? 'Crédito 💳' : 'Débito'
 
   const lines: string[] = [
@@ -236,6 +251,26 @@ export function buildConfirmationText(pending: PendingExpenseData): string {
 
   if (pending.invoiceDueMonthId) {
     lines.push(`🗓️ Fatura: ${formatMonthIdForDisplay(pending.invoiceDueMonthId)}`)
+  }
+
+  lines.push('', 'Tudo certo? Confirme abaixo 👇')
+
+  return lines.join('\n')
+}
+
+/**
+ * Builds the confirmation text for a batch of expenses/refunds.
+ * Lists each item with an icon distinguishing expenses (💸) from refunds (💚).
+ */
+export function buildBulkConfirmationText(items: PendingExpenseData[]): string {
+  const lines: string[] = ['Vou registrar os seguintes itens 📋', '']
+
+  for (const item of items) {
+    const icon = item.isRefund ? '💚' : '💸'
+    const label = item.isRefund
+      ? `Reembolso ${capitalizeFirst(item.description)}`
+      : capitalizeFirst(item.description)
+    lines.push(`${icon} ${label} — ${formatCurrencyBRL(item.amountInReais)} (${item.category})`)
   }
 
   lines.push('', 'Tudo certo? Confirme abaixo 👇')

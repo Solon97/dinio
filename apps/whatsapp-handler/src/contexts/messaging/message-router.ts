@@ -150,6 +150,7 @@ export async function routeMessage(
         expenseDate: null,
         paymentType: null,
         cardNameMention: null,
+        isRefund: null,
       },
     ];
   } else {

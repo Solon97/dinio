@@ -29,6 +29,7 @@ const SingleIntentSchema = z.object({
   expenseDate: z.string().nullable().optional().transform((v) => v ?? null),
   paymentType: z.enum(['debito', 'credito']).nullable().optional().transform((v) => v ?? null),
   cardNameMention: z.string().nullable().optional().transform((v) => v ?? null),
+  isRefund: z.boolean().nullable().optional().transform((v) => v ?? null),
 })
 
 const ParsedIntentArraySchema = z.object({
@@ -45,6 +46,7 @@ const FALLBACK_INTENTS: ParsedIntent[] = [
     expenseDate: null,
     paymentType: null,
     cardNameMention: null,
+    isRefund: null,
   },
 ]
 

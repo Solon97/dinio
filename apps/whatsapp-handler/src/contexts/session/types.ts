@@ -58,6 +58,8 @@ export interface PendingExpenseData {
    * so the handler can resolve a selection by ID without an extra API call.
    */
   availableCards?: PendingCardInfo[]
+  /** True when this entry is a refund (amount will be sent as negative to the API). */
+  isRefund?: boolean
 }
 
 /**

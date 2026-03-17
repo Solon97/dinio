@@ -114,6 +114,7 @@ async function startNewExpenseFlow(
     category,
     date,
     paymentType,
+    isRefund: intent.isRefund ?? false,
   };
 
   if (paymentType === "credito") {
@@ -228,25 +229,43 @@ async function persistExpense(
   reply: ReplyFunction,
 ): Promise<void> {
   try {
+    const amountInReais = pendingData.isRefund
+      ? -Math.abs(pendingData.amountInReais)
+      : pendingData.amountInReais;
+
     const apiResponse = await registerExpense({
       userId: context.userId,
       description: pendingData.description,
-      amountInReais: pendingData.amountInReais,
+      amountInReais,
       category: pendingData.category,
       date: pendingData.date,
       creditCardId: pendingData.card?.id,
       invoiceDueMonthId: pendingData.invoiceDueMonthId,
     });
 
-    await reply(
-      [
-        "Pronto! 💸",
-        "",
-        `Já anotei os ${formatCurrencyFromCents(Math.round(pendingData.amountInReais * 100))} de ${capitalizeFirst(pendingData.description)}.`,
-        `Hoje você já gastou ${formatCurrencyFromCents(apiResponse.today_spent)} e ainda tem ${formatCurrencyFromCents(apiResponse.month_balance)} no mês.`,
-        `Seu valor mais seguro para hoje ficou em ${formatCurrencyFromCents(apiResponse.recommended_today)} 👍`,
-      ].join("\n"),
-    );
+    const amountDisplay = formatCurrencyFromCents(Math.round(pendingData.amountInReais * 100));
+
+    if (pendingData.isRefund) {
+      await reply(
+        [
+          "Pronto! 💚",
+          "",
+          `Já anotei o reembolso de ${amountDisplay} de ${capitalizeFirst(pendingData.description)}.`,
+          `Hoje você já gastou ${formatCurrencyFromCents(apiResponse.today_spent)} e ainda tem ${formatCurrencyFromCents(apiResponse.month_balance)} no mês.`,
+          `Seu valor mais seguro para hoje ficou em ${formatCurrencyFromCents(apiResponse.recommended_today)} 👍`,
+        ].join("\n"),
+      );
+    } else {
+      await reply(
+        [
+          "Pronto! 💸",
+          "",
+          `Já anotei os ${amountDisplay} de ${capitalizeFirst(pendingData.description)}.`,
+          `Hoje você já gastou ${formatCurrencyFromCents(apiResponse.today_spent)} e ainda tem ${formatCurrencyFromCents(apiResponse.month_balance)} no mês.`,
+          `Seu valor mais seguro para hoje ficou em ${formatCurrencyFromCents(apiResponse.recommended_today)} 👍`,
+        ].join("\n"),
+      );
+    }
   } catch (error) {
     await reply(resolveApiErrorMessage(error, "register"));
   }

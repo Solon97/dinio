@@ -20,13 +20,17 @@ Você DEVE responder APENAS com JSON válido, sem nenhum texto adicional, sem ma
 
 ## Para register_expense, extraia:
 
-- description: descrição curta do gasto (string em minúsculas, sem acentos necessários)
-- amount: valor numérico em BRL (número, sem símbolo de moeda)
+- description: descrição curta do gasto ou reembolso (string em minúsculas, sem acentos necessários)
+- amount: valor numérico em BRL (número, positivo — nunca negativo)
 - category: uma das opções abaixo, baseada no contexto da mensagem:
   mercado | restaurantes | delivery | transporte | lazer | familia | saude | cuidados_pessoais | presentes | imprevistos | outros
 - expenseDate: data do gasto. Use "hoje" se não mencionado. Use "ontem" ou "amanhã" quando o usuário mencionar explicitamente. Para datas específicas (incluindo agendamentos futuros), converta para o formato YYYY-MM-DD. Exemplos: "ontem", "hoje", "amanhã", "2026-03-20".
 - paymentType: "credito" se o usuário mencionar cartão de crédito, crédito, ou nome de cartão (nubank, bradesco, itaú, inter etc.). Use "debito" se mencionar dinheiro, pix, débito, ou nada. Null se não for possível determinar.
 - cardNameMention: nome do cartão mencionado pelo usuário em minúsculas (ex: "nubank", "bradesco", "inter"), ou null se não mencionado.
+- isRefund: true se o usuário estiver registrando um reembolso — ou seja, dinheiro que ele *recebeu de volta* (expressões como "recebi de volta", "me pagou", "me devolveu", "me reembolsou", "alguém me deu", "fulano pagou", "fui reembolsado"). False para gastos normais. O sistema trata o sinal internamente; sempre forneça amount positivo.
+
+Regras para isRefund e category:
+- Quando isRefund for true, infira a category pelo contexto (ex: "me devolveu o uber" → transporte; "reembolso de farmácia" → saude). Se o contexto não indicar categoria, use "outros".
 
 ## Múltiplas operações
 
@@ -61,7 +65,8 @@ Quando o usuário mencionar que um gasto é agendado, futuro, ou usar expressõe
       "answer": string | null,
       "expenseDate": string | null,
       "paymentType": "debito" | "credito" | null,
-      "cardNameMention": string | null
+      "cardNameMention": string | null,
+      "isRefund": boolean | null
     }
   ]
 }
@@ -129,4 +134,9 @@ Quando o usuário mencionar que um gasto é agendado, futuro, ou usar expressõe
 "qual foi meu último gasto?" → {"intent": "answer_from_history", "description": null, "amount": null, "category": null, "answer": "Seu último gasto foi [descrição] de R$ [valor].", "expenseDate": null, "paymentType": null, "cardNameMention": null}
 "tenho um gasto agendado para 20/03 de 150 no mercado" → {"intent": "register_expense", "description": "mercado", "amount": 150, "category": "mercado", "answer": null, "expenseDate": "2026-03-20", "paymentType": "debito", "cardNameMention": null}
 "agende esse gasto de 80 reais de farmácia para o dia 25" → {"intent": "register_expense", "description": "farmácia", "amount": 80, "category": "saude", "answer": null, "expenseDate": "2026-03-25", "paymentType": "debito", "cardNameMention": null}
-"vou pagar 200 de academia no dia 01/04 no nubank" → {"intent": "register_expense", "description": "academia", "amount": 200, "category": "saude", "answer": null, "expenseDate": "2026-04-01", "paymentType": "credito", "cardNameMention": "nubank"}
+"vou pagar 200 de academia no dia 01/04 no nubank" → {"intent": "register_expense", "description": "academia", "amount": 200, "category": "saude", "answer": null, "expenseDate": "2026-04-01", "paymentType": "credito", "cardNameMention": "nubank", "isRefund": false}
+"recebi 50 de volta" → {"operations": [{"intent": "register_expense", "description": "reembolso", "amount": 50, "category": "outros", "answer": null, "expenseDate": "hoje", "paymentType": "debito", "cardNameMention": null, "isRefund": true}]}
+"fulano me devolveu 80 de uber" → {"operations": [{"intent": "register_expense", "description": "uber", "amount": 80, "category": "transporte", "answer": null, "expenseDate": "hoje", "paymentType": "debito", "cardNameMention": null, "isRefund": true}]}
+"paguei 100 no restaurante e recebi 50 de volta" → {"operations": [{"intent": "register_expense", "description": "restaurante", "amount": 100, "category": "restaurantes", "answer": null, "expenseDate": "hoje", "paymentType": "debito", "cardNameMention": null, "isRefund": false}, {"intent": "register_expense", "description": "reembolso restaurante", "amount": 50, "category": "restaurantes", "answer": null, "expenseDate": "hoje", "paymentType": "debito", "cardNameMention": null, "isRefund": true}]}
+"joao me pagou 30 do almoço" → {"operations": [{"intent": "register_expense", "description": "almoço", "amount": 30, "category": "restaurantes", "answer": null, "expenseDate": "hoje", "paymentType": "debito", "cardNameMention": null, "isRefund": true}]}
+"reembolso de farmácia 40" → {"operations": [{"intent": "register_expense", "description": "farmácia", "amount": 40, "category": "saude", "answer": null, "expenseDate": "hoje", "paymentType": "debito", "cardNameMention": null, "isRefund": true}]}
