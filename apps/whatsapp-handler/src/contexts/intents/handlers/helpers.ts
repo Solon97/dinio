@@ -267,10 +267,7 @@ export function buildBulkConfirmationText(items: PendingExpenseData[]): string {
 
   for (const item of items) {
     const icon = item.isRefund ? '💚' : '💸'
-    const label = item.isRefund
-      ? `Reembolso ${capitalizeFirst(item.description)}`
-      : capitalizeFirst(item.description)
-    lines.push(`${icon} ${label} — ${formatCurrencyBRL(item.amountInReais)} (${item.category})`)
+    lines.push(`${icon} ${capitalizeFirst(item.description)} — ${formatCurrencyBRL(item.amountInReais)} (${item.category})`)
   }
 
   lines.push('', 'Tudo certo? Confirme abaixo 👇')

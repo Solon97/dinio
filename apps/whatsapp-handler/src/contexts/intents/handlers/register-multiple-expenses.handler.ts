@@ -196,10 +196,7 @@ function buildBulkSummary(results: ItemResult[]): string {
 
     for (const r of successful) {
       const icon = r.isRefund ? '💚' : '✅'
-      const label = r.isRefund
-        ? `Reembolso ${capitalizeFirst(r.description)}`
-        : capitalizeFirst(r.description)
-      lines.push(`${icon} ${label} — ${formatCurrencyFromCents(r.amountInCents)}`)
+      lines.push(`${icon} ${capitalizeFirst(r.description)} — ${formatCurrencyFromCents(r.amountInCents)}`)
     }
   }
 
