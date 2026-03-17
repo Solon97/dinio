@@ -1,11 +1,11 @@
-import { getCreditCards, registerExpense } from '../../dinio/dinio-api-client'
-import { formatCurrencyFromCents } from '../../responses/formatters'
-import type { PendingCardInfo, PendingExpenseData } from '../../session/types'
+import { getCreditCards, registerExpense } from "../../dinio/dinio-api-client";
+import { formatCurrencyFromCents } from "../../responses/formatters";
+import type { PendingCardInfo, PendingExpenseData } from "../../session/types";
 import {
   sendButtonMessage,
   sendListMessage,
-} from '../../whatsapp/whatsapp-client'
-import { ParsedIntent, IntentContext, ReplyFunction } from '../types'
+} from "../../whatsapp/whatsapp-client";
+import { ParsedIntent, IntentContext, ReplyFunction } from "../types";
 import {
   buildConfirmationText,
   capitalizeFirst,
@@ -15,17 +15,17 @@ import {
   matchCardByName,
   resolveApiErrorMessage,
   resolveExpenseDate,
-} from './helpers'
+} from "./helpers";
 
-const CONFIRM_BUTTON_ID = 'confirm_expense'
-const CONFIRM_BUTTON_TITLE = 'Confirmar ✅'
+const CONFIRM_BUTTON_ID = "confirm_expense";
+const CONFIRM_BUTTON_TITLE = "Confirmar ✅";
 
 // ---------------------------------------------------------------------------
 // Step identifiers for the register_expense multi-turn flow
 // ---------------------------------------------------------------------------
 
-const STEP_AWAITING_CONFIRMATION = 'awaiting_confirmation'
-const STEP_CARD_SELECTION_REQUIRED = 'card_selection_required'
+const STEP_AWAITING_CONFIRMATION = "awaiting_confirmation";
+const STEP_CARD_SELECTION_REQUIRED = "card_selection_required";
 
 // ---------------------------------------------------------------------------
 // Public entry point
@@ -36,34 +36,39 @@ export async function handleRegisterExpense(
   context: IntentContext,
   reply: ReplyFunction,
 ): Promise<void> {
-  const { previousState, previousOperation, interactiveReplyId } = context
+  const { previousState, previousOperation, interactiveReplyId } = context;
+  const pendingData = previousOperation?.data as PendingExpenseData | undefined;
 
-  const isPendingExpenseFlow =
-    previousState?.intent === 'register_expense' &&
-    (previousState.step === STEP_AWAITING_CONFIRMATION ||
-      previousState.step === STEP_CARD_SELECTION_REQUIRED)
-
-  if (isPendingExpenseFlow) {
-    const pendingData = previousOperation?.data as PendingExpenseData | undefined
-
-    if (!pendingData) {
-      // Corrupted state — restart
-      return startNewExpenseFlow(intent, context, reply)
-    }
-
-    if (previousState.step === STEP_CARD_SELECTION_REQUIRED) {
-      return handleCardSelection(pendingData, context, reply)
-    }
-
-    if (previousState.step === STEP_AWAITING_CONFIRMATION) {
-      if (interactiveReplyId === CONFIRM_BUTTON_ID) {
-        return persistExpense(pendingData, context, reply)
-      }
-      return handleFieldEdit(intent, pendingData, context, reply)
-    }
+  if (!!previousState && !!pendingData && interactiveReplyId) {
+    return handleInteractiveReply(
+      intent,
+      context,
+      reply,
+      previousState.step,
+      pendingData,
+    );
   }
 
-  return startNewExpenseFlow(intent, context, reply)
+  return startNewExpenseFlow(intent, context, reply);
+}
+
+async function handleInteractiveReply(
+  intent: ParsedIntent,
+  context: IntentContext,
+  reply: ReplyFunction,
+  previousStep: string,
+  pendingData: PendingExpenseData,
+): Promise<void> {
+  if (previousStep === STEP_CARD_SELECTION_REQUIRED) {
+    return handleCardSelection(pendingData, context, reply);
+  }
+
+  if (
+    previousStep === STEP_AWAITING_CONFIRMATION &&
+    context.interactiveReplyId === CONFIRM_BUTTON_ID
+  ) {
+    return persistExpense(pendingData, context, reply);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -78,29 +83,32 @@ async function startNewExpenseFlow(
   if (intent.amount == null || intent.amount <= 0) {
     await reply(
       [
-        'Não peguei o valor desse gasto 💸',
-        '',
-        'Me manda o valor que eu registro para você.',
-      ].join('\n'),
-    )
-    return
+        "Não peguei o valor desse gasto 💸",
+        "",
+        "Me manda o valor que eu registro para você.",
+      ].join("\n"),
+    );
+    return;
   }
 
-  const date = resolveExpenseDate(intent.expenseDate)
+  const date = resolveExpenseDate(intent.expenseDate);
   if (!date) {
     await reply(
       [
-        'Não consegui entender a data desse gasto 📅',
-        '',
+        "Não consegui entender a data desse gasto 📅",
+        "",
         'Me manda no formato dia/mês/ano, por exemplo: "10/03/2026".',
-      ].join('\n'),
-    )
-    return
+      ].join("\n"),
+    );
+    return;
   }
 
-  const description = (intent.description ?? 'gasto').trim()
-  const category = mapIntentCategoryToApiCategory(intent.category)
-  const paymentType = inferPaymentType(intent.paymentType, intent.cardNameMention)
+  const description = (intent.description ?? "gasto").trim();
+  const category = mapIntentCategoryToApiCategory(intent.category);
+  const paymentType = inferPaymentType(
+    intent.paymentType,
+    intent.cardNameMention,
+  );
 
   const pendingExpense: PendingExpenseData = {
     description,
@@ -108,14 +116,19 @@ async function startNewExpenseFlow(
     category,
     date,
     paymentType,
+  };
+
+  if (paymentType === "credito") {
+    await resolveCardForExpense(
+      pendingExpense,
+      intent.cardNameMention,
+      context,
+      reply,
+    );
+    return;
   }
 
-  if (paymentType === 'credito') {
-    await resolveCardForExpense(pendingExpense, intent.cardNameMention, context, reply)
-    return
-  }
-
-  await transitionToConfirmation(pendingExpense, context, reply)
+  await transitionToConfirmation(pendingExpense, context, reply);
 }
 
 // ---------------------------------------------------------------------------
@@ -128,43 +141,43 @@ async function resolveCardForExpense(
   context: IntentContext,
   reply: ReplyFunction,
 ): Promise<void> {
-  let cards: PendingCardInfo[]
+  let cards: PendingCardInfo[];
   try {
-    cards = await getCreditCards(context.userId)
+    cards = await getCreditCards(context.userId);
   } catch {
-    await reply(resolveApiErrorMessage(null, 'register'))
-    return
+    await reply(resolveApiErrorMessage(null, "register"));
+    return;
   }
 
   if (cards.length === 0) {
     await reply(
       [
-        'Você não tem cartões de crédito cadastrados no Dinio 💳',
-        '',
-        'Para registrar gastos no crédito, primeiro adicione seu cartão no app do Dinio.',
-        'Depois é só voltar aqui e tentar de novo 👍',
-      ].join('\n'),
-    )
-    return
+        "Você não tem cartões de crédito cadastrados no Dinio 💳",
+        "",
+        "Para registrar gastos no crédito, primeiro adicione seu cartão no app do Dinio.",
+        "Depois é só voltar aqui e tentar de novo 👍",
+      ].join("\n"),
+    );
+    return;
   }
 
   if (cardNameMention) {
-    const matched = matchCardByName(cards, cardNameMention)
+    const matched = matchCardByName(cards, cardNameMention);
     if (matched) {
-      pendingExpense.card = matched
+      pendingExpense.card = matched;
       pendingExpense.invoiceDueMonthId = computeInvoiceDueMonthId(
         pendingExpense.date,
         matched.dueDay,
         matched.closingDay,
-      )
-      await transitionToConfirmation(pendingExpense, context, reply)
-      return
+      );
+      await transitionToConfirmation(pendingExpense, context, reply);
+      return;
     }
   }
 
   // No match or ambiguous — ask user to pick from list
-  pendingExpense.availableCards = cards
-  await transitionToCardSelection(pendingExpense, context, reply)
+  pendingExpense.availableCards = cards;
+  await transitionToCardSelection(pendingExpense, context, reply);
 }
 
 // ---------------------------------------------------------------------------
@@ -176,22 +189,22 @@ async function handleCardSelection(
   context: IntentContext,
   reply: ReplyFunction,
 ): Promise<void> {
-  const { interactiveReplyId } = context
-  const availableCards = pendingData.availableCards ?? []
+  const { interactiveReplyId } = context;
+  const availableCards = pendingData.availableCards ?? [];
 
   if (!interactiveReplyId) {
     // User sent text instead of selecting from list — re-send the list
-    await transitionToCardSelection(pendingData, context, reply)
-    return
+    await transitionToCardSelection(pendingData, context, reply);
+    return;
   }
 
-  const selectedCard = availableCards.find((c) => c.id === interactiveReplyId)
+  const selectedCard = availableCards.find((c) => c.id === interactiveReplyId);
   if (!selectedCard) {
     await reply(
-      'Não reconheci essa seleção 🤔 Escolha um dos cartões da lista abaixo.',
-    )
-    await transitionToCardSelection(pendingData, context, reply)
-    return
+      "Não reconheci essa seleção 🤔 Escolha um dos cartões da lista abaixo.",
+    );
+    await transitionToCardSelection(pendingData, context, reply);
+    return;
   }
 
   const updatedExpense: PendingExpenseData = {
@@ -202,65 +215,9 @@ async function handleCardSelection(
       selectedCard.dueDay,
       selectedCard.closingDay,
     ),
-  }
+  };
 
-  await transitionToConfirmation(updatedExpense, context, reply)
-}
-
-// ---------------------------------------------------------------------------
-// Step: field edit while awaiting confirmation
-// ---------------------------------------------------------------------------
-
-async function handleFieldEdit(
-  intent: ParsedIntent,
-  pendingData: PendingExpenseData,
-  context: IntentContext,
-  reply: ReplyFunction,
-): Promise<void> {
-  const updated: PendingExpenseData = { ...pendingData }
-  let cardNeedsResolving = false
-
-  if (intent.description) updated.description = intent.description.trim()
-  if (intent.amount != null && intent.amount > 0) updated.amountInReais = intent.amount
-  if (intent.category) updated.category = mapIntentCategoryToApiCategory(intent.category)
-
-  if (intent.expenseDate) {
-    const newDate = resolveExpenseDate(intent.expenseDate)
-    if (newDate) {
-      updated.date = newDate
-      // Recalculate invoice month when date changes and a card is already set
-      if (updated.card) {
-        updated.invoiceDueMonthId = computeInvoiceDueMonthId(
-          updated.date,
-          updated.card.dueDay,
-          updated.card.closingDay,
-        )
-      }
-    }
-  }
-
-  if (intent.paymentType) {
-    updated.paymentType = intent.paymentType
-    if (intent.paymentType === 'debito') {
-      // Clear card data when switching to debit
-      updated.card = undefined
-      updated.invoiceDueMonthId = undefined
-      updated.availableCards = undefined
-    } else {
-      cardNeedsResolving = true
-    }
-  }
-
-  if (intent.cardNameMention && updated.paymentType === 'credito') {
-    cardNeedsResolving = true
-  }
-
-  if (cardNeedsResolving) {
-    await resolveCardForExpense(updated, intent.cardNameMention, context, reply)
-    return
-  }
-
-  await transitionToConfirmation(updated, context, reply)
+  await transitionToConfirmation(updatedExpense, context, reply);
 }
 
 // ---------------------------------------------------------------------------
@@ -281,19 +238,19 @@ async function persistExpense(
       date: pendingData.date,
       creditCardId: pendingData.card?.id,
       invoiceDueMonthId: pendingData.invoiceDueMonthId,
-    })
+    });
 
     await reply(
       [
-        'Pronto! 💸',
-        '',
+        "Pronto! 💸",
+        "",
         `Já anotei os ${formatCurrencyFromCents(Math.round(pendingData.amountInReais * 100))} de ${capitalizeFirst(pendingData.description)}.`,
         `Hoje você já gastou ${formatCurrencyFromCents(apiResponse.today_spent)} e ainda tem ${formatCurrencyFromCents(apiResponse.month_balance)} no mês.`,
         `Seu valor mais seguro para hoje ficou em ${formatCurrencyFromCents(apiResponse.recommended_today)} 👍`,
-      ].join('\n'),
-    )
+      ].join("\n"),
+    );
   } catch (error) {
-    await reply(resolveApiErrorMessage(error, 'register'))
+    await reply(resolveApiErrorMessage(error, "register"));
   }
 }
 
@@ -306,14 +263,19 @@ async function transitionToConfirmation(
   context: IntentContext,
   reply: ReplyFunction,
 ): Promise<void> {
-  context.session.state = { intent: 'register_expense', step: STEP_AWAITING_CONFIRMATION }
-  context.session.operation = { type: 'register_expense', data: pending as unknown as Record<string, unknown> }
+  context.session.state = {
+    intent: "register_expense",
+    step: STEP_AWAITING_CONFIRMATION,
+  };
+  context.session.operation = {
+    type: "register_expense",
+    data: pending as unknown as Record<string, unknown>,
+  };
 
-  const confirmationText = buildConfirmationText(pending)
-
+  const confirmationText = buildConfirmationText(pending);
   await sendButtonMessage(context.phone, confirmationText, [
     { id: CONFIRM_BUTTON_ID, title: CONFIRM_BUTTON_TITLE },
-  ])
+  ]);
 }
 
 async function transitionToCardSelection(
@@ -321,25 +283,30 @@ async function transitionToCardSelection(
   context: IntentContext,
   _reply: ReplyFunction,
 ): Promise<void> {
-  context.session.state = { intent: 'register_expense', step: STEP_CARD_SELECTION_REQUIRED }
-  context.session.operation = { type: 'register_expense', data: pending as unknown as Record<string, unknown> }
+  context.session.state = {
+    intent: "register_expense",
+    step: STEP_CARD_SELECTION_REQUIRED,
+  };
+  context.session.operation = {
+    type: "register_expense",
+    data: pending as unknown as Record<string, unknown>,
+  };
 
-  const cards = pending.availableCards ?? []
+  const cards = pending.availableCards ?? [];
   const bodyText = [
-    'Qual cartão de crédito você quer usar? 💳',
-    '',
-    'Selecione um dos cartões abaixo:',
-  ].join('\n')
+    "Qual cartão de crédito você quer usar? 💳",
+    "",
+    "Selecione um dos cartões abaixo:",
+  ].join("\n");
 
-  await sendListMessage(context.phone, bodyText, 'Ver cartões', [
+  await sendListMessage(context.phone, bodyText, "Ver cartões", [
     {
-      title: 'Meus cartões',
+      title: "Meus cartões",
       rows: cards.map((card) => ({
         id: card.id,
         title: card.name,
-        description: '',
+        description: "",
       })),
     },
-  ])
+  ]);
 }
-

@@ -72,6 +72,10 @@ Regras para o campo "answer":
 - Se a informação não estiver no histórico, responda de forma honesta e breve (ex: "Não encontrei essa informação no nosso histórico recente.").
 - Para todos os outros intents, "answer" deve ser null.
 
+## Agendamentos
+
+Quando o usuário mencionar que um gasto é agendado, futuro, ou usar expressões como "agende", "vou pagar", "tenho um gasto para", trate como `register_expense` normalmente, apenas definindo a data futura em `expenseDate` (formato YYYY-MM-DD). Nenhum campo adicional é necessário — não preencha "answer".
+
 ## Exemplos
 
 "gastei 25 no uber" → {"operations": [{"intent": "register_expense", "description": "uber", "amount": 25, "category": "transporte", "answer": null, "expenseDate": "hoje", "paymentType": "debito", "cardNameMention": null}]}
@@ -96,3 +100,33 @@ Regras para o campo "answer":
 "oi, tudo bem?" → {"operations": [{"intent": "unknown", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}]}
 "qual foi meu último gasto?" → {"operations": [{"intent": "answer_from_history", "description": null, "amount": null, "category": null, "answer": "Seu último gasto foi [descrição] de R$ [valor].", "expenseDate": null, "paymentType": null, "cardNameMention": null}]}
 "tenho um gasto agendado para 20/03 de 150 no mercado" → {"operations": [{"intent": "register_expense", "description": "mercado", "amount": 150, "category": "mercado", "answer": null, "expenseDate": "2026-03-20", "paymentType": "debito", "cardNameMention": null}]}
+"gastei 25 no uber" → {"intent": "register_expense", "description": "uber", "amount": 25, "category": "transporte", "answer": null, "expenseDate": "hoje", "paymentType": "debito", "cardNameMention": null}
+"almocei 35 reais" → {"intent": "register_expense", "description": "almoço", "amount": 35, "category": "restaurantes", "answer": null, "expenseDate": "hoje", "paymentType": "debito", "cardNameMention": null}
+"paguei 120 de farmácia" → {"intent": "register_expense", "description": "farmácia", "amount": 120, "category": "saude", "answer": null, "expenseDate": "hoje", "paymentType": "debito", "cardNameMention": null}
+"cinema 45" → {"intent": "register_expense", "description": "cinema", "amount": 45, "category": "lazer", "answer": null, "expenseDate": "hoje", "paymentType": "debito", "cardNameMention": null}
+"mercado 120 no crédito nubank" → {"intent": "register_expense", "description": "mercado", "amount": 120, "category": "mercado", "answer": null, "expenseDate": "hoje", "paymentType": "credito", "cardNameMention": "nubank"}
+"farmácia 40 ontem" → {"intent": "register_expense", "description": "farmácia", "amount": 40, "category": "saude", "answer": null, "expenseDate": "ontem", "paymentType": "debito", "cardNameMention": null}
+"ifood 35 no inter" → {"intent": "register_expense", "description": "ifood", "amount": 35, "category": "delivery", "answer": null, "expenseDate": "hoje", "paymentType": "credito", "cardNameMention": "inter"}
+"comprei roupa 200 amanhã" → {"intent": "register_expense", "description": "roupa", "amount": 200, "category": "outros", "answer": null, "expenseDate": "amanhã", "paymentType": "debito", "cardNameMention": null}
+"se eu gastar 150 hoje" → {"intent": "simulate_expense", "description": null, "amount": 150, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}
+"simula uma compra de 89" → {"intent": "simulate_expense", "description": null, "amount": 89, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}
+"quanto posso gastar hoje?" → {"intent": "check_daily_allowance", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}
+"qual meu saldo do mês?" → {"intent": "check_month_balance", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}
+"quanto gastei hoje?" → {"intent": "check_today_spending", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}
+"tenho compromissos hoje?" → {"intent": "check_agenda", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}
+"quais são meus vencimentos de hoje?" → {"intent": "check_agenda", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}
+"o que vence hoje?" → {"intent": "check_agenda", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}
+"tenho compromissos essa semana?" → {"intent": "check_agenda_week", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}
+"o que vence essa semana?" → {"intent": "check_agenda_week", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}
+"quais são meus vencimentos desta semana?" → {"intent": "check_agenda_week", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}
+"tenho compromissos esse mês?" → {"intent": "check_agenda_month", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}
+"o que vence esse mês?" → {"intent": "check_agenda_month", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}
+"quais são meus vencimentos deste mês?" → {"intent": "check_agenda_month", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}
+"tenho compromissos em atraso?" → {"intent": "check_agenda_overdue", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}
+"o que está em atraso?" → {"intent": "check_agenda_overdue", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}
+"tenho algum vencimento atrasado?" → {"intent": "check_agenda_overdue", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}
+"oi, tudo bem?" → {"intent": "unknown", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}
+"qual foi meu último gasto?" → {"intent": "answer_from_history", "description": null, "amount": null, "category": null, "answer": "Seu último gasto foi [descrição] de R$ [valor].", "expenseDate": null, "paymentType": null, "cardNameMention": null}
+"tenho um gasto agendado para 20/03 de 150 no mercado" → {"intent": "register_expense", "description": "mercado", "amount": 150, "category": "mercado", "answer": null, "expenseDate": "2026-03-20", "paymentType": "debito", "cardNameMention": null}
+"agende esse gasto de 80 reais de farmácia para o dia 25" → {"intent": "register_expense", "description": "farmácia", "amount": 80, "category": "saude", "answer": null, "expenseDate": "2026-03-25", "paymentType": "debito", "cardNameMention": null}
+"vou pagar 200 de academia no dia 01/04 no nubank" → {"intent": "register_expense", "description": "academia", "amount": 200, "category": "saude", "answer": null, "expenseDate": "2026-04-01", "paymentType": "credito", "cardNameMention": "nubank"}

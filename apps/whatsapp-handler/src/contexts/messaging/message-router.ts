@@ -14,7 +14,10 @@ import {
   getSession,
   saveSession,
 } from "../session/chatSessionStore";
-import { buildIntentContext } from "../session/contextBuilder";
+import {
+  buildIntentContext,
+  formatContextForPrompt,
+} from "../session/contextBuilder";
 import { sendTextMessage } from "../whatsapp/whatsapp-client";
 import { isMessageRelevant } from "./relevance-filter";
 
@@ -108,7 +111,7 @@ export async function routeMessage(
   // -------------------------------------------------------------------------
   const hasActiveFlow = !!session.state;
   const isInteractiveReply = !!message.interactiveReplyId;
-
+  reply(JSON.stringify({ hasActiveFlow, isInteractiveReply }));
   if (
     !hasActiveFlow &&
     !isInteractiveReply &&
@@ -155,6 +158,7 @@ export async function routeMessage(
     intents = await parseIntent(intentContext);
   }
 
+  reply(JSON.stringify({ intents }));
   log.info({ intents }, "intent(s) parsed");
 
   // Clear previous operation state before dispatch so handlers start with a
