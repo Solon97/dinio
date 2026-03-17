@@ -40,8 +40,10 @@ export interface BotAgendaItem {
   name: string
   /** null for credit card invoices where the total is not yet known */
   amountCents: number | null
-  /** ISO date (YYYY-MM-DD). Present for week/month queries. */
+  /** ISO date (YYYY-MM-DD). Present for week/month/overdue queries. */
   date?: string
+  /** True when the item is a pending reimbursement receivable, not an outgoing payment. */
+  isRefund?: boolean
 }
 
 export interface BotAgendaResponse {
