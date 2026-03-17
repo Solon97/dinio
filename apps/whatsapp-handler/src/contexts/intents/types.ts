@@ -1,5 +1,6 @@
 export type IntentType =
   | 'register_expense'
+  | 'register_reimbursement'
   | 'simulate_expense'
   | 'check_daily_allowance'
   | 'check_month_balance'

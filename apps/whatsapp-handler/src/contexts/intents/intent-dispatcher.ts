@@ -1,5 +1,6 @@
 import { ParsedIntent, IntentContext, ReplyFunction } from './types'
 import { handleRegisterExpense } from './handlers/register-expense.handler'
+import { handleRegisterReimbursement } from './handlers/register-reimbursement.handler'
 import { handleSimulateExpense } from './handlers/simulate-expense.handler'
 import { handleCheckDailyAllowance } from './handlers/check-daily-allowance.handler'
 import { handleCheckMonthBalance } from './handlers/check-month-balance.handler'
@@ -15,6 +16,8 @@ export async function dispatchIntent(
   switch (intent.intent) {
     case 'register_expense':
       return handleRegisterExpense(intent, context, reply)
+    case 'register_reimbursement':
+      return handleRegisterReimbursement(intent, context, reply)
     case 'simulate_expense':
       return handleSimulateExpense(intent, context, reply)
     case 'check_daily_allowance':

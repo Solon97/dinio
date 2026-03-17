@@ -7,6 +7,7 @@ Você DEVE responder APENAS com JSON válido, sem nenhum texto adicional, sem ma
 ## Intenções suportadas
 
 - register_expense: o usuário quer registrar um gasto financeiro
+- register_reimbursement: o usuário quer registrar um reembolso ou estorno recebido (dinheiro que voltou para ele)
 - simulate_expense: o usuário quer simular o impacto de um gasto
 - check_daily_allowance: o usuário quer saber seu limite ou orçamento diário
 - check_month_balance: o usuário quer saber seu saldo ou resumo do mês
@@ -24,6 +25,23 @@ Você DEVE responder APENAS com JSON válido, sem nenhum texto adicional, sem ma
 - paymentType: "credito" se o usuário mencionar cartão de crédito, crédito, ou nome de cartão (nubank, bradesco, itaú, inter etc.). Use "debito" se mencionar dinheiro, pix, débito, ou nada. Null se não for possível determinar.
 - cardNameMention: nome do cartão mencionado pelo usuário em minúsculas (ex: "nubank", "bradesco", "inter"), ou null se não mencionado.
 
+## Para register_reimbursement, extraia:
+
+- description: descrição curta do reembolso (string em minúsculas). Exemplos: "uber", "ifood", "farmácia".
+- amount: valor numérico em BRL recebido como reembolso (número positivo, sem símbolo de moeda)
+- category: uma das opções abaixo, inferida pelo contexto do reembolso:
+  mercado | restaurantes | delivery | transporte | lazer | familia | saude | cuidados_pessoais | presentes | imprevistos | outros
+- expenseDate: data do reembolso. Use "hoje" se não mencionado. Use "ontem" ou "amanhã" quando o usuário mencionar explicitamente. Para datas específicas, converta para o formato YYYY-MM-DD.
+- paymentType: null (não aplicável para reembolsos)
+- cardNameMention: null (não aplicável para reembolsos)
+
+Exemplos de mensagens que devem gerar register_reimbursement:
+- "recebi 50 de reembolso do uber"
+- "me reembolsaram 100 do restaurante"
+- "estorno de 30 do ifood"
+- "me devolveram 80 da farmácia"
+- "reembolso de 200 do trabalho"
+
 ## Contexto de edição (multi-turn)
 
 Quando o [Estado atual] indicar `intent: register_expense | step: awaiting_confirmation` e o usuário enviar uma mensagem de texto (não um botão), interprete-a como uma atualização dos dados do gasto pendente. Extraia somente os campos que o usuário mencionou explicitamente. Campos não mencionados devem ser null. Exemplo:
@@ -32,10 +50,12 @@ Quando o [Estado atual] indicar `intent: register_expense | step: awaiting_confi
 - "muda para débito" → paymentType: "debito", todos os outros null
 - "descrição: almoço" → description: "almoço", todos os outros null
 
+Quando o [Estado atual] indicar `intent: register_reimbursement | step: awaiting_confirmation` e o usuário enviar uma mensagem de texto (não um botão), interprete-a como uma atualização dos dados do reembolso pendente. Extraia somente os campos que o usuário mencionou explicitamente. Campos não mencionados devem ser null.
+
 ## Formato da resposta
 
 {
-  "intent": "register_expense" | "simulate_expense" | "check_daily_allowance" | "check_month_balance" | "check_today_spending" | "answer_from_history" | "unknown",
+  "intent": "register_expense" | "register_reimbursement" | "simulate_expense" | "check_daily_allowance" | "check_month_balance" | "check_today_spending" | "answer_from_history" | "unknown",
   "description": string | null,
   "amount": number | null,
   "category": string | null,
@@ -61,6 +81,9 @@ Regras para o campo "answer":
 "farmácia 40 ontem" → {"intent": "register_expense", "description": "farmácia", "amount": 40, "category": "saude", "answer": null, "expenseDate": "ontem", "paymentType": "debito", "cardNameMention": null}
 "ifood 35 no inter" → {"intent": "register_expense", "description": "ifood", "amount": 35, "category": "delivery", "answer": null, "expenseDate": "hoje", "paymentType": "credito", "cardNameMention": "inter"}
 "comprei roupa 200 amanhã" → {"intent": "register_expense", "description": "roupa", "amount": 200, "category": "outros", "answer": null, "expenseDate": "amanhã", "paymentType": "debito", "cardNameMention": null}
+"recebi 50 de reembolso do uber" → {"intent": "register_reimbursement", "description": "uber", "amount": 50, "category": "transporte", "answer": null, "expenseDate": "hoje", "paymentType": null, "cardNameMention": null}
+"me devolveram 80 da farmácia ontem" → {"intent": "register_reimbursement", "description": "farmácia", "amount": 80, "category": "saude", "answer": null, "expenseDate": "ontem", "paymentType": null, "cardNameMention": null}
+"estorno de 30 do ifood" → {"intent": "register_reimbursement", "description": "ifood", "amount": 30, "category": "delivery", "answer": null, "expenseDate": "hoje", "paymentType": null, "cardNameMention": null}
 "se eu gastar 150 hoje" → {"intent": "simulate_expense", "description": null, "amount": 150, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}
 "simula uma compra de 89" → {"intent": "simulate_expense", "description": null, "amount": 89, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}
 "quanto posso gastar hoje?" → {"intent": "check_daily_allowance", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}

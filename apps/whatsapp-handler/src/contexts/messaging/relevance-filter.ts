@@ -35,6 +35,10 @@ const DINIO_KEYWORDS = [
   "simula",
   "registr",
   "anot",
+  "reembolso",
+  "estorno",
+  "devolver",
+  "devolveram",
   "sim",
   "não",
 ];

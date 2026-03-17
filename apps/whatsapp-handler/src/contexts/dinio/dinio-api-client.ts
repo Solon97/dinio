@@ -159,6 +159,28 @@ export async function getCreditCards(userId: string): Promise<BotCreditCard[]> {
   return result.creditCards
 }
 
+interface RegisterReimbursementInput {
+  userId: string
+  description: string
+  amountInReais: number
+  category: string
+  /** ISO date string YYYY-MM-DD. Defaults to today server-side when omitted. */
+  date?: string
+}
+
+export async function registerReimbursement(input: RegisterReimbursementInput): Promise<RegisterExpenseResponse> {
+  return requestJson<RegisterExpenseResponse>('/api/bot/register-reimbursement', {
+    method: 'POST',
+    body: JSON.stringify({
+      user_id: input.userId,
+      description: input.description,
+      amount: toCents(input.amountInReais),
+      category: input.category,
+      ...(input.date ? { date: input.date } : {}),
+    }),
+  })
+}
+
 interface SimulateExpenseInput {
   userId: string
   amountInReais: number

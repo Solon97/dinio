@@ -1,6 +1,6 @@
 import { computeInvoiceDueMonthIdForDate, formatMonthIdLabel } from 'dinio-shared'
 import { DinioApiError } from '../../dinio/dinio-api-client'
-import type { PendingCardInfo, PendingExpenseData } from '../../session/types'
+import type { PendingCardInfo, PendingExpenseData, PendingReimbursementData } from '../../session/types'
 
 // ---------------------------------------------------------------------------
 // Category mapping
@@ -243,11 +243,34 @@ export function buildConfirmationText(pending: PendingExpenseData): string {
   return lines.join('\n')
 }
 
+/**
+ * Builds the multi-line confirmation text shown to the user before saving the
+ * reimbursement. This is the body of the WhatsApp button message.
+ */
+export function buildReimbursementConfirmationText(pending: PendingReimbursementData): string {
+  const amountFormatted = formatCurrencyBRL(pending.amountInReais)
+  const dateFormatted = formatDateForDisplay(pending.date)
+  const categoryDisplay = categoryWithEmoji(pending.category)
+
+  const lines: string[] = [
+    'Vou registrar esse reembolso 💚',
+    '',
+    `📝 Nome: ${capitalizeFirst(pending.description)}`,
+    `💰 Valor: ${amountFormatted}`,
+    `🗂️ Categoria: ${categoryDisplay}`,
+    `📅 Data: ${dateFormatted}`,
+    '',
+    'Tudo certo? Confirme abaixo 👇',
+  ]
+
+  return lines.join('\n')
+}
+
 // ---------------------------------------------------------------------------
 // Error resolution
 // ---------------------------------------------------------------------------
 
-export function resolveApiErrorMessage(error: unknown, operation: 'register' | 'status' | 'simulate'): string {
+export function resolveApiErrorMessage(error: unknown, operation: 'register' | 'register_reimbursement' | 'status' | 'simulate'): string {
   if (error instanceof DinioApiError) {
     if (error.code === 'LAST_DAY_OF_MONTH') {
       return [
@@ -276,6 +299,10 @@ export function resolveApiErrorMessage(error: unknown, operation: 'register' | '
 
   if (operation === 'register') {
     return ['Não consegui registrar esse gasto agora 💸', '', 'Tenta de novo daqui a pouquinho.'].join('\n')
+  }
+
+  if (operation === 'register_reimbursement') {
+    return ['Não consegui registrar esse reembolso agora 💚', '', 'Tenta de novo daqui a pouquinho.'].join('\n')
   }
 
   return ['Não consegui consultar agora 📊', '', 'Tenta de novo daqui a pouco.'].join('\n')

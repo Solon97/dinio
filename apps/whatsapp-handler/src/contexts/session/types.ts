@@ -65,6 +65,18 @@ export interface PendingExpenseData {
 }
 
 /**
+ * Typed payload stored inside `OperationContext.data` while a
+ * register_reimbursement multi-turn flow is in progress.
+ */
+export interface PendingReimbursementData {
+  description: string
+  amountInReais: number
+  category: string
+  /** ISO date string YYYY-MM-DD resolved for the reimbursement. */
+  date: string
+}
+
+/**
  * The full session blob encrypted and stored in Redis under
  * `chat:session:{phone_hash}`.
  */

@@ -11,6 +11,7 @@ const PROMPT_FILE = 'whatsapp-intent-parser.txt'
 const ParsedIntentSchema = z.object({
   intent: z.enum([
     'register_expense',
+    'register_reimbursement',
     'simulate_expense',
     'check_daily_allowance',
     'check_month_balance',
