@@ -1,5 +1,6 @@
 import ButtonCheckout from "@/components/shared/ButtonCheckout";
 import config from "@/config";
+import { formatBRL } from "@/libs/currency";
 
 const plan = config.stripe.plans.find((p) => p.id === "default_yearly");
 
@@ -15,20 +16,25 @@ const TrialSection = () => {
             <div className="h-0.5 bg-primary-600 w-full" />
 
             <div className="p-8">
-              {/* Heading */}
-              <h2 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-neutral-900 mb-2">
-                {plan?.badge}
-              </h2>
-              <p className="text-sm font-normal text-neutral-500 mb-6">
-                Sem compromisso. Cancele antes do trial acabar e não paga nada.
-              </p>
+              {/* Heading — centered */}
+              <div className="text-center mb-6">
+                <h2 className="font-display text-2xl sm:text-3xl font-extrabold tracking-tight text-neutral-900 mb-2">
+                  {plan?.badge}
+                </h2>
+                <p className="text-sm font-normal text-neutral-500">
+                  Sem compromisso. Cancele antes do trial acabar e não paga nada.
+                </p>
+              </div>
 
-              {/* Price */}
-              <div className="flex items-baseline gap-2 mb-6">
-                <span className="font-display text-4xl font-black text-neutral-900">
-                  R$&nbsp;{plan?.price}
-                </span>
-                <span className="text-sm text-neutral-400">/ano depois do trial</span>
+              {/* Price — centered, hierarquia clara */}
+              <div className="text-center mb-6 pb-6 border-b border-neutral-100">
+                <div className="flex items-baseline justify-center gap-1.5 mb-1">
+                  <span className="font-display text-5xl font-black text-neutral-900 tracking-tight">
+                    {formatBRL(plan?.equivalentMonthlyPrice)}
+                  </span>
+                  <span className="text-base text-neutral-400 font-medium">/mês*</span>
+                </div>
+                <p className="text-xs text-neutral-400 mt-2">*Depois do trial, será cobrado {formatBRL(plan?.price)}/ano, o que equivale a {formatBRL(plan?.equivalentMonthlyPrice)}/mês</p>
               </div>
 
               {/* Feature list */}

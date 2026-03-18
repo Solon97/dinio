@@ -11,8 +11,8 @@ const steps = [
   },
   {
     num: "03",
-    title: "O sistema cuida do resto",
-    body: "Gastou acima da média? O Dinio recalibra automaticamente os próximos dias. Sem planilha, sem punição.",
+    title: "Recalibração automática",
+    body: "Gastou acima da média? O Dinio redistribui o saldo restante pelos dias que faltam.",
   },
 ];
 
