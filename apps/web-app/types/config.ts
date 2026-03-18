@@ -32,7 +32,7 @@ export interface ConfigProps {
   };
   stripe: {
     plans: {
-      id: "diagnosis" | "default_yearly";
+      id: "default_yearly";
       isFeatured?: boolean;
       recurrency: "monthly" | "yearly";
       name: string;
