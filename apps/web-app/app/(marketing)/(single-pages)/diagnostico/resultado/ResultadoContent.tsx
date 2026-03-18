@@ -25,7 +25,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import posthog from "posthog-js";
-import { useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 
 const DIAGNOSTICO_STORAGE_KEY = "dinio:diagnostico:last-input";
 const DIAGNOSTICO_STORAGE_MAX_AGE_IN_MINUTES = 30;
@@ -87,7 +87,7 @@ const getStatusInfo = (status: string) => {
   }
 };
 
-const SectionLabel = ({ children }: { children: React.ReactNode }) => (
+const SectionLabel = ({ children }: { children: ReactNode }) => (
   <span className="inline-flex items-center gap-2 text-xs font-semibold tracking-widest uppercase text-primary-600 mb-4">
     <span className="w-4 h-px bg-primary-600" />
     {children}
