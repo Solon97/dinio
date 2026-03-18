@@ -1,21 +1,17 @@
 import { ConfigProps } from "./types/config";
 
 const defaultPlanSettings = {
-  badge: "23% de desconto no primeiro ano",
+  badge: "14 dias para experimentar de graça",
   features: [
-    { name: "Saiba quanto pode gastar hoje — sem culpa" },
-    { name: "Teto diário recalculado automaticamente" },
-    { name: "Seus gastos fixos sob controle" },
-    { name: "Projeção clara de como você vai terminar o mês" },
-    { name: "Teste por 30 dias sem risco" },
+    { name: "Média recomendada de gasto diária calculada automaticamente", },
+    { name: "Recalibração sem esforço ao longo do mês" },
+    { name: "Registro de gastos e orientação no WhatsApp" },
+    {name: "Teste grátis de 14 dias" },
+    { name: "Garantia de 30 dias após a cobrança" },
   ],
-  price: 177.0,
-  priceAnchor: 237,
-  equivalentMonthlyPrice: 177 / 12,
+  price: 237,
+  equivalentMonthlyPrice: 237 / 12,
   recurrency: "yearly",
-  renewalNote: `* Cobrança anual de R$ 177,00 no primeiro ano.
-          Após o 1° ano, renovação automática para R$ 237,00/ano.
-          Cancele quando quiser.`,
 };
 
 const config: ConfigProps = {
@@ -35,13 +31,6 @@ const config: ConfigProps = {
   stripe: {
     // Create multiple plans in your Stripe dashboard, then add them here. You can add as many plans as you want, just make sure to add the recurrency
     plans: [
-      {
-        ...defaultPlanSettings,
-        id: "diagnosis",
-        name: "Ative seu Teto Diário",
-        description:
-          "O valor que você viu acima passa a ser recalculado automaticamente todos os dias para manter seu mês sob controle.",
-      },
       {
         ...defaultPlanSettings,
         id: "default_yearly",

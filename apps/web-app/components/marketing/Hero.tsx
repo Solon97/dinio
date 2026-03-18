@@ -1,113 +1,120 @@
-import ButtonLeadModal from "@/components/marketing/ButtonLeadModal";
-import config from "@/config";
-import Link from "next/link";
+import Image from "next/image";
+import ButtonCheckout from "@/components/shared/ButtonCheckout";
+
+const WhatsAppMockup = () => (
+  <div className="w-full max-w-sm mx-auto lg:mx-0 rounded-2xl overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.12)] border border-neutral-100">
+    {/* Header bar */}
+    <div className="bg-[#075E54] px-4 py-3 flex items-center gap-3">
+      <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden p-1">
+        <Image src="/logo.png" alt="Dinio" width={28} height={28} />
+      </div>
+      <div>
+        <p className="text-white text-sm font-semibold leading-none">Dinio</p>
+        <p className="text-white/70 text-xs mt-0.5">Online agora</p>
+      </div>
+    </div>
+
+    {/* Chat area */}
+    <div className="bg-[#ECE5DD] px-3 py-4 space-y-2.5" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d4ccc4' fill-opacity='0.3'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E\")" }}>
+
+      {/* User bubble */}
+      <div className="flex justify-end">
+        <div className="bg-[#DCF8C6] rounded-2xl rounded-tr-sm px-3.5 py-2 max-w-[78%] shadow-sm">
+          <p className="text-[#111b21] text-sm">Quanto posso gastar hoje?</p>
+          <p className="text-[10px] text-[#667781] text-right mt-0.5">09:12 ✓✓</p>
+        </div>
+      </div>
+
+      {/* Dinio response */}
+      <div className="flex justify-start">
+        <div className="bg-white rounded-2xl rounded-tl-sm px-3.5 py-2.5 max-w-[85%] shadow-sm">
+          <p className="text-[#111b21] text-sm leading-relaxed">
+            Bom dia! 👋<br />
+            Sua média de hoje é <strong>R$&nbsp;87</strong>. Você já gastou R$&nbsp;35.<br /><br />
+            ✅ Ainda pode gastar <strong>R$&nbsp;52</strong> com tranquilidade.
+          </p>
+          <p className="text-[10px] text-[#667781] text-right mt-1">09:12</p>
+        </div>
+      </div>
+
+      {/* User bubble 2 */}
+      <div className="flex justify-end">
+        <div className="bg-[#DCF8C6] rounded-2xl rounded-tr-sm px-3.5 py-2 max-w-[78%] shadow-sm">
+          <p className="text-[#111b21] text-sm">Gastei R$ 28 no mercado</p>
+          <p className="text-[10px] text-[#667781] text-right mt-0.5">14:47 ✓✓</p>
+        </div>
+      </div>
+
+      {/* Dinio response 2 */}
+      <div className="flex justify-start">
+        <div className="bg-white rounded-2xl rounded-tl-sm px-3.5 py-2.5 max-w-[85%] shadow-sm">
+          <p className="text-[#111b21] text-sm leading-relaxed">
+            Anotado! 🟢<br />
+            Ainda sobram <strong>R$&nbsp;24</strong> hoje.<br />
+            O mês segue no controle.
+          </p>
+          <p className="text-[10px] text-[#667781] text-right mt-1">14:47</p>
+        </div>
+      </div>
+    </div>
+  </div>
+);
 
 const Hero = () => {
   return (
-    <section className="bg-base-100 section-spacing">
-      <div className="container-base flex flex-col items-center justify-center gap-10 lg:gap-14">
-        <div className="flex flex-col gap-6 lg:gap-8 items-center justify-center text-center container-narrow">
-          {/* Badge de praticidade */}
-          <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#ccfbf1] text-[#0f766e] text-sm font-semibold">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 20 20"
-              fill="currentColor"
-              className="w-4 h-4"
-            >
-              <path
-                fillRule="evenodd"
-                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
-                clipRule="evenodd"
-              />
-            </svg>
-            Leva 5 minutos por dia
-          </span>
+    <section className="bg-white section-spacing overflow-hidden">
+      <div className="container-base">
+        <div className="flex flex-col lg:grid lg:grid-cols-[55%_45%] gap-14 lg:gap-12 items-center">
 
-          <h1 className="font-extrabold text-3xl sm:text-4xl lg:text-5xl xl:text-6xl tracking-tight text-[#0f172a]">
-            Saiba exatamente quanto você pode gastar{" "}
-            <span className="text-[#0d9488]">todo dia</span>
-          </h1>
+          {/* Left — copy */}
+          <div
+            className="flex flex-col gap-7"
+            style={{ animation: "fadeInUp 0.5s ease-out both" }}
+          >
+            {/* Label */}
+            <div className="flex items-center gap-3">
+              <span className="block w-5 h-px bg-primary-600" />
+              <span className="text-xs font-semibold tracking-widest uppercase text-primary-600">
+                Assistente financeiro no WhatsApp
+              </span>
+            </div>
 
-          <p className="text-base sm:text-lg lg:text-xl text-[#64748b] leading-relaxed">
-            Com o Dinio você tem clareza para decidir hoje e garantir que o
-            dinheiro dure o mês todo
-          </p>
+            {/* H1 */}
+            <h1 className="font-display text-4xl sm:text-5xl lg:text-6xl font-black leading-[1.1] tracking-tight text-neutral-900">
+              Não sabe se pode gastar?{" "}
+              <em className="not-italic text-primary-600">
+                Pergunta para o Dinio.
+              </em>
+            </h1>
 
-          <div className="flex flex-col sm:flex-row gap-4 items-center w-full sm:w-auto">
-            {config.leadMode ? (
-              <ButtonLeadModal
-                buttonVariant="primary"
-                buttonText="Começar agora"
-              />
-            ) : (
-              <div className="flex flex-col items-center gap-2 w-full sm:w-auto">
-                <Link
-                  href="/#pricing"
-                  className="btn bg-[#0d9488] hover:bg-[#0f766e] text-white border-none btn-lg px-8 rounded-xl font-bold shadow-md w-full sm:w-auto"
-                >
-                  Começar agora
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                    className="w-5 h-5"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M3 10a.75.75 0 01.75-.75h10.638L10.23 5.29a.75.75 0 111.04-1.08l5.5 5.25a.75.75 0 010 1.08l-5.5 5.25a.75.75 0 11-1.04-1.08l4.158-3.96H3.75A.75.75 0 013 10z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </Link>
-                <div className="flex flex-col items-center gap-1">
-                  <span className="text-xs font-medium text-[#0d9488] bg-[#ccfbf1]/50 px-2 py-0.5 rounded-full">
-                    Garantia do Primeiro Mês
-                  </span>
-                  <span className="text-xs text-[#94a3b8]">
-                    30 dias para testar sem risco
-                  </span>
-                </div>
+            {/* Body */}
+            <p className="text-lg text-neutral-500 leading-relaxed max-w-md">
+              Configure sua renda e gastos fixos uma vez. O Dinio calcula sua
+              média de gasto diária e recalibra automaticamente — tudo no
+              WhatsApp, em segundos.
+            </p>
+
+            {/* CTA */}
+            <div className="flex flex-col items-start gap-3">
+              <div className="w-full sm:w-auto sm:min-w-64">
+                <ButtonCheckout
+                  recurrency="yearly"
+                  text="Começar trial gratuito"
+                />
               </div>
-            )}
+              <p className="text-sm text-neutral-400">
+                14 dias grátis · Cartão solicitado agora · Cobrança só após o
+                trial
+              </p>
+            </div>
           </div>
 
-          {/* <TestimonialsAvatars priority={true} /> */}
-        </div>
-
-        {/* Ilustração do conceito - Card de teto diário */}
-        <div className="w-full max-w-sm sm:max-w-md">
-          <div className="bg-white rounded-3xl border border-[#e2e8f0] p-6 sm:p-8 shadow-lg">
-            <div className="text-center space-y-4">
-              <p className="text-sm font-medium text-[#64748b] uppercase tracking-wide">
-                Seu teto de hoje
-              </p>
-              <p className="text-5xl sm:text-6xl font-extrabold text-[#0d9488]">
-                R$ 87
-              </p>
-              <div className="flex items-center justify-center gap-2 text-[#10b981]">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                  className="w-5 h-5"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-                <span className="text-sm font-semibold">
-                  Pode gastar tranquilo
-                </span>
-              </div>
-              <div className="pt-4 border-t border-[#f1f5f9]">
-                <p className="text-xs text-[#94a3b8]">
-                  Atualizado automaticamente todo dia
-                </p>
-              </div>
-            </div>
+          {/* Right — WhatsApp mockup */}
+          <div
+            className="w-full flex justify-center lg:justify-end"
+            style={{ animation: "fadeInUp 0.6s 0.15s ease-out both" }}
+          >
+            <WhatsAppMockup />
           </div>
         </div>
       </div>

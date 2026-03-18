@@ -3,6 +3,7 @@
 import { useState, useEffect, type ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import config from "@/config";
 
 interface MarketingHeaderProps {
@@ -35,14 +36,12 @@ const MarketingHeader = ({
       href="/"
       title={`${config.appName} homepage`}
     >
-      <span className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-teal-500 lowercase select-none">
-        {config.appName}
-      </span>
+      <Image src="/logo.png" alt={config.appName} width={80} height={32} priority />
     </Link>
   );
 
   return (
-    <header className={`bg-white border-b border-[#e2e8f0] ${className}`}>
+    <header className={`sticky top-0 z-50 bg-white/95 backdrop-blur-sm border-b border-neutral-200 ${className}`}>
       <nav
         className="container-base flex items-center justify-between py-3 sm:py-4"
         aria-label="Global"

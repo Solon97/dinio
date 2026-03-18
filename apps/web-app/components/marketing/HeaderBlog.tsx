@@ -5,7 +5,6 @@ import ButtonSignin from "@/components/shared/ButtonSignin";
 import config from "@/config";
 import { Popover, Transition } from "@headlessui/react";
 import Link from "next/link";
-import ButtonLeadModal from "./ButtonLeadModal";
 import MarketingHeader from "./MarketingHeader";
 
 const links: {
@@ -18,12 +17,7 @@ const links: {
   },
 ];
 
-const cta = config.leadMode ? (
-  <ButtonLeadModal
-    buttonVariant="primary"
-    extraStyle="!px-5 !py-2.5 !min-h-0 !h-auto text-sm"
-  />
-) : (
+const cta = (
   <ButtonSignin
     text="Entrar"
     extraStyle="bg-[#0d9488] hover:bg-[#0f766e] text-white border-none"

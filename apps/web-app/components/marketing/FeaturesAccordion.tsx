@@ -9,7 +9,6 @@ interface Feature {
   svg?: JSX.Element;
 }
 
-// Features do Dinio baseados nos benefícios do business_definition.md
 const features = [
   {
     title: "Informe o essencial",
@@ -22,7 +21,7 @@ const features = [
         viewBox="0 0 24 24"
         strokeWidth={1.5}
         stroke="currentColor"
-        className="w-6 h-6"
+        className="w-5 h-5"
       >
         <path
           strokeLinecap="round"
@@ -43,7 +42,7 @@ const features = [
         viewBox="0 0 24 24"
         strokeWidth={1.5}
         stroke="currentColor"
-        className="w-6 h-6"
+        className="w-5 h-5"
       >
         <path
           strokeLinecap="round"
@@ -64,7 +63,7 @@ const features = [
         viewBox="0 0 24 24"
         strokeWidth={1.5}
         stroke="currentColor"
-        className="w-6 h-6"
+        className="w-5 h-5"
       >
         <path
           strokeLinecap="round"
@@ -85,7 +84,7 @@ const features = [
         viewBox="0 0 24 24"
         strokeWidth={1.5}
         stroke="currentColor"
-        className="w-6 h-6"
+        className="w-5 h-5"
       >
         <path
           strokeLinecap="round"
@@ -98,6 +97,7 @@ const features = [
 ] as Feature[];
 
 const Item = ({
+  index,
   feature,
   isOpen,
   setFeatureSelected,
@@ -110,12 +110,10 @@ const Item = ({
   const { title, svg } = feature;
 
   return (
-    <li>
+    <li className="border-b border-neutral-100 last:border-0">
       <button
-        className={`relative flex gap-3 items-center w-full py-4 px-4 text-base font-medium text-left md:text-lg rounded-xl transition-all duration-200 ${
-          isOpen
-            ? "bg-[#f0fdfa] border border-[#99f6e4]"
-            : "hover:bg-[#f8fafc] border border-transparent"
+        className={`flex items-center gap-4 w-full py-4 text-left transition-colors group ${
+          isOpen ? "text-neutral-900" : "text-neutral-500 hover:text-neutral-800"
         }`}
         onClick={(e) => {
           e.preventDefault();
@@ -123,36 +121,47 @@ const Item = ({
         }}
         aria-expanded={isOpen}
       >
+        {/* Left teal bar */}
         <span
-          className={`flex items-center justify-center w-10 h-10 rounded-lg transition-colors duration-200 ${
-            isOpen ? "bg-[#0d9488] text-white" : "bg-[#f1f5f9] text-[#64748b]"
+          className={`shrink-0 w-0.5 h-8 rounded-full transition-colors duration-200 ${
+            isOpen ? "bg-primary-600" : "bg-transparent group-hover:bg-neutral-200"
+          }`}
+          aria-hidden="true"
+        />
+
+        {/* Icon */}
+        <span
+          className={`shrink-0 transition-colors duration-200 ${
+            isOpen ? "text-primary-600" : "text-neutral-400"
           }`}
         >
           {svg}
         </span>
-        <span
-          className={`flex-1 ${
-            isOpen ? "text-[#0d9488] font-semibold" : "text-[#334155]"
-          }`}
-        >
+
+        {/* Title */}
+        <span className={`flex-1 text-base font-semibold ${isOpen ? "text-neutral-900" : ""}`}>
           <h3 className="inline">{title}</h3>
         </span>
+
+        {/* Chevron */}
         <svg
-          className={`w-5 h-5 transition-transform duration-200 ${
-            isOpen ? "rotate-0 text-[#0d9488]" : "-rotate-90 text-[#94a3b8]"
+          className={`w-4 h-4 shrink-0 transition-transform duration-200 ${
+            isOpen ? "rotate-0 text-primary-600" : "-rotate-90 text-neutral-300"
           }`}
           fill="none"
           viewBox="0 0 24 24"
           stroke="currentColor"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M9 5l7 7-7 7"
-          />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
+
+      {/* Expanded description */}
+      {isOpen && (
+        <p className="pl-10 pb-4 text-sm font-normal text-neutral-500 leading-relaxed">
+          {feature.description}
+        </p>
+      )}
     </li>
   );
 };
@@ -173,26 +182,27 @@ const FeaturesAccordion = ({
   const [featureSelected, setFeatureSelected] = useState<number>(0);
 
   return (
-    <section
-      className={`section-spacing ${className ?? "bg-base-100"}`}
-      id="features"
-    >
+    <section className={`section-spacing ${className ?? "bg-white"}`} id="features">
       <div className="container-base">
-        <div className="text-center mb-10 md:mb-16">
-          <span className="inline-block px-4 py-2 rounded-full bg-[#ccfbf1] text-[#0f766e] text-sm font-semibold mb-4">
+        {/* Header */}
+        <div className="text-center mb-12 md:mb-16">
+          <span className="inline-flex items-center gap-2 text-xs font-semibold tracking-widest uppercase text-primary-600 mb-4">
+            <span className="w-4 h-px bg-primary-600" />
             {badge}
+            <span className="w-4 h-px bg-primary-600" />
           </span>
-          <h2 className="font-extrabold text-3xl sm:text-4xl lg:text-5xl tracking-tight text-[#0f172a]">
+          <h2 className="font-display text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-neutral-900">
             {title}
           </h2>
-          <p className="mt-4 text-base sm:text-lg text-[#64748b] container-narrow mx-auto">
+          <p className="mt-4 text-base sm:text-lg font-normal text-neutral-500 container-narrow mx-auto leading-relaxed">
             {subtitle}
           </p>
         </div>
 
-        <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-start max-w-5xl mx-auto">
-          {/* Lista de features */}
-          <ul className="w-full lg:w-1/2 space-y-2">
+        {/* Two-column layout */}
+        <div className="flex flex-col lg:flex-row gap-8 lg:gap-16 items-start max-w-5xl mx-auto">
+          {/* Accordion list */}
+          <ul className="w-full lg:w-1/2">
             {features.map((feature, i) => (
               <Item
                 key={feature.title}
@@ -204,76 +214,63 @@ const FeaturesAccordion = ({
             ))}
           </ul>
 
-          {/* Card visual do feature selecionado */}
-          <div className="w-full lg:w-1/2 lg:sticky lg:top-8">
-            <div className="bg-gradient-to-br from-[#f0fdfa] to-[#ccfbf1] rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-10 border border-[#99f6e4] min-h-[380px] sm:min-h-[400px] flex flex-col">
-              <div className="text-center flex flex-col flex-1">
-                <h3 className="text-xl sm:text-2xl font-bold text-[#0f172a] mb-4">
+          {/* Preview card */}
+          <div className="w-full lg:w-1/2 lg:sticky lg:top-24">
+            <div className="bg-white rounded-2xl border border-neutral-100 shadow-[0_2px_20px_rgba(0,0,0,0.06)] overflow-hidden">
+              {/* Teal accent top bar */}
+              <div className="h-0.5 bg-primary-600 w-full" />
+
+              <div className="p-7 sm:p-8 min-h-80 flex flex-col">
+                <p className="text-xs font-semibold tracking-widest uppercase text-neutral-400 mb-6">
                   {features[featureSelected].title}
-                </h3>
-                <p className="text-sm sm:text-base text-[#475569] leading-relaxed mb-6">
-                  {features[featureSelected].description}
                 </p>
 
-                {/* Container de ilustração com altura fixa */}
                 <div className="flex-1 flex items-center justify-center">
-                  {/* Ilustração 1: Informe o essencial */}
+                  {/* Illustration 1 */}
                   {featureSelected === 0 && (
-                    <div className="w-full bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm border border-[#e2e8f0]">
-                      <div className="space-y-3 text-left">
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-[#475569]">
-                            💰 Renda Mensal
-                          </span>
-                          <span className="text-sm font-semibold text-[#0f172a]">
-                            R$ 5.000
-                          </span>
-                        </div>
-                        <div className="border-t border-dashed border-gray-200 my-2"></div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-[#475569]">
-                            🏠 Aluguel
-                          </span>
-                          <span className="text-sm font-semibold text-[#0f172a]">
-                            R$ 1.200
+                    <div className="w-full space-y-3">
+                      {[
+                        { label: "💰 Renda Mensal", value: "R$ 5.000" },
+                        { label: "🏠 Aluguel", value: "R$ 1.200" },
+                        { label: "⚡ Contas Fixas", value: "R$ 800" },
+                      ].map((row) => (
+                        <div
+                          key={row.label}
+                          className="flex justify-between items-center py-2.5 border-b border-neutral-50 last:border-0"
+                        >
+                          <span className="text-sm text-neutral-500">{row.label}</span>
+                          <span className="text-sm font-semibold text-neutral-800 tabular-nums">
+                            {row.value}
                           </span>
                         </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-sm text-[#475569]">
-                            ⚡ Contas Fixas
-                          </span>
-                          <span className="text-sm font-semibold text-[#0f172a]">
-                            R$ 800
-                          </span>
-                        </div>
-                      </div>
+                      ))}
                     </div>
                   )}
 
-                  {/* Ilustração 2: Receba seu teto diário */}
+                  {/* Illustration 2 */}
                   {featureSelected === 1 && (
-                    <div className="w-full bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm border border-[#e2e8f0]">
-                      <p className="text-xs text-[#94a3b8] uppercase tracking-wide mb-2">
+                    <div className="text-center">
+                      <p className="text-xs font-semibold tracking-widest uppercase text-neutral-400 mb-3">
                         Hoje você pode gastar
                       </p>
-                      <p className="text-3xl sm:text-4xl font-extrabold text-[#0d9488]">
-                        R$ 87,50
+                      <p className="font-display text-5xl font-semibold text-primary-600 tabular-nums">
+                        R$&nbsp;87,50
                       </p>
-                      <p className="text-xs text-[#64748b] mt-2">
+                      <p className="text-xs text-neutral-400 mt-3">
                         Considerando meta de economizar 10%
                       </p>
                     </div>
                   )}
 
-                  {/* Ilustração 3: Decida com segurança */}
+                  {/* Illustration 3 */}
                   {featureSelected === 2 && (
-                    <div className="w-full bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm border border-[#e2e8f0]">
-                      <p className="text-sm text-[#475569] mb-3">
-                        &quot;Posso pedir delivery?&quot;
+                    <div className="text-center space-y-4">
+                      <p className="text-sm text-neutral-500 italic">
+                        &ldquo;Posso pedir delivery?&rdquo;
                       </p>
-                      <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-[#d1fae5] rounded-full">
+                      <div className="inline-flex items-center gap-2.5 px-5 py-2.5 bg-emerald-50 border border-emerald-100 rounded-full">
                         <svg
-                          className="w-4 h-4 sm:w-5 sm:h-5 text-[#10b981]"
+                          className="w-4 h-4 text-emerald-500 shrink-0"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -285,25 +282,25 @@ const FeaturesAccordion = ({
                             d="M5 13l4 4L19 7"
                           />
                         </svg>
-                        <span className="font-semibold text-[#065f46] text-sm sm:text-base">
-                          Pode sim! Sobram R$ 52
+                        <span className="text-sm font-semibold text-emerald-700">
+                          Pode sim! Sobram R$&nbsp;52
                         </span>
                       </div>
                     </div>
                   )}
 
-                  {/* Ilustração 4: Ajuste automático */}
+                  {/* Illustration 4 */}
                   {featureSelected === 3 && (
-                    <div className="w-full bg-white rounded-xl sm:rounded-2xl p-4 sm:p-6 shadow-sm border border-[#e2e8f0]">
-                      <div className="flex items-center justify-center gap-3 sm:gap-4">
-                        <div className="text-center">
-                          <p className="text-xs text-[#94a3b8]">Ontem gastou</p>
-                          <p className="text-lg sm:text-xl font-bold text-[#f43f5e]">
-                            R$ 150
+                    <div className="w-full space-y-4">
+                      <div className="flex items-center justify-between gap-4">
+                        <div className="flex-1 p-4 rounded-xl bg-neutral-50 border border-neutral-100 text-center">
+                          <p className="text-xs text-neutral-400 mb-1">Ontem gastou</p>
+                          <p className="font-display text-2xl font-semibold text-rose-500 tabular-nums">
+                            R$&nbsp;150
                           </p>
                         </div>
                         <svg
-                          className="w-5 h-5 sm:w-6 sm:h-6 text-[#94a3b8]"
+                          className="w-5 h-5 text-neutral-300 shrink-0"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -311,20 +308,18 @@ const FeaturesAccordion = ({
                           <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
-                            strokeWidth={2}
+                            strokeWidth={1.5}
                             d="M13 7l5 5m0 0l-5 5m5-5H6"
                           />
                         </svg>
-                        <div className="text-center">
-                          <p className="text-xs text-[#94a3b8]">
-                            Teto para Hoje
-                          </p>
-                          <p className="text-lg sm:text-xl font-bold text-[#0d9488]">
-                            R$ 65
+                        <div className="flex-1 p-4 rounded-xl bg-primary-50 border border-primary-100 text-center">
+                          <p className="text-xs text-neutral-400 mb-1">Teto hoje</p>
+                          <p className="font-display text-2xl font-semibold text-primary-600 tabular-nums">
+                            R$&nbsp;65
                           </p>
                         </div>
                       </div>
-                      <p className="text-xs text-[#64748b] mt-3">
+                      <p className="text-xs text-center text-neutral-400">
                         Recalculado para fechar o mês no azul
                       </p>
                     </div>

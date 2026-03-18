@@ -14,11 +14,13 @@ const ButtonCheckout = ({
   mode = "subscription",
   text,
   onClickTracking,
+  variant = "primary",
 }: {
   recurrency: string;
   mode?: "payment" | "subscription";
   text?: string;
   onClickTracking?: () => void;
+  variant?: "primary" | "outline-white";
 }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const router = useRouter();
@@ -72,9 +74,14 @@ const ButtonCheckout = ({
     }
   };
 
+  const variantClass =
+    variant === "outline-white"
+      ? "btn btn-block bg-white hover:bg-neutral-100 text-primary-700 border-none rounded-xl font-semibold group !normal-case"
+      : "btn btn-block bg-[#0d9488] hover:bg-[#0f766e] text-white border-none rounded-xl font-semibold group !normal-case";
+
   return (
     <button
-      className="btn btn-block bg-[#0d9488] hover:bg-[#0f766e] text-white border-none rounded-xl font-bold group !normal-case"
+      className={variantClass}
       onClick={() => {
         if (onClickTracking) {
           onClickTracking();

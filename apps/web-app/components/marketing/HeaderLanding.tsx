@@ -1,38 +1,31 @@
 "use client";
 
 import Link from "next/link";
-import config from "@/config";
 import MarketingHeader from "./MarketingHeader";
 import ButtonSignin from "@/components/shared/ButtonSignin";
-import ButtonLeadModal from "./ButtonLeadModal";
 
 const links: {
   href: string;
   label: string;
 }[] = [
   {
-    href: "/#features",
+    href: "/#como-funciona",
     label: "Como funciona",
   },
   {
-    href: "/#pricing",
+    href: "/#trial",
     label: "Preços",
   },
   {
-    href: "/#faq",
-    label: "FAQ",
+    href: "/#perguntas",
+    label: "Perguntas",
   },
 ];
 
-const cta = config.leadMode ? (
-  <ButtonLeadModal
-    buttonVariant="primary"
-    extraStyle="!px-5 !py-2.5 !min-h-0 !h-auto text-sm"
-  />
-) : (
+const cta = (
   <ButtonSignin
     text="Entrar"
-    extraStyle="bg-[#0d9488] hover:bg-[#0f766e] text-white border-none"
+    extraStyle="bg-[#0d9488] hover:bg-[#0f766e] text-white border-none rounded-lg px-5 py-2 text-sm font-medium"
   />
 );
 
@@ -43,7 +36,7 @@ const HeaderLanding = () => {
         <Link
           href={link.href}
           key={link.href}
-          className="text-[#475569] hover:text-[#0d9488] font-medium transition-colors"
+          className="text-sm text-neutral-500 hover:text-primary-600 font-medium transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-primary-600 after:transition-all hover:after:w-full"
           title={link.label}
         >
           {link.label}

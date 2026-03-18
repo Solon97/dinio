@@ -1,23 +1,22 @@
-import DiagnosisCTA from "@/components/marketing/DiagnosisCTA";
-import FAQ from "@/components/marketing/FAQ";
-import FeaturesAccordion from "@/components/marketing/FeaturesAccordion";
+import FinalCTA from "@/components/marketing/FinalCTA";
 import Hero from "@/components/marketing/Hero";
-import Pricing from "@/components/marketing/Pricing";
-import Problem from "@/components/marketing/Problem";
+import HowItWorks from "@/components/marketing/HowItWorks";
+import Objections from "@/components/marketing/Objections";
+import TrialSection from "@/components/marketing/TrialSection";
 import { getSEOTags, renderSchemaTags } from "@/libs/seo";
 
 export const metadata = getSEOTags({
   canonicalUrlRelative: "/",
-  title: "Dinio - Controle financeiro simples",
+  title: "Quanto posso gastar hoje? | Dinio",
+  description:
+    "O Dinio calcula quanto você pode gastar hoje sem comprometer o fim do mês. Simples, no WhatsApp, sem planilha.",
   keywords: [
+    "quanto posso gastar hoje",
+    "assistente financeiro whatsapp",
+    "controle financeiro pessoal simples",
+    "app financeiro sem planilha",
     "controle financeiro",
-    "orçamento pessoal",
-    "teto de gastos",
     "finanças pessoais",
-    "app de finanças",
-    "organização financeira",
-    "gastos fixos",
-    "planejamento financeiro",
   ],
 });
 
@@ -26,11 +25,10 @@ export default function Home() {
     <>
       {renderSchemaTags()}
       <Hero />
-      <Problem />
-      <FeaturesAccordion />
-      <Pricing />
-      <FAQ />
-      <DiagnosisCTA />
+      <HowItWorks />
+      <Objections />
+      <TrialSection />
+      <FinalCTA />
     </>
   );
 }
