@@ -32,14 +32,14 @@ const LINK_MESSAGE_SUCCESS = [
   "É rápido — leva menos de 1 minuto.",
   "",
   "Toque no link abaixo para fazer a conexão:",
-];
+].join("\n");
 
 const LINK_MESSAGE_ERROR = [
   LINK_MESSAGE_PREFIX,
   "Tive um problema para gerar seu link de conexão agora.",
   "",
   "Tente novamente em alguns instantes que deve funcionar.",
-];
+].join("\n");
 
 export async function routeMessage(
   message: IncomingMessage,
@@ -70,7 +70,7 @@ export async function routeMessage(
     const link = resolveResult.link;
     const responseText = link
       ? `${LINK_MESSAGE_SUCCESS}\n\n${link}`
-      : LINK_MESSAGE_ERROR.join("\n");
+      : LINK_MESSAGE_ERROR;
 
     await sendTextMessage(message.phone, responseText);
     log.info({ messageId: message.messageId }, "sent linking message");
