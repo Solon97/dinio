@@ -5,7 +5,7 @@ interface CreateCheckoutParams {
   mode: "payment" | "subscription";
   successUrl: string;
   cancelUrl: string;
-  couponId?: string | null;
+  trialPeriodDays?: number;
   metaEventId?: string;
   metaFbc?: string;
   metaFbp?: string;
@@ -31,7 +31,7 @@ export const createCheckout = async ({
   successUrl,
   cancelUrl,
   priceId,
-  couponId,
+  trialPeriodDays,
   metaEventId,
   metaFbc,
   metaFbp,
@@ -67,7 +67,6 @@ export const createCheckout = async ({
       }
       extraParams.tax_id_collection = { enabled: true };
     }
-    const discounts = couponId ? [{ coupon: couponId }] : [];
     const metadata: Record<string, string> = {};
     if (metaEventId) metadata.meta_event_id = metaEventId;
     if (metaFbc) metadata.meta_fbc = metaFbc;
@@ -87,12 +86,14 @@ export const createCheckout = async ({
       ],
       success_url: successUrl,
       cancel_url: cancelUrl,
-      discounts,
       metadata,
       subscription_data:
         mode === "subscription"
           ? {
               metadata,
+              ...(trialPeriodDays && trialPeriodDays > 0
+                ? { trial_period_days: trialPeriodDays }
+                : {}),
             }
           : undefined,
       ...extraParams,

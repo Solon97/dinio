@@ -68,42 +68,34 @@ export async function POST(req: NextRequest) {
           }
         : {};
 
-    const isNewCustomer = !profile?.customer_id;
-    const newUsersCouponId = process.env.STRIPE_NEW_USERS_COUPON_ID || null;
+    const isNeverSubscriber = !profile?.customer_id;
+    const configuredTrialDays = parseInt(
+      process.env.STRIPE_NEW_USERS_TRIAL_DAYS ?? "",
+      10,
+    );
+    const trialPeriodDays =
+      isNeverSubscriber &&
+      mode === "subscription" &&
+      Number.isFinite(configuredTrialDays) &&
+      configuredTrialDays > 0
+        ? configuredTrialDays
+        : undefined;
 
-    const couponCandidates: (string | null)[] = isNewCustomer
-      ? [newUsersCouponId, null]
-      : [null];
-
-    let stripeSessionURL: string | null = null;
-    for (const couponId of couponCandidates) {
-      if (
-        couponId &&
-        couponCandidates.indexOf(couponId) !==
-          couponCandidates.lastIndexOf(couponId)
-      ) {
-        continue;
-      }
-      stripeSessionURL = await createCheckout({
-        priceId: stripePriceId,
-        mode,
-        successUrl,
-        cancelUrl,
-        metaEventId,
-        metaFbc,
-        metaFbp,
-        metaClientIp: clientIp,
-        metaUserAgent,
-        // If user is logged in, it will pass the user ID to the Stripe Session so it can be retrieved in the webhook later
-        clientReferenceId: user?.id,
-        user: profileUser,
-        couponId,
-      });
-
-      if (stripeSessionURL) {
-        break;
-      }
-    }
+    const stripeSessionURL = await createCheckout({
+      priceId: stripePriceId,
+      mode,
+      successUrl,
+      cancelUrl,
+      metaEventId,
+      metaFbc,
+      metaFbp,
+      metaClientIp: clientIp,
+      metaUserAgent,
+      // If user is logged in, it will pass the user ID to the Stripe Session so it can be retrieved in the webhook later
+      clientReferenceId: user?.id,
+      user: profileUser,
+      trialPeriodDays,
+    });
 
     if (!stripeSessionURL) {
       return NextResponse.json(
