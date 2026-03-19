@@ -14,13 +14,15 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Fragment, useState } from "react";
 import { toast } from "react-hot-toast";
 import NotificationBell from "@/components/app/notifications/NotificationBell";
 
 export default function AppHeader() {
   const router = useRouter();
+  const pathname = usePathname();
+  const isSubscribePage = pathname === "/subscribe";
   const supabase = createClient();
   const { user, refetch } = useUser();
   const [isBillingLoading, setIsBillingLoading] = useState(false);
@@ -76,7 +78,7 @@ export default function AppHeader() {
         {/* User Dropdown */}
         {user ? (
           <div className="flex items-center gap-2">
-            <NotificationBell />
+            {!isSubscribePage && <NotificationBell />}
             <Popover className="relative">
               {({ open }) => (
                 <>
@@ -145,30 +147,32 @@ export default function AppHeader() {
                           </>
                         )}
 
-                        {user.whatsappLinked ? (
-                          <button
-                            onClick={handleUnlinkWhatsapp}
-                            disabled={isUnlinkingWhatsapp}
-                            className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-50 hover:text-rose-600 transition-colors disabled:opacity-50"
-                          >
-                            {isUnlinkingWhatsapp ? (
-                              <span className="loading loading-spinner loading-xs" />
-                            ) : (
-                              <MessageCircle size={16} />
-                            )}
-                            Desvincular WhatsApp
-                          </button>
-                        ) : (
-                          whatsappBotPhone && (
-                            <a
-                              href={`https://wa.me/${whatsappBotPhone}?text=${encodeURIComponent("Olá, quero vincular meu WhatsApp ao Dinio")}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-50 hover:text-teal-600 transition-colors"
+                        {!isSubscribePage && (
+                          user.whatsappLinked ? (
+                            <button
+                              onClick={handleUnlinkWhatsapp}
+                              disabled={isUnlinkingWhatsapp}
+                              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-50 hover:text-rose-600 transition-colors disabled:opacity-50"
                             >
-                              <MessageCircle size={16} />
-                              Vincular WhatsApp
-                            </a>
+                              {isUnlinkingWhatsapp ? (
+                                <span className="loading loading-spinner loading-xs" />
+                              ) : (
+                                <MessageCircle size={16} />
+                              )}
+                              Desvincular WhatsApp
+                            </button>
+                          ) : (
+                            whatsappBotPhone && (
+                              <a
+                                href={`https://wa.me/${whatsappBotPhone}?text=${encodeURIComponent("Olá, quero vincular meu WhatsApp ao Dinio")}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-50 hover:text-teal-600 transition-colors"
+                              >
+                                <MessageCircle size={16} />
+                                Vincular WhatsApp
+                              </a>
+                            )
                           )
                         )}
 
