@@ -86,7 +86,7 @@ function WhatsAppLinkContent() {
             <div className="w-full text-left space-y-3 text-sm text-slate-700 bg-slate-50 p-5 rounded-xl border border-slate-100 mb-6">
               <p className="font-semibold text-slate-900">O que você pode fazer agora:</p>
               <ul className="list-disc pl-5 space-y-2">
-                <li><span className="font-medium text-slate-800">Registrar gastos</span> enviando uma mensagem natural (ex: "gastei 20 no ifood")</li>
+                <li><span className="font-medium text-slate-800">Registrar gastos</span> enviando uma mensagem natural (ex: &ldquo;gastei 20 no ifood&rdquo;)</li>
                 <li><span className="font-medium text-slate-800">Consultar seu orçamento</span> perguntando quanto você ainda pode gastar</li>
                 <li><span className="font-medium text-slate-800">Simular compras</span> questionando se dá pra parcelar ou comprar algo</li>
               </ul>
