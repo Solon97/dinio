@@ -187,11 +187,11 @@ export default function ResultadoContent() {
 
             {/* Status card */}
             <div
-              className={`flex items-start gap-5 p-6 sm:p-8 rounded-2xl border ${
+              className={`flex flex-col items-center text-center gap-4 p-6 sm:p-8 rounded-2xl border ${
                 statusInfo.bgColor
               } ${statusInfo.borderColor}`}
             >
-              <div className="shrink-0 pt-1">{statusInfo.icon}</div>
+              <div className="shrink-0">{statusInfo.icon}</div>
               <div>
                 <h1
                   className={`font-display text-3xl sm:text-4xl font-extrabold leading-tight tracking-tight ${
@@ -322,6 +322,7 @@ export default function ResultadoContent() {
             <SectionLabel>Comece agora</SectionLabel>
             <h2 className="font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-neutral-900">
               Seu orçamento já está calculado.{" "}
+              <div></div>
               <span className="text-primary-600">
                 Deixe o Dinio fazer o controle diário.
               </span>
