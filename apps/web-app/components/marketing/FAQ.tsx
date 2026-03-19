@@ -57,8 +57,7 @@ const faqList: FAQItemProps[] = [
     question: "Posso cancelar quando quiser?",
     answer: (
       <p>
-        Sim! Você pode cancelar a qualquer momento, sem burocracia. E se não
-        gostar nos primeiros 30 dias, devolvemos 100% do seu dinheiro.
+        Sim! Você pode cancelar a qualquer momento, sem burocracia. E se mudar de ideia nos primeiros 7 dias após a cobrança, devolvemos 100% do seu dinheiro.
       </p>
     ),
   },

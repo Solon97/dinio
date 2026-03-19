@@ -42,9 +42,9 @@ As assinaturas são processadas por provedor de pagamento terceirizado (Stripe).
 As condições comerciais vigentes (preço, periodicidade, renovação e benefícios) são exibidas na página de contratação no momento da compra.
 Você pode cancelar a renovação automática a qualquer momento para evitar novas cobranças no próximo ciclo.
 
-5. Garantia de 30 dias
+5. Garantia de 7 dias
 
-Oferecemos garantia de 30 dias sem risco para o primeiro mês de uso, conforme a oferta vigente no momento da contratação.
+Oferecemos garantia de 7 dias sem risco após a primeira cobrança, conforme a oferta vigente no momento da contratação.
 Solicitações de reembolso dentro desse período podem ser feitas pelo contato oficial de suporte.
 
 6. Regras de uso

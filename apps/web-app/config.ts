@@ -7,7 +7,7 @@ const defaultPlanSettings = {
     { name: "Recalibração sem esforço ao longo do mês" },
     { name: "Registro de gastos e orientação no WhatsApp" },
     {name: "Teste grátis de 14 dias" },
-    { name: "Garantia de 30 dias após a cobrança" },
+    { name: "Garantia de 7 dias após a cobrança" },
   ],
   price: 237,
   equivalentMonthlyPrice: 237 / 12,

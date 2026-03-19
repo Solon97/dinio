@@ -1,6 +1,6 @@
 # Product Marketing Context — Dinio
 
-*Last updated: 2026-03-10*
+*Last updated: 2026-03-19*
 
 ---
 
@@ -16,8 +16,8 @@ O Dinio transforma dados simples de planejamento (renda, gastos fixos e reserva)
 **Product type:** SaaS B2C com interface conversacional WhatsApp-first + app web de suporte
 
 **Business model:**
-- Assinatura anual: R$ 177 no 1o ano -> R$ 237/ano na renovacao
-- Garantia de 30 dias sem risco
+- Assinatura anual: R$ 237,00/ano (cobranca apos 14 dias de trial gratuito)
+- Garantia de 7 dias sem risco apos a primeira cobranca
 
 ---
 
@@ -220,7 +220,7 @@ O Dinio combina planejamento mensal e gasto acumulado para entregar uma recomend
 **Metricas/claims:**
 - Setup inicial em menos de 5 minutos
 - Interacoes diarias em segundos via WhatsApp
-- Garantia de 30 dias sem risco
+- Garantia de 7 dias sem risco apos a cobranca
 
 **Pontos de prova estruturais:**
 - Recomendacao diaria recalibrada automaticamente pelo avancar do mes
@@ -242,12 +242,12 @@ O Dinio combina planejamento mensal e gasto acumulado para entregar uma recomend
 
 **Business goal:** Crescer base de assinantes anuais com alta retencao por habito conversacional diario
 
-**Acao de conversao principal:** Assinar o plano anual (CTA: "Comecar agora")
+**Acao de conversao principal:** Iniciar trial gratuito de 14 dias no plano anual de R$ 237,00 (CTA: "Comecar trial gratuito")
 
 **Funil — Entrada pela Landing Page:**
 1. Visitante identifica o problema: nao saber quanto pode gastar hoje
 2. Entende a proposta WhatsApp-first de decisao rapida no dia a dia
-3. Clica em "Comecar agora" e assina
+3. Clica em "Comecar trial gratuito" e inicia o trial de 14 dias
 4. Faz onboarding no web app (renda + fixos + reserva)
 5. Passa a usar o WhatsApp para registrar gastos e consultar recomendacao diaria
 6. Retem por repeticao de micro-decisoes com tranquilidade

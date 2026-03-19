@@ -388,7 +388,7 @@ export default function ResultadoContent() {
                 />
 
                 <p className="text-xs text-neutral-400 text-center mt-4">
-                  Garantia de 30 dias após a cobrança. Pediu reembolso,
+                  Garantia de 7 dias após a cobrança. Pediu reembolso,
                   devolvemos.
                 </p>
               </div>

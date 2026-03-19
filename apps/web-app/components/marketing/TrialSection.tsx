@@ -63,7 +63,7 @@ const TrialSection = () => {
 
               {/* Guarantee */}
               <p className="text-xs text-neutral-400 text-center mt-4">
-                Garantia de 30 dias após a cobrança. Pediu reembolso, devolvemos.
+                Garantia de 7 dias após a cobrança. Pediu reembolso, devolvemos.
               </p>
             </div>
           </div>
