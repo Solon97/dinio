@@ -20,12 +20,16 @@ async function notifyLinkSuccess(phoneNumber: string) {
   const internalSecret = process.env.BOT_INTERNAL_SECRET;
 
   if (!handlerBaseUrl || !internalSecret) {
+    console.error("Skipping notifyLinkSuccess: Missing WHATSAPP_HANDLER_BASE_URL or BOT_INTERNAL_SECRET env vars.");
     return;
   }
 
   try {
-    await fetch(
-      `${handlerBaseUrl.replace(/\/$/, "")}/internal/notify-link-success`,
+    const url = `${handlerBaseUrl.replace(/\/$/, "")}/internal/notify-link-success`;
+    console.log(`Sending link success notification to ${url}...`);
+
+    const response = await fetch(
+      url,
       {
         method: "POST",
         headers: {
@@ -35,8 +39,15 @@ async function notifyLinkSuccess(phoneNumber: string) {
         body: JSON.stringify({ phone_number: phoneNumber }),
       },
     );
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => "N/A");
+      console.error(`Error from whatsapp-handler (${response.status}):`, errorText);
+    } else {
+      console.log("Notificação de sucesso enviada ao whatsapp-handler com sucesso!");
+    }
   } catch (error) {
-    console.error("Error notifying WhatsApp link success", error);
+    console.error("Failed to fetch notify-link-success route", error);
   }
 }
 
@@ -132,6 +143,13 @@ export async function POST(request: Request) {
       .from("whatsapp_link_tokens")
       .delete()
       .eq("phone_hash", tokenRow.phone_hash);
+
+    try {
+      const phoneNumber = decryptPhoneNumber(tokenRow.phone_encrypted);
+      await notifyLinkSuccess(phoneNumber);
+    } catch (error) {
+      console.error("Error preparing link success notification (re-link)", error);
+    }
 
     return NextResponse.json({ linked: true });
   }

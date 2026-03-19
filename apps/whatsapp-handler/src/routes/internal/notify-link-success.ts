@@ -6,12 +6,15 @@ interface NotifyLinkSuccessBody {
 }
 
 const LINK_SUCCESS_MESSAGE = [
-  'WhatsApp conectado com sucesso ao seu Dinio.',
+  '🎉 *WhatsApp conectado com sucesso ao seu Dinio!*',
   '',
-  'Agora voce pode:',
-  'registrar gastos',
-  'consultar seu orcamento',
-  'simular compras',
+  'A partir de agora eu sou o seu assistente financeiro aqui no WhatsApp. Você pode me pedir coisas como:',
+  '',
+  '🛒 *"Gastei 45 no ifood no crédito"*',
+  '💰 *"Quanto eu ainda posso gastar esse mês ?"*',
+  '🤔 *"Posso gastar 100 reais em uma blusa ?"*',
+  '',
+  'É só mandar uma mensagem natural, como se estivesse falando com um amigo. Tô aqui pra ajudar! 😊'
 ].join('\n')
 
 function getInternalSecret(): string {
@@ -26,7 +29,7 @@ function getInternalSecret(): string {
 
 const notifyLinkSuccessRoute: FastifyPluginAsync = async (fastify): Promise<void> => {
   fastify.post<{ Body: NotifyLinkSuccessBody }>(
-    '/internal/notify-link-success',
+    '/notify-link-success',
     {
       schema: {
         body: {
