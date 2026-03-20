@@ -38,6 +38,10 @@ export async function POST(req: NextRequest) {
       metaFbc,
       metaFbp,
       metaUserAgent,
+      utm_source,
+      utm_medium,
+      utm_campaign,
+      utm_content,
     } = body;
     const clientIp =
       req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
@@ -91,6 +95,10 @@ export async function POST(req: NextRequest) {
       metaFbp,
       metaClientIp: clientIp,
       metaUserAgent,
+      utmSource: utm_source,
+      utmMedium: utm_medium,
+      utmCampaign: utm_campaign,
+      utmContent: utm_content,
       // If user is logged in, it will pass the user ID to the Stripe Session so it can be retrieved in the webhook later
       clientReferenceId: user?.id,
       user: profileUser,

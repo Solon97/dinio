@@ -9,6 +9,7 @@ import config from "@/config";
 import { trackInitiateCheckout } from "@/libs/pixel";
 import posthog from "posthog-js";
 import { posthogEvents } from "@/libs/posthog";
+import { getSessionUtmProperties } from "@/libs/utm";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -47,6 +48,7 @@ export default function CheckoutPage() {
         const eventId = crypto.randomUUID();
         sessionStorage.setItem("dinio:meta:checkout_event_id", eventId);
         const successUrl = `${window.location.origin}/dashboard`;
+        const utmProperties = getSessionUtmProperties();
 
         // Create checkout session
         const { url }: { url: string } = await apiClient.post(
@@ -57,12 +59,15 @@ export default function CheckoutPage() {
             cancelUrl: `${window.location.origin}/#pricing`,
             mode: "subscription",
             metaEventId: eventId,
+            ...utmProperties,
           },
         );
 
         trackInitiateCheckout(eventId);
 
-        posthog.capture(posthogEvents.CHECKOUT_INITIATED);
+        posthog.capture(posthogEvents.CHECKOUT_INITIATED, {
+          ...utmProperties,
+        });
 
         // Redirect to Stripe checkout
         window.location.href = url;

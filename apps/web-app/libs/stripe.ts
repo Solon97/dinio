@@ -11,6 +11,10 @@ interface CreateCheckoutParams {
   metaFbp?: string;
   metaClientIp?: string;
   metaUserAgent?: string;
+  utmSource?: string;
+  utmMedium?: string;
+  utmCampaign?: string;
+  utmContent?: string;
   clientReferenceId?: string;
   user?: {
     customerId?: string;
@@ -37,6 +41,10 @@ export const createCheckout = async ({
   metaFbp,
   metaClientIp,
   metaUserAgent,
+  utmSource,
+  utmMedium,
+  utmCampaign,
+  utmContent,
 }: CreateCheckoutParams): Promise<string> => {
   try {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
@@ -74,6 +82,10 @@ export const createCheckout = async ({
     if (metaClientIp) metadata.meta_client_ip = metaClientIp;
     // Stripe metadata values are limited to 500 chars
     if (metaUserAgent) metadata.meta_user_agent = metaUserAgent.slice(0, 500);
+    if (typeof utmSource === "string") metadata.utm_source = utmSource;
+    if (typeof utmMedium === "string") metadata.utm_medium = utmMedium;
+    if (typeof utmCampaign === "string") metadata.utm_campaign = utmCampaign;
+    if (typeof utmContent === "string") metadata.utm_content = utmContent;
 
     const stripeSession = await stripe.checkout.sessions.create({
       mode,

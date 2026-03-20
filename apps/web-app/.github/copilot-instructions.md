@@ -50,6 +50,13 @@
 - Crossing Client/Server component boundaries incorrectly causes build failures.
 - Missing env vars breaks auth, Supabase, or Stripe flows.
 
+## Acquisition Tracking Conventions
+- Keep event names in `snake_case` and use `diagnosis_*` prefix for diagnosis funnel events.
+- Use only `diagnosis_completed` (never `diagnostic_completed`).
+- Do not use `qualified_lead` in acquisition funnel instrumentation.
+- Include explicit `utm_source`, `utm_medium`, `utm_campaign`, and `utm_content` string properties on conversion events (`diagnosis_cta_clicked`, `checkout_initiated`, `trial_started`).
+- Trigger Meta `CompleteRegistration` on diagnosis CTA click and Meta `Subscribe` only after successful trial start confirmation in Stripe webhook.
+
 ## dinio-shared
 
 `dinio-shared` is installed and available. Import from `'dinio-shared'`.

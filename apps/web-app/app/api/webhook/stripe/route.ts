@@ -72,15 +72,20 @@ export async function POST(req: NextRequest) {
           typeof stripeObject.subscription === "string"
             ? stripeObject.subscription
             : stripeObject.subscription?.id;
-        const amountTotal = (stripeObject.amount_total ?? 0) / 100;
         // Safely read price id from the first line item (may be undefined if not expanded or empty)
         const priceId = session?.line_items?.data?.[0]?.price?.id ?? null;
+        const contractedPlanValue =
+          (session?.line_items?.data?.[0]?.price?.unit_amount ??
+            stripeObject.amount_total ??
+            0) / 100;
         const annualPriceId = getAnnualPriceId();
         const userId = stripeObject.client_reference_id;
 
         const customer = (await stripe.customers.retrieve(
           customerId as string,
         )) as Stripe.Customer;
+        const distinctId =
+          typeof userId === "string" && userId ? userId : customerId;
 
         const customerEmail =
           stripeObject.customer_details?.email ||
@@ -105,23 +110,50 @@ export async function POST(req: NextRequest) {
           })
           .eq("id", user?.id);
 
+        const metadata = stripeObject.metadata || {};
+        const utmProperties = {
+          utm_source: metadata.utm_source || "",
+          utm_medium: metadata.utm_medium || "",
+          utm_campaign: metadata.utm_campaign || "",
+          utm_content: metadata.utm_content || "",
+        };
+
         posthogClient.capture({
-          distinctId: userId,
+          distinctId,
           event: posthogEvents.SUBSCRIPTION_CREATED,
           properties: {
-            revenue: amountTotal,
+            revenue: contractedPlanValue,
             currency: "BRL",
             plan: priceId,
             eventId: stripeObject.id,
           },
         });
+
+        if (subscriptionId) {
+          const subscription = await stripe.subscriptions.retrieve(
+            subscriptionId,
+          );
+
+          if (subscription.status === "trialing") {
+            posthogClient.capture({
+              distinctId,
+              event: posthogEvents.TRIAL_STARTED,
+              properties: {
+                plan: priceId,
+                eventId: stripeObject.id,
+                ...utmProperties,
+              },
+            });
+          }
+        }
+
         await posthogClient.flush();
 
-        if (customerEmail && amountTotal > 0) {
-          const meta = stripeObject.metadata || {};
+        if (customerEmail && contractedPlanValue > 0) {
+          const meta = metadata;
           await sendMetaSubscribeEvent({
             email: customerEmail,
-            value: amountTotal,
+            value: contractedPlanValue,
             currency: "BRL",
             eventId: meta.meta_event_id || undefined,
             clientIpAddress: meta.meta_client_ip || undefined,
@@ -133,7 +165,7 @@ export async function POST(req: NextRequest) {
           console.warn("[meta] Missing customerEmail or invalid amount", {
             eventId: stripeObject.id,
             customerEmail,
-            amountTotal,
+            amountTotal: contractedPlanValue,
           });
         }
 

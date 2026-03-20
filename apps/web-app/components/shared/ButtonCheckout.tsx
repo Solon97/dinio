@@ -8,6 +8,7 @@ import config from "@/config";
 import { trackInitiateCheckout } from "@/libs/pixel";
 import posthog from "posthog-js";
 import { posthogEvents } from "@/libs/posthog";
+import { getSessionUtmProperties } from "@/libs/utm";
 
 const ButtonCheckout = ({
   recurrency,
@@ -46,6 +47,7 @@ const ButtonCheckout = ({
 
       const metaFbc = document.cookie.match(/(^|;)\s*_fbc=([^;]+)/)?.[2];
       const metaFbp = document.cookie.match(/(^|;)\s*_fbp=([^;]+)/)?.[2];
+      const utmProperties = getSessionUtmProperties();
 
       // User is authenticated, proceed to checkout
       const { url }: { url: string } = await apiClient.post(
@@ -59,12 +61,15 @@ const ButtonCheckout = ({
           metaFbc,
           metaFbp,
           metaUserAgent: navigator.userAgent,
+          ...utmProperties,
         },
       );
 
       trackInitiateCheckout(eventId);
 
-      posthog.capture(posthogEvents.CHECKOUT_INITIATED);
+      posthog.capture(posthogEvents.CHECKOUT_INITIATED, {
+        ...utmProperties,
+      });
 
       window.location.href = url;
     } catch (e) {

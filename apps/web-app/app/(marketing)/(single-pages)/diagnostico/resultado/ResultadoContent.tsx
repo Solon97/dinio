@@ -12,6 +12,7 @@ import {
 } from "@/libs/diagnosticoService";
 import { trackCompleteRegistration } from "@/libs/pixel";
 import { posthogEvents } from "@/libs/posthog";
+import { getSessionUtmProperties } from "@/libs/utm";
 import {
   AlertCircle,
   AlertTriangle,
@@ -148,14 +149,6 @@ export default function ResultadoContent() {
       status: result.status,
     });
 
-    if (result.dailyLimit >= 40) {
-      trackCompleteRegistration();
-      posthog.capture(posthogEvents.QUALIFIED_LEAD, {
-        dailyLimit: result.dailyLimit,
-        status: result.status,
-      });
-    }
-
     hasTrackedCompleteRegistration.current = true;
   }, [result]);
 
@@ -171,10 +164,15 @@ export default function ResultadoContent() {
   const plan = config.stripe.plans.find((p) => p.id === "default_yearly");
   const planFeatures = plan?.features.map((f) => f.name) ?? [];
 
-  const handleCtaTracking = () =>
+  const handleCtaTracking = () => {
+    const utmProperties = getSessionUtmProperties();
+    trackCompleteRegistration();
+
     posthog.capture(posthogEvents.DIAGNOSIS_CTA_CLICKED, {
       status: result.status,
+      ...utmProperties,
     });
+  };
 
   return (
     <main>
