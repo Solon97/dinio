@@ -16,6 +16,7 @@ const nextConfig = {
       { source: "/diagnostico/fb/economia-domestica", destination: "/diagnostico?utm_source=facebook&utm_medium=group&utm_content=economia-domestica", permanent: false },
       { source: "/diagnostico/fb/financas-pessoais-futuro", destination: "/diagnostico?utm_source=facebook&utm_medium=group&utm_content=financas-pessoais-futuro", permanent: false },
       { source: "/diagnostico/fb/educacao-financeira", destination: "/diagnostico?utm_source=facebook&utm_medium=group&utm_content=educacao-financeira", permanent: false },
+      { source: "/diagnostico/ig/bio", destination: "/diagnostico?utm_source=instagram&utm_medium=social&utm_content=bio", permanent: false },
     ];
   },
   images: {
