@@ -12,8 +12,10 @@ const nextConfig = {
   },
   async redirects() {
     return [
-      { source: "/checkup", destination: "/diagnostico", permanent: true },
-      { source: "/checkup/resultado", destination: "/diagnostico/resultado", permanent: true },
+      { source: "/diagnostico/fb/investimentos", destination: "/diagnostico?utm_source=facebook&utm_medium=group&utm_content=economia-financas-investimentos", permanent: false },
+      { source: "/diagnostico/fb/economia", destination: "/diagnostico?utm_source=facebook&utm_medium=group&utm_content=economia-domestica", permanent: false },
+      { source: "/diagnostico/fb/futuro", destination: "/diagnostico?utm_source=facebook&utm_medium=group&utm_content=financas-pessoais-futuro", permanent: false },
+      { source: "/diagnostico/fb/educacao", destination: "/diagnostico?utm_source=facebook&utm_medium=group&utm_content=educacao-financeira", permanent: false },
     ];
   },
   images: {
