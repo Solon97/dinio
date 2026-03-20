@@ -9,6 +9,8 @@ export interface DiagnosticoResult {
   dailyLimit: number;
 }
 
+const SEVERE_DAILY_LIMIT_THRESHOLD = 30;
+
 export function calculateDiagnostico(
   income: number,
   fixedExpenses: number,
@@ -44,6 +46,10 @@ export function calculateDiagnostico(
   ).getDate();
 
   const dailyLimit = variableBudget / daysInMonth;
+
+  if (dailyLimit <= SEVERE_DAILY_LIMIT_THRESHOLD) {
+    status = "critical";
+  }
 
   return {
     fixedPercent,

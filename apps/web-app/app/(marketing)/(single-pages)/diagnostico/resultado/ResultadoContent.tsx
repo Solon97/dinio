@@ -46,12 +46,11 @@ const getStatusInfo = (status: string) => {
         icon: <AlertCircle className="w-10 h-10 text-red-500" />,
         title: "Situação crítica",
         description:
-          "A maior parte da sua renda está comprometida.\nVocê tem pouca margem para gastos do dia a dia, o que pode levar a estresse e surpresas no fim do mês.",
-        bridgeHeadline:
-          "Acompanhar diariamente é essencial para evitar surpresas",
+          "Sua margem para o dia a dia está muito apertada.\nAumentar a renda ou renegociar dívidas são os caminhos mais indicados — mas mesmo essas ações só funcionam com controle diário. Sem saber para onde o dinheiro vai, qualquer melhora some antes de fazer diferença.",
+        bridgeHeadline: "Controle diário é o pré-requisito para qualquer melhora durar",
         bridgeDescription:
-          "Com o teto diário atualizado automaticamente, você tem um guia claro do quanto pode gastar em cada dia.",
-        ctaHeadline: "Retome o controle do seu dinheiro",
+          "Renegociar uma dívida ou aumentar a renda libera espaço — mas se os gastos do dia a dia continuarem sem referência, esse espaço some em semanas. Com o teto diário recalibrado automaticamente, você sabe exatamente o que fazer com cada centavo que sobrar.",
+        ctaHeadline: "Comece pelo controle. O resto fica mais fácil.",
         ctaSubtitle: "Descubra em 5 minutos.",
       };
     case "warning":
@@ -187,16 +186,14 @@ export default function ResultadoContent() {
 
             {/* Status card */}
             <div
-              className={`flex flex-col items-center text-center gap-4 p-6 sm:p-8 rounded-2xl border ${
-                statusInfo.bgColor
-              } ${statusInfo.borderColor}`}
+              className={`flex flex-col items-center text-center gap-4 p-6 sm:p-8 rounded-2xl border ${statusInfo.bgColor
+                } ${statusInfo.borderColor}`}
             >
               <div className="shrink-0">{statusInfo.icon}</div>
               <div>
                 <h1
-                  className={`font-display text-3xl sm:text-4xl font-extrabold leading-tight tracking-tight ${
-                    statusInfo.textColor
-                  } mb-2`}
+                  className={`font-display text-3xl sm:text-4xl font-extrabold leading-tight tracking-tight ${statusInfo.textColor
+                    } mb-2`}
                 >
                   {statusInfo.title}
                 </h1>
