@@ -93,10 +93,18 @@ Fluxo funcional de dados:
 - atualizar configuracao existente: `PUT /api/budget`
 - carregar configuracao do periodo: `GET /api/budget?month=&year=`
 
+Comportamento apos salvar:
+
+- `POST` e `PUT` retornam o payload completo do budget
+- a UI aplica os dados retornados imediatamente, sem depender de `GET` extra no fluxo principal
+- o resumo anual e sincronizado em background para manter a visao anual consistente sem travar o wizard
+- durante o save, o wizard bloqueia acao de cancelar e novos cliques em navegacao/concluir, exibindo estado de `Salvando...`
+
 Cache:
 
 - o frontend usa cache em `localStorage` com TTL
 - ao salvar configuracao, o cache mensal e anual relacionado e invalidado
+- o cache mensal e reidratado com o payload recem-salvo para evitar refetch imediato redundante
 
 ## Dependencias para outras visoes
 

@@ -261,8 +261,8 @@ export interface BudgetConfigResponse extends BrandedApiResponse<"BudgetConfigRe
 }
 
 /**
- * Lightweight response for budget creation (POST /api/budget)
- * The full dashboard payload is fetched via GET right after save.
+ * Lightweight response for budget creation (legacy compatibility).
+ * Dashboard flow now expects full BudgetConfigResponse from POST/PUT.
  */
 export interface BudgetSaveResponse extends BrandedApiResponse<"BudgetSaveResponse"> {
   created: boolean;

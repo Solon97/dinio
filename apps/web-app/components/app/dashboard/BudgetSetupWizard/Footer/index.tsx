@@ -1,4 +1,5 @@
-import { ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
+import { useBudget } from "@/contexts/BudgetContext";
 import { useBudgetSetupWizard } from "../Context";
 import { TOTAL_STEPS } from "../shared/utils";
 
@@ -7,6 +8,7 @@ interface FooterProps {
 }
 
 export function BudgetSetupWizardFooter({ onFinish }: FooterProps) {
+  const { isLoading: isSaving } = useBudget();
   const { step, setStep, totalIncome, creditCards, expenses } =
     useBudgetSetupWizard();
 
@@ -29,6 +31,7 @@ export function BudgetSetupWizardFooter({ onFinish }: FooterProps) {
       {step > 1 ? (
         <button
           onClick={() => setStep(step - 1)}
+          disabled={isSaving}
           className="px-4 md:px-6 py-3 rounded-xl font-bold text-slate-500 hover:bg-slate-50 transition-colors flex items-center gap-2 text-sm md:text-base"
         >
           <ArrowLeft size={18} /> Voltar
@@ -40,7 +43,7 @@ export function BudgetSetupWizardFooter({ onFinish }: FooterProps) {
       {step < TOTAL_STEPS ? (
         <button
           onClick={() => setStep(step + 1)}
-          disabled={isNextDisabled}
+          disabled={isNextDisabled || isSaving}
           title={nextTitle}
           className="px-6 md:px-8 py-3 bg-teal-600 hover:bg-teal-700 text-white rounded-xl font-bold shadow-lg shadow-teal-200 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
         >
@@ -49,9 +52,18 @@ export function BudgetSetupWizardFooter({ onFinish }: FooterProps) {
       ) : (
         <button
           onClick={onFinish}
-          className="px-6 md:px-8 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold shadow-lg shadow-emerald-200 transition-all flex items-center gap-2 text-sm md:text-base"
+          disabled={isSaving}
+          className="px-6 md:px-8 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-xl font-bold shadow-lg shadow-emerald-200 transition-all flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed text-sm md:text-base"
         >
-          <CheckCircle2 size={18} /> Concluir
+          {isSaving ? (
+            <>
+              <Loader2 size={18} className="animate-spin" /> Salvando...
+            </>
+          ) : (
+            <>
+              <CheckCircle2 size={18} /> Concluir
+            </>
+          )}
         </button>
       )}
     </div>

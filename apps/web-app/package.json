@@ -65,6 +65,6 @@
     "tailwindcss": "^4.1.10",
     "typescript": "^5.9.2",
     "uuid": "^13.0.0",
-    "vitest": "^4.0.16"
+    "vitest": "^4.1.0"
   }
 }

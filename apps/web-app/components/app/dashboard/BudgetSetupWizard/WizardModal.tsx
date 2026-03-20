@@ -7,7 +7,11 @@ import { BudgetSetupWizardFooter } from "./Footer";
 import { InstallmentDeleteModal } from "./shared/InstallmentDeleteModal";
 import { WizardOnboardingSync } from "./WizardOnboardingSync";
 
-export function WizardModal() {
+interface WizardModalProps {
+  isSaving?: boolean;
+}
+
+export function WizardModal({ isSaving = false }: WizardModalProps) {
   const {
     expenseToDelete,
     setExpenseToDelete,
@@ -26,6 +30,8 @@ export function WizardModal() {
   } = useBudgetSetupWizard();
 
   const handleFinish = () => {
+    if (isSaving) return;
+
     // Ensure card expenses use card's dueDay
     // Keep temporary IDs - backend will handle mapping them to real IDs
     const finalExpenses = expenses.map((e) => {
@@ -72,7 +78,7 @@ export function WizardModal() {
         id="onboarding-wizard-modal"
         className="bg-white md:rounded-3xl w-full max-w-2xl h-full md:h-auto md:max-h-[90vh] flex flex-col shadow-2xl overflow-hidden relative"
       >
-        <BudgetSetupWizardHeader onCancel={onCancel} />
+        <BudgetSetupWizardHeader onCancel={onCancel} isSaving={isSaving} />
 
         <BudgetSetupWizardBody />
 

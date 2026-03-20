@@ -4,9 +4,13 @@ import { TOTAL_STEPS } from "../shared/utils";
 
 interface HeaderProps {
   onCancel: () => void;
+  isSaving?: boolean;
 }
 
-export function BudgetSetupWizardHeader({ onCancel }: HeaderProps) {
+export function BudgetSetupWizardHeader({
+  onCancel,
+  isSaving = false,
+}: HeaderProps) {
   const { monthName, step } = useBudgetSetupWizard();
   return (
     <div className="bg-teal-600 p-4 md:p-6 text-white flex justify-between items-center shrink-0">
@@ -20,7 +24,8 @@ export function BudgetSetupWizardHeader({ onCancel }: HeaderProps) {
       </div>
       <button
         onClick={onCancel}
-        className="text-teal-100 hover:text-white p-2 hover:bg-teal-500 rounded-lg transition-colors"
+        disabled={isSaving}
+        className="text-teal-100 hover:text-white p-2 hover:bg-teal-500 rounded-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
       >
         <X size={24} />
       </button>

@@ -125,7 +125,7 @@ export class BudgetController {
           targetRemaining,
           invoiceOpeningBalances,
         },
-        { responseMode: "lean" },
+        { responseMode: "full" },
       );
 
       console.info("[budget][controller] create-budget", {

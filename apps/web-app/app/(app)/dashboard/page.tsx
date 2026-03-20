@@ -44,6 +44,7 @@ export default function Dashboard() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [viewMode, setViewMode] = useState<ViewMode>("week");
   const [showWizard, setShowWizard] = useState(false);
+  const [isSavingBudget, setIsSavingBudget] = useState(false);
 
   const {
     state: onboardingState,
@@ -282,6 +283,8 @@ export default function Dashboard() {
 
   const handleSaveConfig = useCallback(
     async (config: BudgetConfig) => {
+      if (isSavingBudget) return;
+
       const payload: BudgetConfigPayload = {
         month: currentDate.getMonth(),
         year: currentDate.getFullYear(),
@@ -293,12 +296,19 @@ export default function Dashboard() {
         invoiceOpeningBalances: config.invoiceOpeningBalances,
       };
 
-      await saveBudget(payload);
-      completeActiveTour();
-      await completeSetupTour();
-      setShowWizard(false);
+      setIsSavingBudget(true);
+      try {
+        const savedConfig = await saveBudget(payload);
+        if (!savedConfig) return;
+
+        completeActiveTour();
+        await completeSetupTour();
+        setShowWizard(false);
+      } finally {
+        setIsSavingBudget(false);
+      }
     },
-    [currentDate, saveBudget, completeSetupTour],
+    [currentDate, saveBudget, completeSetupTour, isSavingBudget],
   );
 
   const handleViewChange = useCallback(
@@ -335,8 +345,10 @@ export default function Dashboard() {
             isFirstMonth={!currentConfig.isPreviousMonthConfigured}
             isPartialMonth={currentConfig.isPartialMonth}
             partialMonthInfo={currentConfig.partialMonthInfo}
+            isSaving={isSavingBudget}
             onSave={handleSaveConfig}
             onCancel={() => {
+              if (isSavingBudget) return;
               destroyActiveTour();
               setShowWizard(false);
             }}

@@ -162,20 +162,38 @@ export function BudgetProvider({ children }: BudgetProviderProps) {
         invalidateMonthCache(user.id, payload.month, payload.year);
         invalidateYearCache(user.id, payload.year);
 
-        if (!isEditing) {
-          const fullConfig = await fetchBudget(
-            payload.month,
-            payload.year,
-            true,
-          );
-          if (fullConfig) {
-            setCurrentConfig(fullConfig);
-            return fullConfig;
-          }
-          return null;
-        }
+        // Immediately hydrate state and month cache from save response.
+        const monthCacheKey = getBudgetCacheKey(
+          user.id,
+          payload.month,
+          payload.year,
+        );
+        setCache(
+          monthCacheKey,
+          responseData,
+          calculateTTL(payload.month, payload.year),
+        );
 
         setCurrentConfig(responseData);
+
+        // Keep yearly view consistent without blocking the save flow.
+        void (async () => {
+          try {
+            const yearlyResponse: YearlySummaryResponse = await apiClient.get(
+              `/budget/year?year=${payload.year}`,
+            );
+            const yearlyCacheKey = getYearlyCacheKey(user.id, payload.year);
+            setCache(
+              yearlyCacheKey,
+              yearlyResponse,
+              calculateTTL(undefined, payload.year),
+            );
+            setYearlyData(yearlyResponse);
+          } catch {
+            // Silent refresh: avoid breaking save UX when yearly sync fails.
+          }
+        })();
+
         return responseData;
       } catch (err) {
         const message = err instanceof Error ? err.message : "Unknown error";
@@ -185,7 +203,7 @@ export function BudgetProvider({ children }: BudgetProviderProps) {
         setIsLoading(false);
       }
     },
-    [currentConfig, fetchBudget, user?.id],
+    [currentConfig, user?.id],
   );
 
   const fetchYearlySummary = useCallback(

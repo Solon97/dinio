@@ -48,6 +48,7 @@ function makeExpenseIntent(overrides: Partial<ParsedIntent> = {}): ParsedIntent 
     expenseDate: 'hoje',
     paymentType: 'debito',
     cardNameMention: null,
+    isRefund: null,
     ...overrides,
   }
 }
@@ -212,6 +213,7 @@ describe('dispatchIntent', () => {
         expenseDate: null,
         paymentType: null,
         cardNameMention: null,
+        isRefund: null,
       },
     ]
     const context = makeContext()

@@ -14,14 +14,17 @@ interface BudgetSetupWizardProps {
   isFirstMonth?: boolean;
   isPartialMonth: boolean;
   partialMonthInfo: PartialMonthInfo;
+  isSaving?: boolean;
   onSave: (_config: BudgetConfig) => void;
   onCancel: () => void;
 }
 
 export default function BudgetSetupWizard(props: BudgetSetupWizardProps) {
+  const { isSaving = false, ...providerProps } = props;
+
   return (
-    <BudgetSetupWizardProvider {...props}>
-      <WizardModal />
+    <BudgetSetupWizardProvider {...providerProps}>
+      <WizardModal isSaving={isSaving} />
     </BudgetSetupWizardProvider>
   );
 }

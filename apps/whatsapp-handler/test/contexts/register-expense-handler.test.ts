@@ -61,6 +61,7 @@ function makeIntent(overrides: Partial<ParsedIntent> = {}): ParsedIntent {
     expenseDate: null,
     paymentType: null,
     cardNameMention: null,
+    isRefund: null,
     ...overrides,
   }
 }
