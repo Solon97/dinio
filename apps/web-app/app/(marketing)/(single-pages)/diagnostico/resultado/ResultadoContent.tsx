@@ -46,13 +46,14 @@ const getStatusInfo = (status: string) => {
         icon: <AlertCircle className="w-10 h-10 text-red-500" />,
         title: "Situação crítica",
         description:
-          "Sua margem para o dia a dia está muito apertada.\nAumentar a renda ou renegociar dívidas são os caminhos mais indicados — mas mesmo essas ações só funcionam com controle diário. Sem saber para onde o dinheiro vai, qualquer melhora some antes de fazer diferença.",
-        bridgeHeadline: "Controle diário é o pré-requisito para qualquer melhora durar",
+          "Aumentar a renda ou renegociar dívidas é o caminho certo — mas qualquer melhora some se você não souber para onde o dinheiro vai primeiro.",
+        bridgeHeadline: "Controle diário é o que faz qualquer melhora durar",
         bridgeDescription:
-          "Renegociar uma dívida ou aumentar a renda libera espaço — mas se os gastos do dia a dia continuarem sem referência, esse espaço some em semanas. Com o teto diário recalibrado automaticamente, você sabe exatamente o que fazer com cada centavo que sobrar.",
+          "Quem consegue uma renda extra ou renegocia uma dívida e não tem controle diário volta ao mesmo lugar em poucos meses. O teto atualizado todo dia garante que cada real a mais vire resultado de verdade.",
         ctaHeadline: "Comece pelo controle. O resto fica mais fácil.",
-        ctaSubtitle: "Descubra em 5 minutos.",
+        ctaSubtitle: "14 dias grátis.",
       };
+
     case "warning":
       return {
         textColor: "text-amber-700",
@@ -61,13 +62,14 @@ const getStatusInfo = (status: string) => {
         icon: <AlertTriangle className="w-10 h-10 text-amber-500" />,
         title: "Atenção",
         description:
-          "Os gastos fixos estão começando a pressionar seu orçamento.\nCada novo gasto sem referência pode levar a surpresas no fim do mês.",
-        bridgeHeadline: "Você está perto do limite. Monitorar cada dia faz diferença.",
+          "Você tem uma margem para gastar, mas é pequena. Quem está perto do limite não pode depender da intuição — precisa saber quanto pode gastar a cada dia.",
+        bridgeHeadline: "Um gasto fora do lugar no dia errado fecha o mês no vermelho",
         bridgeDescription:
-          "Com o teto diário atualizado automaticamente, você sabe exatamente quando pode gastar e quando precisa segurar.",
-        ctaHeadline: "Evite ultrapassar o teto sem perceber",
-        ctaSubtitle: "Descubra em 5 minutos.",
+          "Com o teto recalibrado diariamente, você sabe antes de gastar se pode ou se precisa segurar — antes de cometer o erro, não depois de descobrir no extrato.",
+        ctaHeadline: "Proteja a margem que você tem.",
+        ctaSubtitle: "14 dias grátis.",
       };
+
     default:
       return {
         textColor: "text-teal-700",
@@ -76,12 +78,12 @@ const getStatusInfo = (status: string) => {
         icon: <CheckCircle className="w-10 h-10 text-teal-500" />,
         title: "Equilíbrio saudável",
         description:
-          "Seus gastos fixos estão equilibrados.\nO Dinio garante que continue assim.",
-        bridgeHeadline: "Equilíbrio não é sorte, é consistência",
+          "Seus gastos estão equilibrados. A questão agora é: o que você vai fazer com o que sobra?",
+        bridgeHeadline: "O que sobra só vira reserva se você souber exatamente quanto é",
         bridgeDescription:
-          "Com o teto diário atualizado automaticamente, sua margem vai para reserva, não para gastos impulsivos no final do mês.",
-        ctaHeadline: "Transforme sua margem em reserva de verdade",
-        ctaSubtitle: "Descubra em 5 minutos.",
+          "Sem acompanhamento diário, o que sobra desaparece em pequenos gastos invisíveis. Com o teto recalibrado, a sobra vai para onde você decidiu — não para onde ele escapou.",
+        ctaHeadline: "Transforme equilíbrio em progresso real.",
+        ctaSubtitle: "14 dias grátis.",
       };
   }
 };
