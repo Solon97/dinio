@@ -2,9 +2,9 @@ import { getSEOTags } from "@/libs/seo";
 import { ReactNode } from "react";
 
 export const metadata = getSEOTags({
-  title: "Ferramenta de Planejamento Financeiro Pessoal | Diagnóstico Dinio",
-  description: `Descubra quanto você pode gastar por dia sem comprometer o mês. 
-Faça um diagnóstico financeiro gratuito e organize seu planejamento financeiro pessoal em menos de 2 minutos.`,
+  title: "Controle financeiro pessoal: quanto posso gastar por dia | Diagnóstico Dinio",
+  description:
+    "Faça um diagnóstico rápido de controle financeiro pessoal e descubra quanto pode gastar por dia sem comprometer o mês.",
   canonicalUrlRelative: "/diagnostico",
 });
 

@@ -7,16 +7,15 @@ import { getSEOTags, renderSchemaTags } from "@/libs/seo";
 
 export const metadata = getSEOTags({
   canonicalUrlRelative: "/",
-  title: "Quanto posso gastar hoje? | Dinio",
+  title: "App de finanças pessoais | Dinio",
   description:
-    "O Dinio calcula quanto você pode gastar hoje sem comprometer o fim do mês. Simples, no WhatsApp, sem planilha.",
+    "Dinio é um aplicativo de controle financeiro que calcula quanto você pode gastar hoje sem comprometer o fim do mês. Simples, no WhatsApp, sem planilha.",
   keywords: [
-    "quanto posso gastar hoje",
-    "assistente financeiro whatsapp",
-    "controle financeiro pessoal simples",
-    "app financeiro sem planilha",
+    "app de finanças pessoais",
+    "orçamento diário",
     "controle financeiro",
-    "finanças pessoais",
+    "aplicativo de controle financeiro",
+    "organizar gastos mensais",
   ],
 });
 

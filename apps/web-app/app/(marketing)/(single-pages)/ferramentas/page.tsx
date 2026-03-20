@@ -3,9 +3,9 @@ import { seoTools } from "@/libs/seoTools";
 import { getSEOTags } from "@/libs/seo";
 
 export const metadata = getSEOTags({
-  title: "Ferramentas de Planejamento Financeiro | Dinio",
+  title: "Ferramentas de controle financeiro pessoal e orçamento diário | Dinio",
   description:
-    "Conheça nossas calculadoras e ferramentas gratuitas de planejamento financeiro corporativo e pessoal para organizar o seu orçamento mensal.",
+    "Acesse ferramentas de controle de gastos para saber quanto deve gastar por dia, definir limite de gastos diários e organizar as finanças.",
   canonicalUrlRelative: "/ferramentas",
 });
 

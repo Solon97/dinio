@@ -6,6 +6,42 @@ interface SeoToolLayoutProps {
 }
 
 export function SeoToolLayout({ tool }: SeoToolLayoutProps) {
+  const defaultSections = [
+    {
+      heading: "Como funciona?",
+      body: tool.howItWorks,
+    },
+    {
+      heading: "Por que é importante?",
+      body: tool.whyItsImportant,
+    },
+  ];
+
+  const contentSections = tool.contentParagraphs
+    ? [
+        {
+          heading: "O problema no dia a dia",
+          body: tool.contentParagraphs.problem,
+        },
+        {
+          heading: "Por que as soluções tradicionais falham",
+          body: tool.contentParagraphs.traditionalLimit,
+        },
+        {
+          heading: "Como o cálculo correto funciona na prática",
+          body: tool.contentParagraphs.practicalCalculation,
+        },
+        {
+          heading: "O que muda quando você conhece esse número",
+          body: tool.contentParagraphs.behaviorChange,
+        },
+        {
+          heading: "Perguntas frequentes",
+          body: tool.contentParagraphs.faq,
+        },
+      ]
+    : defaultSections;
+
   return (
     <main className="min-h-screen py-16 px-4 sm:px-6 lg:px-8 bg-base-100">
       <article className="max-w-3xl mx-auto space-y-12">
@@ -26,21 +62,12 @@ export function SeoToolLayout({ tool }: SeoToolLayoutProps) {
 
         {/* Explanatory Content Section */}
         <section className="prose prose-lg md:prose-xl prose-base max-w-none prose-headings:font-bold prose-headings:tracking-tight space-y-10">
-          <div>
-            <h2 className="text-3xl text-base-content mb-4">Como funciona ?</h2>
-            <p className="text-base-content/80 leading-relaxed">
-              {tool.howItWorks}
-            </p>
-          </div>
-
-          <div>
-            <h2 className="text-3xl text-base-content mb-4">
-              Por que é importante ?
-            </h2>
-            <p className="text-base-content/80 leading-relaxed">
-              {tool.whyItsImportant}
-            </p>
-          </div>
+          {contentSections.map((section) => (
+            <div key={section.heading}>
+              <h2 className="text-3xl text-base-content mb-4">{section.heading}</h2>
+              <p className="text-base-content/80 leading-relaxed">{section.body}</p>
+            </div>
+          ))}
         </section>
       </article>
     </main>
