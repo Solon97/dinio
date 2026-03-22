@@ -4,11 +4,13 @@ import {
   createContext,
   useContext,
   useEffect,
+  useRef,
   useState,
   ReactNode,
 } from "react";
 import posthog from "posthog-js";
 import apiClient from "@/libs/api";
+import { posthogEvents } from "@/libs/posthog";
 import { UserData } from "@/libs/userService";
 
 export type { UserData };
@@ -26,6 +28,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<UserData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const sessionTrackedRef = useRef(false);
 
   const fetchUser = async () => {
     try {
@@ -56,6 +59,22 @@ export function UserProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     fetchUser();
   }, []);
+
+  useEffect(() => {
+    if (!user || sessionTrackedRef.current) return;
+    sessionTrackedRef.current = true;
+
+    const dayNumber =
+      Math.floor(
+        (Date.now() - new Date(user.createdAt).getTime()) /
+          (1000 * 60 * 60 * 24),
+      ) + 1;
+
+    posthog.capture(posthogEvents.SESSION_STARTED, {
+      day_number: dayNumber,
+      has_any_expense: user.hasAnyExpense,
+    });
+  }, [user]);
 
   return (
     <UserContext.Provider

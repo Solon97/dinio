@@ -12,6 +12,9 @@ import {
   IIncomeRepository,
   IInstallmentExpenseRepository,
 } from "../../domain/repositories/IBudgetRepository";
+import { captureServerEvent } from "@/libs/posthogServer";
+import { posthogEvents } from "@/libs/posthog";
+import { computeMonthId } from "@/libs/monthId";
 
 export class BudgetController {
   constructor(
@@ -135,6 +138,18 @@ export class BudgetController {
         durationMs: Math.round(performance.now() - start),
         created: result.created,
       });
+
+      if (result.created) {
+        const activeExpenses =
+          expenses?.filter((e) => !e.markedForDeletion) ?? [];
+        captureServerEvent(userId, posthogEvents.ONBOARDING_COMPLETED, {
+          month_id: String(computeMonthId(year, month)),
+          has_fixed_expenses: activeExpenses.length > 0,
+          reserve_percentage: allocation.reservePercent,
+        }).catch((e) =>
+          console.error("[posthog] onboarding_completed error:", e),
+        );
+      }
 
       return NextResponse.json(result.response, {
         status: result.created ? 201 : 200,

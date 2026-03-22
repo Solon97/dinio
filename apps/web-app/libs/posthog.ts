@@ -7,4 +7,7 @@ export const posthogEvents = {
   CHECKOUT_INITIATED: "checkout_initiated",
   TRIAL_STARTED: "trial_started",
   SUBSCRIPTION_CREATED: "subscription_created",
+  ONBOARDING_COMPLETED: "onboarding_completed",
+  EXPENSE_CREATED: "expense_created",
+  SESSION_STARTED: "session_started",
 };

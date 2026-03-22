@@ -1,6 +1,8 @@
 import { EXPENSE_CATEGORIES } from "@/constants/categories";
 import { computeMonthIdFromString } from "@/libs/monthId";
 import { createClient } from "@/libs/supabase/server";
+import { captureServerEvent } from "@/libs/posthogServer";
+import { posthogEvents } from "@/libs/posthog";
 import { DailyExpenseRow, ExpenseResponse } from "@/types/budget";
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -236,6 +238,15 @@ export async function POST(request: Request) {
 
     const payload = validation.data as ValidatedExpensePayload;
 
+    // Check if this is the user's first expense before inserting
+    const { data: existingExpense } = await supabase
+      .from("daily_expenses")
+      .select("id")
+      .eq("user_id", user.id)
+      .limit(1)
+      .maybeSingle();
+    const isFirstExpense = existingExpense === null;
+
     // Insert the expense
     const { data: expense, error: insertError } = await supabase
       .from("daily_expenses")
@@ -272,6 +283,16 @@ export async function POST(request: Request) {
       createdAt: expense.created_at,
       invoiceDueMonthId: expense.invoice_due_month_id ?? null,
     };
+
+    const daysSinceOnboarding = Math.floor(
+      (Date.now() - new Date(user.created_at).getTime()) /
+        (1000 * 60 * 60 * 24),
+    );
+    captureServerEvent(user.id, posthogEvents.EXPENSE_CREATED, {
+      is_first_expense: isFirstExpense,
+      days_since_onboarding: daysSinceOnboarding,
+      month_id: String(expense.month_id),
+    }).catch((e) => console.error("[posthog] expense_created error:", e));
 
     return NextResponse.json(response, { status: 201 });
   } catch (error) {

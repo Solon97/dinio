@@ -13,6 +13,8 @@ export interface UserData {
   onboardingDailyCompleted: boolean;
   onboardingMonthlyCompleted: boolean;
   onboardingYearlyCompleted: boolean;
+  createdAt: string;
+  hasAnyExpense: boolean;
 }
 
 /**
@@ -47,6 +49,11 @@ export async function getUserData(): Promise<UserData | null> {
     .eq("user_id", user.id)
     .maybeSingle();
 
+  const { count: expenseCount } = await supabase
+    .from("daily_expenses")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", user.id);
+
   // Compute display name with fallback logic
   let displayName = "Usuário";
   if (user.user_metadata?.name) {
@@ -69,5 +76,7 @@ export async function getUserData(): Promise<UserData | null> {
     onboardingDailyCompleted: profile?.onboarding_daily_completed ?? false,
     onboardingMonthlyCompleted: profile?.onboarding_monthly_completed ?? false,
     onboardingYearlyCompleted: profile?.onboarding_yearly_completed ?? false,
+    createdAt: user.created_at,
+    hasAnyExpense: (expenseCount ?? 0) > 0,
   };
 }

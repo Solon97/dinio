@@ -5,15 +5,8 @@ import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { getProfile } from "./get-user";
-import { PostHog } from "posthog-node";
+import { captureServerEvent } from "@/libs/posthogServer";
 import { posthogEvents } from "@/libs/posthog";
-
-const posthogClient = new PostHog(
-  process.env.NEXT_PUBLIC_POSTHOG_KEY || "phc_dummy_key",
-  {
-    host: process.env.NEXT_PUBLIC_POSTHOG_UI_HOST || "https://us.i.posthog.com",
-  },
-);
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2023-08-16",
@@ -118,15 +111,11 @@ export async function POST(req: NextRequest) {
           utm_content: metadata.utm_content || "",
         };
 
-        posthogClient.capture({
-          distinctId,
-          event: posthogEvents.SUBSCRIPTION_CREATED,
-          properties: {
-            revenue: contractedPlanValue,
-            currency: "BRL",
-            plan: priceId,
-            eventId: stripeObject.id,
-          },
+        await captureServerEvent(distinctId, posthogEvents.SUBSCRIPTION_CREATED, {
+          revenue: contractedPlanValue,
+          currency: "BRL",
+          plan: priceId,
+          eventId: stripeObject.id,
         });
 
         if (subscriptionId) {
@@ -135,19 +124,13 @@ export async function POST(req: NextRequest) {
           );
 
           if (subscription.status === "trialing") {
-            posthogClient.capture({
-              distinctId,
-              event: posthogEvents.TRIAL_STARTED,
-              properties: {
-                plan: priceId,
-                eventId: stripeObject.id,
-                ...utmProperties,
-              },
+            await captureServerEvent(distinctId, posthogEvents.TRIAL_STARTED, {
+              plan: priceId,
+              eventId: stripeObject.id,
+              ...utmProperties,
             });
           }
         }
-
-        await posthogClient.flush();
 
         if (customerEmail && contractedPlanValue > 0) {
           const meta = metadata;
