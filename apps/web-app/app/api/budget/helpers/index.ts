@@ -501,6 +501,9 @@ export interface FinancialMetrics {
  * - recommendedDailyAverage: Dynamic operational guidance (WhatsApp assistant)
  *   → Formula: (remainingBalance + todaySpent) / remainingDaysIncludingToday
  *   → Changes daily as spending occurs; used for "how much can I spend today?" queries
+ * - currentDailyAverage: Actual average pace since budget start day
+ *   → Formula: totalSpentSinceBudgetStart / elapsedDaysSinceBudgetStart
+ *   → For mid-month setups, denominator starts at budgetStartDay (not day 1)
  *
  * Example (mid-month with remainingDailyBudget = 60000, dailyBudget = 100000):
  * - initialAvailable = 100000 (full allocation)
@@ -583,8 +586,21 @@ export const calculateFinancialMetrics = ({
     daysInMonth - effectiveCurrentDay,
   );
 
+  const effectiveBudgetStartDay = Math.max(
+    1,
+    Math.min(daysInMonth, budgetStartDay),
+  );
+  const elapsedDaysSinceBudgetStart =
+    effectiveCurrentDay >= effectiveBudgetStartDay
+      ? effectiveCurrentDay - effectiveBudgetStartDay + 1
+      : 0;
+
   const totalSpentToDateCents = dailyHistory
-    .filter((dayRecord) => dayRecord.day <= effectiveCurrentDay)
+    .filter(
+      (dayRecord) =>
+        dayRecord.day >= effectiveBudgetStartDay &&
+        dayRecord.day <= effectiveCurrentDay,
+    )
     .reduce((acc, dayRecord) => acc + dayRecord.spent, 0);
 
   const todaySpentCents =
@@ -603,8 +619,8 @@ export const calculateFinancialMetrics = ({
     ),
   );
   const currentDailyAverageCents =
-    effectiveCurrentDay > 0
-      ? Math.floor(totalSpentToDateCents / effectiveCurrentDay)
+    elapsedDaysSinceBudgetStart > 0
+      ? Math.floor(totalSpentToDateCents / elapsedDaysSinceBudgetStart)
       : 0;
   const projectedMonthEndBalanceCents =
     remainingBalanceCents -

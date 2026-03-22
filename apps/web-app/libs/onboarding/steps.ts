@@ -16,45 +16,45 @@ export const DAILY_STEPS: DriveStep[] = [
     element: "#onboarding-daily-limit",
     popover: {
       ...SHARED_POPOVER,
-      title: "O número que guia o seu dia",
+      title: "Sua referência para hoje",
       description:
-        "Este é o teto de hoje. Um único número que resume tudo: sua renda, seus fixos, sua reserva e os dias restantes. Se você ficar dentro dele, está no caminho certo.",
+        "Esta é a média de gastos ideal para hoje. Ela nasce do seu planejamento do mês e mostra quanto você pode gastar no dia para manter a estratégia equilibrada.",
     },
   },
   {
     element: "#onboarding-daily-spent",
     popover: {
       ...SHARED_POPOVER,
-      title: "Cada registro tem impacto real",
+      title: "Seu ritmo real de gastos",
       description:
-        "O que você registra aqui não é só controle — é a entrada de dados que recalcula o mês inteiro. Registrar um gasto redireciona o saldo dos dias seguintes automaticamente.",
+        "Aqui você compara sua média atual com a média ideal do dia. Se estiver acima, vale desacelerar nos próximos dias. Se estiver abaixo, você ganhou folga no mês.",
     },
   },
   {
     element: "#onboarding-daily-balance",
     popover: {
       ...SHARED_POPOVER,
-      title: "Quanto ainda cabe na estratégia",
+      title: "O que ainda resta no mês",
       description:
-        "Este saldo é o que resta do orçamento total de gastos diários para o mês. Ele diminui conforme você gasta — independente do dia. Ter esse número claro evita surpresas na última semana do mês.",
+        "Este saldo mostra quanto ainda resta do orçamento de gastos diários no mês. Ele cai conforme você gasta e deixa claro quanto ainda há para distribuir até o fim do período.",
     },
   },
   {
     element: "#onboarding-daily-chart",
     popover: {
       ...SHARED_POPOVER,
-      title: "O teto se adapta ao ritmo do mês",
+      title: "A projeção do seu mês",
       description:
-        "Quando você gasta abaixo do teto, o sistema redistribui o saldo para os dias seguintes elevando o teto. Quando gasta acima, ele compensa. O gráfico mostra essa evolução em tempo real.",
+        "Este gráfico mostra como o saldo evolui ao longo dos dias. Quando você gasta menos que a média ideal, sobra espaço para frente. Quando gasta mais, os próximos dias ficam mais apertados.",
     },
   },
   {
     element: "#view-toggle-month",
     popover: {
       showButtons: ["close"] as "close"[],
-      title: "Agora veja o mês inteiro",
+      title: "Agora veja o planejamento",
       description:
-        "Clique em 'Mensal' para explorar a visão estratégica: como sua renda está distribuída, alertas automáticos e a saúde financeira do mês.",
+        "Clique em 'Mensal' para ver como a renda foi distribuída, acompanhar os insights do período e revisar seus compromissos do mês.",
     },
   },
 ];
@@ -66,25 +66,25 @@ export const MONTHLY_STEPS: DriveStep[] = [
       ...SHARED_POPOVER,
       title: "Visão estratégica do mês",
       description:
-        "Este gráfico mostra como sua renda está distribuída: quanto vai para fixos, quanto para o dia a dia e quanto para reserva. É a fotografia da sua estratégia financeira do mês.",
+        "Aqui você vê como a renda do mês foi dividida entre gastos fixos, dia a dia e reserva. É o resumo visual da estratégia que sustenta o restante da operação.",
     },
   },
   {
     element: "#onboarding-monthly-insights",
     popover: {
       ...SHARED_POPOVER,
-      title: "Análise automática para manter o equilíbrio",
+      title: "Leitura automática do mês",
       description:
-        "O Dinio analisa seu padrão de gastos e gera alertas quando algo foge do planejado. Não é julgamento — é informação para que você possa agir antes que o mês desande.",
+        "O Dinio Insights interpreta seu ritmo, aponta projeções e sinaliza quando algo foge do planejamento. É uma leitura rápida para você agir antes do mês apertar.",
     },
   },
   {
     element: "#onboarding-monthly-expenses",
     popover: {
       ...SHARED_POPOVER,
-      title: "Fixos obrigatórios e dispensáveis",
+      title: "Seus compromissos fixos",
       description:
-        "Seus gastos fixos são classificados em duas categorias: obrigatórios (compromissos inegociáveis como aluguel e internet) e dispensáveis (assinaturas e serviços que podem ser cortados). Essa distinção deixa claro onde há margem de manobra se o mês apertar.",
+        "Aqui ficam os gastos fixos do mês, separados entre obrigatórios e dispensáveis. Essa divisão ajuda você a enxergar o que é compromisso inegociável e onde ainda existe margem de ajuste.",
     },
   },
   {
@@ -93,7 +93,7 @@ export const MONTHLY_STEPS: DriveStep[] = [
       ...SHARED_POPOVER,
       title: "Agenda financeira",
       description:
-        "A agenda organiza todos os pagamentos do mês por data de vencimento. Use-a para nunca perder um prazo e manter suas contas em dia.",
+        "A agenda organiza os pagamentos do mês por vencimento. Ela concentra o que precisa ser pago e ajuda você a não perder prazo nem deixar compromisso escapar.",
     },
   },
   {
@@ -102,7 +102,7 @@ export const MONTHLY_STEPS: DriveStep[] = [
       showButtons: ["close"] as "close"[],
       title: "Veja sua evolução anual",
       description:
-        "Clique em 'Anual' para acompanhar como suas finanças evoluem mês a mês ao longo do ano.",
+        "Clique em 'Anual' para comparar os meses entre si e entender a evolução da sua vida financeira ao longo do ano.",
     },
   },
 ];
@@ -112,9 +112,9 @@ export const YEARLY_STEPS: DriveStep[] = [
     element: "#onboarding-yearly-chart",
     popover: {
       ...SHARED_POPOVER,
-      title: "Sua evolução mês a mês",
+      title: "Sua evolução ao longo do ano",
       description:
-        "Este gráfico compara renda, gastos fixos, gastos diários e reserva para cada mês do ano. Ele revela padrões que só ficam visíveis com o tempo — meses de alta, períodos de contenção e a tendência geral das suas finanças.",
+        "Este gráfico coloca lado a lado a renda, os fixos, os gastos do dia a dia e a reserva de cada mês. Assim fica mais fácil enxergar padrões, comparar períodos e entender como o ano está evoluindo.",
     },
   },
   {
@@ -123,16 +123,16 @@ export const YEARLY_STEPS: DriveStep[] = [
       ...SHARED_POPOVER,
       title: "Resultados consolidados do ano",
       description:
-        "Renda total, gastos totais e saldo acumulado — os três números que resumem o desempenho financeiro do ano. O saldo acumulado é quanto sobrou de verdade após todos os meses.",
+        "Aqui estão os totais do ano: renda acumulada, gastos totais e saldo acumulado. É o resumo para entender quanto entrou, quanto saiu e quanto sobrou no período.",
     },
   },
   {
     popover: {
       showButtons: ["next", "close"] as ("next" | "close")[],
       nextBtnText: "Concluir 🎉",
-      title: "Parabéns! Você completou o tour 🎉",
+      title: "Você já viu o essencial do Dinio 🎉",
       description:
-        "Agora você conhece todas as visões do Dinio: o rastreio diário para decisões do dia a dia, o planejamento mensal para manter a estratégia e a visão anual para acompanhar sua evolução. Use cada uma delas para manter suas finanças sempre no azul.",
+        "No diário você acompanha o ritmo. No mensal você ajusta a estratégia. No anual você enxerga a evolução. Use as três visões em conjunto para manter clareza sobre o seu dinheiro.",
     },
   },
 ];

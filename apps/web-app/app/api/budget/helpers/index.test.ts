@@ -639,9 +639,9 @@ describe("calculateFinancialMetrics", () => {
     // This shows user has used 60% of the full allocation (40% as mid-month setup, 20% as actual spending)
     expect(metrics.balanceProgress).toBe(40);
     expect(metrics.recommendedDailyAverageCents).toBe(3125); // (40000 + 10000) / 16
-    expect(metrics.currentDailyAverageCents).toBe(1250); // 20000 / 16 calendar days
-    expect(metrics.projectedMonthEndBalanceCents).toBe(21250); // 40000 - (1250 * 15)
-    expect(metrics.projectedBudgetDurationDays).toBe(32); // floor(40000 / 1250)
+    expect(metrics.currentDailyAverageCents).toBe(10000); // 20000 / 2 days since budget start
+    expect(metrics.projectedMonthEndBalanceCents).toBe(-110000); // 40000 - (10000 * 15)
+    expect(metrics.projectedBudgetDurationDays).toBe(4); // floor(40000 / 10000)
   });
 
   it("should handle zero budget correctly", () => {
@@ -723,7 +723,7 @@ describe("calculateFinancialMetrics", () => {
     // Negative balance progress: -20000 / 100000 = -20%
     expect(metrics.balanceProgress).toBe(-20);
     expect(metrics.recommendedDailyAverageCents).toBe(1250); // (-20000 + 40000) / 16
-    expect(metrics.currentDailyAverageCents).toBe(5000);
+    expect(metrics.currentDailyAverageCents).toBe(40000); // 80000 / 2 days since budget start
     expect(metrics.projectedBudgetDurationDays).toBe(0);
   });
 

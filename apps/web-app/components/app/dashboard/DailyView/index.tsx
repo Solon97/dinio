@@ -52,10 +52,10 @@ export default function DailyView({
   const paceDeltaPercent =
     recommendedDailyAverage > 0
       ? Math.round(
-          ((currentDailyAverage - recommendedDailyAverage) /
-            recommendedDailyAverage) *
-            100,
-        )
+        ((currentDailyAverage - recommendedDailyAverage) /
+          recommendedDailyAverage) *
+        100,
+      )
       : 0;
   const isAboveRecommended = paceDeltaPercent > 0;
 
@@ -86,6 +86,9 @@ export default function DailyView({
           <h2 className="text-2xl md:text-4xl font-bold tracking-tight">
             {formatBRL(recommendedDailyAverage)}
           </h2>
+          <p className="text-teal-50/90 text-[11px] md:text-xs mt-2 max-w-[16rem] leading-relaxed">
+            Este é o valor ideal para gastar hoje.
+          </p>
         </div>
 
         {/* Current Daily Average */}
@@ -103,21 +106,18 @@ export default function DailyView({
               </h2>
             </div>
             <div
-              className={`p-1.5 md:p-2 rounded-lg shrink-0 ${
-                isAboveRecommended ? "bg-rose-50" : "bg-teal-50"
-              }`}
+              className={`p-1.5 md:p-2 rounded-lg shrink-0 ${isAboveRecommended ? "bg-rose-50" : "bg-teal-50"
+                }`}
             >
               <Wallet
-                className={`w-4 h-4 md:w-5 md:h-5 ${
-                  isAboveRecommended ? "text-rose-500" : "text-teal-500"
-                }`}
+                className={`w-4 h-4 md:w-5 md:h-5 ${isAboveRecommended ? "text-rose-500" : "text-teal-500"
+                  }`}
               />
             </div>
           </div>
           <p
-            className={`text-[10px] md:text-xs mt-2 md:mt-4 font-medium ${
-              isAboveRecommended ? "text-rose-500" : "text-teal-500"
-            }`}
+            className={`text-[10px] md:text-xs mt-2 md:mt-4 font-medium ${isAboveRecommended ? "text-rose-500" : "text-teal-500"
+              }`}
           >
             {paceDeltaPercent === 0
               ? "No ritmo recomendado."
@@ -169,23 +169,14 @@ export default function DailyView({
           />
         </div>
 
-        <div className="md:col-span-6 h-[520px] md:h-[500px] min-w-0">
-          <InsightsPanel
-            insights={dailyInsights}
-            title="Insights do Dia"
-            accentColorClassName="bg-sky-500"
-          />
+        <div className="md:col-span-6 h-[520px] md:h-[500px] min-w-0 overflow-hidden">
+          <CategoryChart data={categoryData} />
         </div>
       </div>
 
       {/* Base: Expense list + categories */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 md:gap-6">
-        <div className="md:col-span-6 h-[480px] md:h-[500px] min-w-0 overflow-hidden">
-          <CategoryChart data={categoryData} />
-        </div>
-        <div className="md:col-span-6 h-[400px] md:h-[500px] min-w-0 overflow-hidden">
-          <ExpenseList month={month} year={year} />
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-1 gap-4 md:gap-6">
+        <ExpenseList month={month} year={year} />
       </div>
     </div>
   );

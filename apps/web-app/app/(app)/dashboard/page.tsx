@@ -219,7 +219,7 @@ export default function Dashboard() {
   const initialAvailable = currentConfig?.initialAvailable ?? 0;
   const remainingBalance = currentConfig?.remainingBalance ?? 0;
   const balanceProgress = currentConfig?.balanceProgress ?? 0;
-  const recommendedDailyAverage = currentConfig?.idealDailyAverage ?? 0;
+  const recommendedDailyAverage = currentConfig?.recommendedDailyAverage ?? 0;
   const currentDailyAverage = currentConfig?.currentDailyAverage ?? 0;
   const projectedBudgetDurationDays =
     currentConfig?.projectedBudgetDurationDays ?? 0;
