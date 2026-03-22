@@ -56,7 +56,7 @@ export default function CheckoutPage() {
           {
             recurrency: selectedPlan,
             successUrl,
-            cancelUrl: `${window.location.origin}/#pricing`,
+            cancelUrl: `${window.location.origin}/#trial`,
             mode: "subscription",
             metaEventId: eventId,
             ...utmProperties,
@@ -107,7 +107,7 @@ export default function CheckoutPage() {
           </h2>
           <p className="text-slate-600 mb-6">{error}</p>
           <button
-            onClick={() => router.push("/#pricing")}
+            onClick={() => router.push("/#trial")}
             className="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-xl transition-colors"
           >
             Voltar aos planos

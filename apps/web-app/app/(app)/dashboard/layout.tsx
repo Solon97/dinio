@@ -39,7 +39,7 @@ export default function LayoutPrivate({ children }: { children: ReactNode }) {
       return;
     }
 
-    router.push("/#pricing");
+    router.push("/#trial");
     return;
   }, [user, isLoading, router]);
 
