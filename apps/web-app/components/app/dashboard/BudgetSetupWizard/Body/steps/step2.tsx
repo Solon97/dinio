@@ -158,7 +158,7 @@ export function Step2() {
                     onClick={() => toggleInvoice(cardId)}
                     className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-sm font-medium transition-colors min-h-[44px] ${isInvoiceOpen ? "bg-amber-50 border border-amber-200 text-amber-800" : "bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100"}`}
                   >
-                    <span>Total da fatura a pagar neste mês</span>
+                    <span>Já existe fatura a ser paga nesse mês ?</span>
                     <span className="text-xs opacity-70">
                       {isInvoiceOpen ? "▲ ocultar" : "▼ informar"}
                     </span>
@@ -168,7 +168,7 @@ export function Step2() {
                     <div className="mt-3 space-y-2">
                       <label className="block">
                         <span className="text-xs font-medium text-slate-600 mb-1.5 block">
-                          Total da fatura deste mês
+                          Informe o total da fatura deste mês
                         </span>
                         <MoneyInput
                           value={invoiceTotals[cardId] ?? 0}
@@ -180,9 +180,7 @@ export function Step2() {
                         />
                       </label>
                       <p className="text-xs text-slate-400 leading-relaxed">
-                        Informe o total da fatura deste mês (O sistema
-                        descontará o total dos gastos fixos, e criará uma
-                        despesa com o valor restante).
+                        O sistema descontará o total dos gastos fixos, e criará uma despesa com o valor restante.
                       </p>
                     </div>
                   )}

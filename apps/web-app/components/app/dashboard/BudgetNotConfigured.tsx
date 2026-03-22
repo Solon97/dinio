@@ -60,6 +60,11 @@ const BudgetNotConfigured: React.FC<BudgetNotConfiguredProps> = ({
             <ol className="space-y-3 md:space-y-4">
               {checklistSteps.map((step, index) => {
                 const StepIcon = step.icon;
+                const previousStep = index > 0 ? checklistSteps[index - 1] : null;
+                const isBlockedByPreviousStep =
+                  !!previousStep && !previousStep.isCompleted;
+                const shouldDisableAction =
+                  !step.isCompleted && isBlockedByPreviousStep;
 
                 return (
                   <li
@@ -96,22 +101,43 @@ const BudgetNotConfigured: React.FC<BudgetNotConfiguredProps> = ({
                         </p>
 
                         {!step.isCompleted && step.actionLabel && step.actionHref && (
-                          <a
-                            id={step.actionId}
-                            href={step.actionHref}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 px-3 py-2 text-xs md:text-sm font-semibold text-teal-700 bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors"
-                          >
-                            {step.actionLabel}
-                          </a>
+                          shouldDisableAction ? (
+                            <button
+                              type="button"
+                              disabled
+                              className="inline-flex items-center gap-2 px-3 py-2 text-xs md:text-sm font-semibold text-slate-400 bg-slate-100 rounded-lg cursor-not-allowed"
+                              title="Conclua o passo anterior para liberar esta ação"
+                            >
+                              {step.actionLabel}
+                            </button>
+                          ) : (
+                            <a
+                              id={step.actionId}
+                              href={step.actionHref}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-2 px-3 py-2 text-xs md:text-sm font-semibold text-teal-700 bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors"
+                            >
+                              {step.actionLabel}
+                            </a>
+                          )
                         )}
 
                         {!step.isCompleted && step.actionLabel && step.onAction && (
                           <button
                             id={step.actionId}
                             onClick={step.onAction}
-                            className="inline-flex items-center gap-2 px-3 py-2 text-xs md:text-sm font-semibold text-teal-700 bg-teal-50 hover:bg-teal-100 rounded-lg transition-colors"
+                            disabled={shouldDisableAction}
+                            title={
+                              shouldDisableAction
+                                ? "Conclua o passo anterior para liberar esta ação"
+                                : undefined
+                            }
+                            className={`inline-flex items-center gap-2 px-3 py-2 text-xs md:text-sm font-semibold rounded-lg transition-colors ${
+                              shouldDisableAction
+                                ? "text-slate-400 bg-slate-100 cursor-not-allowed"
+                                : "text-teal-700 bg-teal-50 hover:bg-teal-100"
+                            }`}
                           >
                             {step.actionLabel}
                           </button>
