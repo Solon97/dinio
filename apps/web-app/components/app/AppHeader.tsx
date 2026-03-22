@@ -18,6 +18,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Fragment, useState } from "react";
 import { toast } from "react-hot-toast";
 import NotificationBell from "@/components/app/notifications/NotificationBell";
+import { getWhatsappBindLink } from "@/libs/whatsappLink";
 
 export default function AppHeader() {
   const router = useRouter();
@@ -60,7 +61,7 @@ export default function AppHeader() {
     }
   };
 
-  const whatsappBotPhone = process.env.NEXT_PUBLIC_WHATSAPP_BOT_PHONE;
+  const whatsappBindLink = getWhatsappBindLink();
 
   return (
     <header className="w-full border-b border-slate-200 bg-white/50 backdrop-blur-sm sticky top-0 z-50">
@@ -162,9 +163,9 @@ export default function AppHeader() {
                               Desvincular WhatsApp
                             </button>
                           ) : (
-                            whatsappBotPhone && (
+                            whatsappBindLink && (
                               <a
-                                href={`https://wa.me/${whatsappBotPhone}?text=${encodeURIComponent("Olá, quero vincular meu WhatsApp ao Dinio")}`}
+                                href={whatsappBindLink}
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 className="flex w-full items-center gap-2 px-3 py-2 text-sm text-slate-600 rounded-lg hover:bg-slate-50 hover:text-teal-600 transition-colors"

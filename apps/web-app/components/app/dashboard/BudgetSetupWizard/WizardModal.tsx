@@ -5,7 +5,6 @@ import { BudgetSetupWizardHeader } from "./Header";
 import { BudgetSetupWizardBody } from "./Body";
 import { BudgetSetupWizardFooter } from "./Footer";
 import { InstallmentDeleteModal } from "./shared/InstallmentDeleteModal";
-import { WizardOnboardingSync } from "./WizardOnboardingSync";
 
 interface WizardModalProps {
   isSaving?: boolean;
@@ -73,7 +72,6 @@ export function WizardModal({ isSaving = false }: WizardModalProps) {
 
   return (
     <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center md:p-4">
-      <WizardOnboardingSync />
       <div
         id="onboarding-wizard-modal"
         className="bg-white md:rounded-3xl w-full max-w-2xl h-full md:h-auto md:max-h-[90vh] flex flex-col shadow-2xl overflow-hidden relative"

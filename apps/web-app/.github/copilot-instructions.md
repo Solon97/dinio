@@ -50,6 +50,15 @@
 - Crossing Client/Server component boundaries incorrectly causes build failures.
 - Missing env vars breaks auth, Supabase, or Stripe flows.
 
+## Dashboard Onboarding Flow
+- Do not run onboarding tours before budget setup.
+- Do not run onboarding tours inside `BudgetSetupWizard`.
+- New users see a checklist empty state in dashboard views (`week` and `month`) with this order:
+  - connect WhatsApp
+  - configure month
+- After the month is configured, onboarding starts from post-setup phases only: daily -> monthly -> yearly.
+- Reuse `getWhatsappBindLink` from `libs/whatsappLink.ts` for all WhatsApp bind CTAs.
+
 ## Acquisition Tracking Conventions
 - Keep event names in `snake_case` and use `diagnosis_*` prefix for diagnosis funnel events.
 - Use only `diagnosis_completed` (never `diagnostic_completed`).

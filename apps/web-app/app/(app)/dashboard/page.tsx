@@ -13,8 +13,10 @@ import {
 import { getCategoryColor } from "@/constants/categories";
 import { useBudget } from "@/contexts/BudgetContext";
 import { useOnboarding } from "@/contexts/OnboardingContext";
+import { useUser } from "@/contexts";
 import { calculateStatus } from "@/libs/financeService";
 import { computeMonthId } from "@/libs/monthId";
+import { getWhatsappBindLink } from "@/libs/whatsappLink";
 import {
   completeActiveTour,
   destroyActiveTour,
@@ -23,7 +25,7 @@ import {
 import { BudgetConfigPayload } from "@/types/budget";
 import { BudgetConfig, FinancialStatus } from "@/types/finance";
 import "driver.js/dist/driver.css";
-import { Calendar, Settings2 } from "lucide-react";
+import { Calendar, MessageCircle, Settings2 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 type ViewMode = "week" | "month" | "year";
@@ -32,6 +34,8 @@ const getDaysInMonth = (month: number, year: number): number =>
   new Date(year, month + 1, 0).getDate();
 
 export default function Dashboard() {
+  const { user } = useUser();
+
   const {
     currentConfig,
     isLoading,
@@ -49,7 +53,6 @@ export default function Dashboard() {
   const {
     state: onboardingState,
     isLoading: onboardingLoading,
-    startSetupTour,
     startDailyTour,
     startMonthlyTour,
     startYearlyTour,
@@ -92,27 +95,13 @@ export default function Dashboard() {
 
   // Check if current month view is configured
   const isConfigured = currentConfig?.isConfigured ?? false;
+  const whatsappBindLink = getWhatsappBindLink();
+  const isNewUser = !isConfigured && !onboardingState.setupCompleted;
 
-  // Phase 1 — Setup tour: fires on load when budget is not yet configured
-  useEffect(() => {
-    if (onboardingLoading || onboardingState.setupCompleted) return;
-    if (viewMode !== "week" || isConfigured || isLoading) return;
-    const timer = setTimeout(() => startSetupTour(), 500);
-    return () => clearTimeout(timer);
-  }, [
-    viewMode,
-    isConfigured,
-    isLoading,
-    onboardingState.setupCompleted,
-    onboardingLoading,
-    startSetupTour,
-  ]);
-
-  // Phase 2 — Daily tour: fires once setup is done and budget is configured
+  // Phase 1 — Daily tour: fires when budget is configured
   useEffect(() => {
     if (onboardingLoading) return;
-    if (!onboardingState.setupCompleted || onboardingState.dailyCompleted)
-      return;
+    if (onboardingState.dailyCompleted) return;
     if (viewMode !== "week" || !isConfigured || isLoading) return;
     const timer = setTimeout(
       () => startDailyTour(() => setViewMode("month")),
@@ -123,13 +112,12 @@ export default function Dashboard() {
     viewMode,
     isConfigured,
     isLoading,
-    onboardingState.setupCompleted,
     onboardingState.dailyCompleted,
     onboardingLoading,
     startDailyTour,
   ]);
 
-  // Phase 3 — Monthly tour: fires when user switches to monthly view after daily tour
+  // Phase 2 — Monthly tour: fires when user switches to monthly view after daily tour
   useEffect(() => {
     if (onboardingLoading) return;
     if (!onboardingState.dailyCompleted || onboardingState.monthlyCompleted)
@@ -150,7 +138,7 @@ export default function Dashboard() {
     startMonthlyTour,
   ]);
 
-  // Phase 4 — Yearly tour: fires when user switches to yearly view after monthly tour
+  // Phase 3 — Yearly tour: fires when user switches to yearly view after monthly tour
   useEffect(() => {
     if (onboardingLoading) return;
     if (!onboardingState.monthlyCompleted || onboardingState.yearlyCompleted)
@@ -331,6 +319,75 @@ export default function Dashboard() {
     setShowWizard(true);
   }, []);
 
+  const dailyChecklistSteps = useMemo(
+    () => [
+      {
+        id: "whatsapp",
+        title: "Conecte seu WhatsApp",
+        description:
+          "Vincule seu WhatsApp para registrar gastos com mais rapidez direto na conversa.",
+        isCompleted: !!user?.whatsappLinked,
+        actionLabel: "Vincular WhatsApp",
+        actionHref: whatsappBindLink ?? undefined,
+        icon: MessageCircle,
+      },
+      {
+        id: "budget",
+        title: "Configure seu mês",
+        description:
+          "Defina sua receita, gastos fixos e estratégia mensal para liberar o rastreio diário.",
+        isCompleted: isConfigured,
+        actionLabel: `Configurar ${monthNames[currentDate.getMonth()]}`,
+        onAction: handleOpenWizard,
+        actionId: "onboarding-configure-btn",
+        icon: Settings2,
+      },
+    ],
+    [
+      user?.whatsappLinked,
+      whatsappBindLink,
+      isConfigured,
+      monthNames,
+      currentDate,
+      handleOpenWizard,
+    ],
+  );
+
+  const monthlyChecklistSteps = useMemo(
+    () => [
+      {
+        id: "whatsapp",
+        title: "Ative o WhatsApp como atalho",
+        description:
+          "Ao conectar, você ganha um canal rápido para capturar gastos e manter o mês atualizado.",
+        isCompleted: !!user?.whatsappLinked,
+        actionLabel: "Vincular WhatsApp",
+        actionHref: whatsappBindLink ?? undefined,
+        icon: MessageCircle,
+      },
+      {
+        id: "budget",
+        title: "Finalize seu planejamento",
+        description:
+          "Configure este mês para visualizar a distribuição da renda e os compromissos financeiros.",
+        isCompleted: isConfigured,
+        actionLabel: `Configurar ${monthNames[currentDate.getMonth()]}`,
+        onAction: handleOpenWizard,
+        icon: Settings2,
+      },
+    ],
+    [
+      user?.whatsappLinked,
+      whatsappBindLink,
+      isConfigured,
+      monthNames,
+      currentDate,
+      handleOpenWizard,
+    ],
+  );
+
+  const shouldShowChecklist = isNewUser && !onboardingLoading && !isLoading;
+
   return (
     <>
       <div className="max-w-6xl mx-auto px-3 md:px-4 py-4 md:py-8 relative font-sans mb-24 md:mb-20">
@@ -430,13 +487,22 @@ export default function Dashboard() {
         {viewMode === "week" && (
           <>
             {!isConfigured && !isLoading ? (
-              <BudgetNotConfigured
-                title="Orçamento não configurado"
-                description="Configure o mês para liberar o rastreio diário e a projeção do seu ritmo de gastos."
-                actionLabel={`Configurar ${monthNames[currentDate.getMonth()]}`}
-                actionId="onboarding-configure-btn"
-                onAction={handleOpenWizard}
-              />
+              shouldShowChecklist ? (
+                <BudgetNotConfigured
+                  title="Comece em 2 passos"
+                  description="Antes de acompanhar o dia a dia, faça este setup rápido para liberar seu painel."
+                  checklistTitle="Primeiros passos"
+                  checklistSteps={dailyChecklistSteps}
+                />
+              ) : (
+                <BudgetNotConfigured
+                  title="Orçamento não configurado"
+                  description="Configure o mês para liberar o rastreio diário e a projeção do seu ritmo de gastos."
+                  actionLabel={`Configurar ${monthNames[currentDate.getMonth()]}`}
+                  actionId="onboarding-configure-btn"
+                  onAction={handleOpenWizard}
+                />
+              )
             ) : (
               <DailyView
                 summary={
@@ -467,12 +533,21 @@ export default function Dashboard() {
         {viewMode === "month" && (
           <>
             {!isConfigured && !isLoading ? (
-              <BudgetNotConfigured
-                title="Configure o Orçamento Mensal"
-                description="Defina suas receitas e gastos fixos para visualizar a saúde financeira do mês."
-                actionLabel={`Configurar ${monthNames[currentDate.getMonth()]}`}
-                onAction={handleOpenWizard}
-              />
+              shouldShowChecklist ? (
+                <BudgetNotConfigured
+                  title="Planejamento em 2 passos"
+                  description="Conclua estes passos para visualizar sua distribuição mensal e compromissos do período."
+                  checklistTitle="Checklist de ativação"
+                  checklistSteps={monthlyChecklistSteps}
+                />
+              ) : (
+                <BudgetNotConfigured
+                  title="Configure o Orçamento Mensal"
+                  description="Defina suas receitas e gastos fixos para visualizar a saúde financeira do mês."
+                  actionLabel={`Configurar ${monthNames[currentDate.getMonth()]}`}
+                  onAction={handleOpenWizard}
+                />
+              )
             ) : (
               <MonthlyView
                 summary={

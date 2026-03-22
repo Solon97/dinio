@@ -1,6 +1,6 @@
 import { driver } from "driver.js";
 import type { Driver } from "driver.js";
-import { SETUP_STEPS, DAILY_STEPS, MONTHLY_STEPS, YEARLY_STEPS } from "./steps";
+import { DAILY_STEPS, MONTHLY_STEPS, YEARLY_STEPS } from "./steps";
 
 type OnboardingPhase = "setup" | "daily" | "monthly" | "yearly";
 
@@ -20,9 +20,32 @@ const DRIVER_BASE_CONFIG = {
   smoothScroll: true,
 };
 
+const MOBILE_BREAKPOINT = 768;
+const MOBILE_CONFIG = {
+  overlayOpacity: 0.55,
+  stagePadding: 16,
+  disableActiveInteraction: true,
+};
+const DESKTOP_START_DELAY_MS = 350;
+const MOBILE_START_DELAY_MS = 900;
+
 let activeDriver: Driver | null = null;
 let activePhase: OnboardingPhase | null = null;
 let forceComplete = false;
+let startTimeout: ReturnType<typeof setTimeout> | null = null;
+
+function isMobileViewport(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.innerWidth < MOBILE_BREAKPOINT;
+}
+
+function getStartDelayMs(): number {
+  return isMobileViewport() ? MOBILE_START_DELAY_MS : DESKTOP_START_DELAY_MS;
+}
+
+function getResponsiveConfig(): Partial<typeof DRIVER_BASE_CONFIG> {
+  return isMobileViewport() ? MOBILE_CONFIG : {};
+}
 
 function trackEvent(name: string): void {
   if (typeof window === "undefined") return;
@@ -37,9 +60,7 @@ function createDriver(
   let completed = false;
 
   const steps =
-    phase === "setup"
-      ? SETUP_STEPS
-      : phase === "daily"
+    phase === "daily"
         ? DAILY_STEPS
         : phase === "monthly"
           ? MONTHLY_STEPS
@@ -56,6 +77,11 @@ function createDriver(
       driverInstance.moveNext();
     },
     onDestroyStarted: () => {
+      if (startTimeout) {
+        clearTimeout(startTimeout);
+        startTimeout = null;
+      }
+
       driverInstance.destroy();
       if (completed || forceComplete) {
         trackEvent(`onboarding_${phase}_completed`);
@@ -82,6 +108,11 @@ export function getActivePhase(): OnboardingPhase | null {
 }
 
 export function destroyActiveTour(): void {
+  if (startTimeout) {
+    clearTimeout(startTimeout);
+    startTimeout = null;
+  }
+
   if (activeDriver) {
     activeDriver.destroy();
     activeDriver = null;
@@ -94,45 +125,42 @@ export function completeActiveTour(): void {
   destroyActiveTour();
 }
 
-// ONBOARDING TEMPORARILY DISABLED
-const ONBOARDING_DISABLED = true;
-
 export function startSetupOnboarding(callbacks: OnboardingCallbacks): void {
-  if (ONBOARDING_DISABLED) return;
-  if (activeDriver) return;
-
-  activeDriver = createDriver("setup", callbacks, { allowClose: false });
-  activePhase = "setup";
-  trackEvent("onboarding_setup_started");
-  activeDriver.drive();
+  callbacks.onComplete();
 }
 
 export function startDailyOnboarding(callbacks: OnboardingCallbacks): void {
-  if (ONBOARDING_DISABLED) return;
   if (activeDriver) return;
 
-  activeDriver = createDriver("daily", callbacks);
+  activeDriver = createDriver("daily", callbacks, getResponsiveConfig());
   activePhase = "daily";
   trackEvent("onboarding_daily_started");
-  activeDriver.drive();
+  startTimeout = setTimeout(() => {
+    activeDriver?.drive();
+    startTimeout = null;
+  }, getStartDelayMs());
 }
 
 export function startMonthlyOnboarding(callbacks: OnboardingCallbacks): void {
-  if (ONBOARDING_DISABLED) return;
   if (activeDriver) return;
 
-  activeDriver = createDriver("monthly", callbacks);
+  activeDriver = createDriver("monthly", callbacks, getResponsiveConfig());
   activePhase = "monthly";
   trackEvent("onboarding_monthly_started");
-  activeDriver.drive();
+  startTimeout = setTimeout(() => {
+    activeDriver?.drive();
+    startTimeout = null;
+  }, getStartDelayMs());
 }
 
 export function startYearlyOnboarding(callbacks: OnboardingCallbacks): void {
-  if (ONBOARDING_DISABLED) return;
   if (activeDriver) return;
 
-  activeDriver = createDriver("yearly", callbacks);
+  activeDriver = createDriver("yearly", callbacks, getResponsiveConfig());
   activePhase = "yearly";
   trackEvent("onboarding_yearly_started");
-  activeDriver.drive();
+  startTimeout = setTimeout(() => {
+    activeDriver?.drive();
+    startTimeout = null;
+  }, getStartDelayMs());
 }

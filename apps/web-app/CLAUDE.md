@@ -60,6 +60,15 @@ supabase migration new <name>
 - Crossing Client/Server component boundaries incorrectly causes build failures.
 - Missing env vars breaks auth, Supabase, or Stripe flows.
 
+## Dashboard Onboarding Flow
+- Do not start tours before month setup.
+- Do not run onboarding inside `BudgetSetupWizard`.
+- For new users in dashboard empty states, use checklist order:
+  - connect WhatsApp
+  - configure month
+- After setup is completed, keep only post-setup tours: daily -> monthly -> yearly.
+- Reuse `getWhatsappBindLink` from `libs/whatsappLink.ts` for WhatsApp bind links.
+
 ## dinio-shared
 
 `dinio-shared` is installed and available. Import from `'dinio-shared'`.

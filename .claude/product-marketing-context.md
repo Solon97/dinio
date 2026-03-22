@@ -257,8 +257,10 @@ O Dinio combina planejamento mensal e gasto acumulado para entregar uma recomend
 2. Informa renda e gastos fixos em fluxo rapido
 3. Recebe leitura imediata da saude financeira e estimativa de gasto diario
 4. Percebe valor de ter acompanhamento conversacional continuo
-5. Assina e configura conta
-6. Migra o uso diario para WhatsApp e usa web app como camada de revisao
+5. Clica em "Comecar trial gratuito" e inicia o trial de 14 dias
+6. Faz onboarding no web app (renda + fixos + reserva)
+7. Passa a usar o WhatsApp para registrar gastos e consultar recomendacao diaria
+8. Retem por repeticao de micro-decisoes com tranquilidade
 
 **Metricas atuais:** (preencher com dados reais quando disponiveis)
 - Conversao visitante -> assinante: —
