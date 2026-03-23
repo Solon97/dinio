@@ -9,7 +9,11 @@ import config from "@/config";
 import { trackInitiateCheckout } from "@/libs/pixel";
 import posthog from "posthog-js";
 import { posthogEvents } from "@/libs/posthog";
-import { getSessionUtmProperties } from "@/libs/utm";
+import {
+  clearCheckoutTrackingCookie,
+  resolveCheckoutTrackingContext,
+  SELECTED_PLAN_KEY,
+} from "@/libs/checkoutTracking";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -36,19 +40,25 @@ export default function CheckoutPage() {
           return;
         }
 
-        // Get selected plan from sessionStorage
-        const selectedPlan = sessionStorage.getItem("selectedPlan");
+        const { plan: selectedPlan, funnelId, utmProperties } =
+          resolveCheckoutTrackingContext();
+
         if (!selectedPlan) {
+          posthog.capture(posthogEvents.CHECKOUT_MISSING_PLAN, {
+            funnel_id: funnelId,
+            ...utmProperties,
+          });
+          router.push("/#trial");
           return;
         }
 
         // Clear the stored plan
-        sessionStorage.removeItem("selectedPlan");
+        sessionStorage.removeItem(SELECTED_PLAN_KEY);
+        clearCheckoutTrackingCookie();
 
         const eventId = crypto.randomUUID();
         sessionStorage.setItem("dinio:meta:checkout_event_id", eventId);
         const successUrl = `${window.location.origin}/dashboard`;
-        const utmProperties = getSessionUtmProperties();
 
         // Create checkout session
         const { url }: { url: string } = await apiClient.post(
@@ -59,6 +69,7 @@ export default function CheckoutPage() {
             cancelUrl: `${window.location.origin}/#trial`,
             mode: "subscription",
             metaEventId: eventId,
+            funnel_id: funnelId,
             ...utmProperties,
           },
         );
@@ -66,6 +77,7 @@ export default function CheckoutPage() {
         trackInitiateCheckout(eventId);
 
         posthog.capture(posthogEvents.CHECKOUT_INITIATED, {
+          funnel_id: funnelId,
           ...utmProperties,
         });
 

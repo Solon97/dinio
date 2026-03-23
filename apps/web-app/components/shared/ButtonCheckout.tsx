@@ -8,7 +8,10 @@ import config from "@/config";
 import { trackInitiateCheckout } from "@/libs/pixel";
 import posthog from "posthog-js";
 import { posthogEvents } from "@/libs/posthog";
-import { getSessionUtmProperties } from "@/libs/utm";
+import {
+  ensureCheckoutFunnelId,
+  resolveCheckoutTrackingContext,
+} from "@/libs/checkoutTracking";
 
 const ButtonCheckout = ({
   recurrency,
@@ -33,8 +36,17 @@ const ButtonCheckout = ({
     try {
       // Check if user is authenticated
       if (!user) {
+        const funnelId = ensureCheckoutFunnelId();
+        const { utmProperties } = resolveCheckoutTrackingContext();
+        const signinParams = new URLSearchParams({
+          plan: recurrency,
+          next: "/checkout",
+          funnel_id: funnelId,
+          ...utmProperties,
+        });
+
         // Redirect to login with plan preserved in query params
-        router.push(`${config.auth.loginUrl}?plan=${recurrency}`);
+        router.push(`${config.auth.loginUrl}?${signinParams.toString()}`);
         return;
       }
       if (user.isPremium) {
@@ -47,7 +59,7 @@ const ButtonCheckout = ({
 
       const metaFbc = document.cookie.match(/(^|;)\s*_fbc=([^;]+)/)?.[2];
       const metaFbp = document.cookie.match(/(^|;)\s*_fbp=([^;]+)/)?.[2];
-      const utmProperties = getSessionUtmProperties();
+      const { funnelId, utmProperties } = resolveCheckoutTrackingContext();
 
       // User is authenticated, proceed to checkout
       const { url }: { url: string } = await apiClient.post(
@@ -61,6 +73,7 @@ const ButtonCheckout = ({
           metaFbc,
           metaFbp,
           metaUserAgent: navigator.userAgent,
+          funnel_id: funnelId,
           ...utmProperties,
         },
       );
@@ -68,6 +81,7 @@ const ButtonCheckout = ({
       trackInitiateCheckout(eventId);
 
       posthog.capture(posthogEvents.CHECKOUT_INITIATED, {
+        funnel_id: funnelId,
         ...utmProperties,
       });
 

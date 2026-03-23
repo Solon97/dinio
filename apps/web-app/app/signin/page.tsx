@@ -1,31 +1,48 @@
 "use client";
 
 import config from "@/config";
+import {
+  resolveCheckoutTrackingContext,
+  SELECTED_PLAN_KEY,
+} from "@/libs/checkoutTracking";
 import { createClient } from "@/libs/supabase/client";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import Link from "next/link";
 import posthog from "posthog-js";
 import { redirect, useSearchParams } from "next/navigation";
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect, Suspense, useRef } from "react";
 import toast from "react-hot-toast";
 import { posthogEvents } from "@/libs/posthog";
 
 function LoginContent() {
   const searchParams = useSearchParams();
   const nextPath = searchParams.get("next");
+  const hasTrackedCheckoutSigninViewed = useRef(false);
+
+  const getResolvedCheckoutContext = () => {
+    return resolveCheckoutTrackingContext();
+  };
 
   useEffect(() => {
     if (config.leadMode) {
       redirect("/");
     }
 
-    // Capture plan from query params and store in sessionStorage
-    const plan = searchParams.get("plan");
+    const { plan, funnelId, utmProperties } = getResolvedCheckoutContext();
+
     if (plan) {
-      posthog.capture(posthogEvents.CHECKOUT_SIGNIN_VIEWED);
-      sessionStorage.setItem("selectedPlan", plan);
+      sessionStorage.setItem(SELECTED_PLAN_KEY, plan);
+
+      if (!hasTrackedCheckoutSigninViewed.current) {
+        posthog.capture(posthogEvents.CHECKOUT_SIGNIN_VIEWED, {
+          funnel_id: funnelId,
+          ...utmProperties,
+        });
+        hasTrackedCheckoutSigninViewed.current = true;
+      }
     }
   }, [searchParams]);
+
   const supabase = createClient();
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -35,12 +52,21 @@ function LoginContent() {
     setIsLoading(true);
 
     try {
+      const { plan } = getResolvedCheckoutContext();
       const callbackPath = new URL(
         window.location.origin + "/api/auth/callback",
       );
-      if (nextPath) {
-        callbackPath.searchParams.set("next", nextPath);
+
+      const callbackParams = new URLSearchParams(
+        Object.fromEntries(searchParams.entries()),
+      );
+
+      const nextTarget = nextPath ?? (plan ? "/checkout" : null);
+      if (nextTarget && !callbackParams.has("next")) {
+        callbackParams.set("next", nextTarget);
       }
+
+      callbackPath.search = callbackParams.toString();
 
       const redirectURL = callbackPath.toString();
       await supabase.auth.signInWithOAuth({

@@ -14,10 +14,14 @@ export async function GET(req: NextRequest) {
     await supabase.auth.exchangeCodeForSession(code);
   }
 
-  const redirectTarget =
-    nextPath && nextPath.startsWith("/")
-      ? `${requestUrl.origin}${nextPath}`
-      : requestUrl.origin + config.auth.callbackUrl;
+  const redirectTarget = new URL(
+    nextPath && nextPath.startsWith("/") ? nextPath : config.auth.callbackUrl,
+    requestUrl.origin,
+  );
+
+  const forwardedParams = new URLSearchParams(requestUrl.searchParams);
+  forwardedParams.delete("code");
+  redirectTarget.search = forwardedParams.toString();
 
   return NextResponse.redirect(redirectTarget);
 }

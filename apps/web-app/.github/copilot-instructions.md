@@ -66,6 +66,14 @@
 - Include explicit `utm_source`, `utm_medium`, `utm_campaign`, and `utm_content` string properties on conversion events (`diagnosis_cta_clicked`, `checkout_initiated`, `trial_started`).
 - Trigger Meta `CompleteRegistration` on diagnosis CTA click and Meta `Subscribe` only after successful trial start confirmation in Stripe webhook.
 
+## Checkout Tracking Continuity
+- For diagnosis -> signin -> checkout flows, persist checkout context using hybrid precedence: query params > transient cookie > sessionStorage.
+- Context must include: `plan`, `funnel_id`, `utm_source`, `utm_medium`, `utm_campaign`, and `utm_content`.
+- Forward these params through OAuth callback redirects and to `/checkout`.
+- Include `funnel_id` in `diagnosis_cta_clicked`, `checkout_signin_viewed`, and `checkout_initiated`.
+- Propagate `funnel_id` to Stripe checkout metadata and include it in webhook-side PostHog events (`trial_started`, `subscription_created`).
+- Use PostHog API host (`NEXT_PUBLIC_POSTHOG_API_HOST`) for server-side event ingestion.
+
 ## dinio-shared
 
 `dinio-shared` is installed and available. Import from `'dinio-shared'`.

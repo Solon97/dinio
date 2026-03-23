@@ -34,16 +34,6 @@
 - If you add a monetary field, update the matching config in `types/monetary.ts`.
 - Temporary wizard IDs use `temp-{timestamp}-{random}` and are resolved server-side.
 
-## Supabase Directory
-
-The `supabase/` directory (migrations, `config.toml`, snippets) lives at the **monorepo root**, not inside `apps/web-app/`. Run Supabase CLI commands from the monorepo root:
-
-```bash
-supabase link --project-ref <PROJECT_ID>
-supabase db push
-supabase migration new <name>
-```
-
 ## Next.js 15 And Supabase Rules
 - Always `await` Next.js async APIs in server code: `headers()`, `cookies()`, `params`.
 - Dynamic route params must be typed as Promise and awaited.
@@ -61,13 +51,28 @@ supabase migration new <name>
 - Missing env vars breaks auth, Supabase, or Stripe flows.
 
 ## Dashboard Onboarding Flow
-- Do not start tours before month setup.
-- Do not run onboarding inside `BudgetSetupWizard`.
-- For new users in dashboard empty states, use checklist order:
+- Do not run onboarding tours before budget setup.
+- Do not run onboarding tours inside `BudgetSetupWizard`.
+- New users see a checklist empty state in dashboard views (`week` and `month`) with this order:
   - connect WhatsApp
   - configure month
-- After setup is completed, keep only post-setup tours: daily -> monthly -> yearly.
-- Reuse `getWhatsappBindLink` from `libs/whatsappLink.ts` for WhatsApp bind links.
+- After the month is configured, onboarding starts from post-setup phases only: daily -> monthly -> yearly.
+- Reuse `getWhatsappBindLink` from `libs/whatsappLink.ts` for all WhatsApp bind CTAs.
+
+## Acquisition Tracking Conventions
+- Keep event names in `snake_case` and use `diagnosis_*` prefix for diagnosis funnel events.
+- Use only `diagnosis_completed` (never `diagnostic_completed`).
+- Do not use `qualified_lead` in acquisition funnel instrumentation.
+- Include explicit `utm_source`, `utm_medium`, `utm_campaign`, and `utm_content` string properties on conversion events (`diagnosis_cta_clicked`, `checkout_initiated`, `trial_started`).
+- Trigger Meta `CompleteRegistration` on diagnosis CTA click and Meta `Subscribe` only after successful trial start confirmation in Stripe webhook.
+
+## Checkout Tracking Continuity
+- For diagnosis -> signin -> checkout flows, persist checkout context using hybrid precedence: query params > transient cookie > sessionStorage.
+- Context must include: `plan`, `funnel_id`, `utm_source`, `utm_medium`, `utm_campaign`, and `utm_content`.
+- Forward these params through OAuth callback redirects and to `/checkout`.
+- Include `funnel_id` in `diagnosis_cta_clicked`, `checkout_signin_viewed`, and `checkout_initiated`.
+- Propagate `funnel_id` to Stripe checkout metadata and include it in webhook-side PostHog events (`trial_started`, `subscription_created`).
+- Use PostHog API host (`NEXT_PUBLIC_POSTHOG_API_HOST`) for server-side event ingestion.
 
 ## dinio-shared
 

@@ -12,7 +12,10 @@ import {
 } from "@/libs/diagnosticoService";
 import { trackCompleteRegistration } from "@/libs/pixel";
 import { posthogEvents } from "@/libs/posthog";
-import { getSessionUtmProperties } from "@/libs/utm";
+import {
+  ensureCheckoutFunnelId,
+  resolveCheckoutTrackingContext,
+} from "@/libs/checkoutTracking";
 import {
   AlertCircle,
   AlertTriangle,
@@ -165,11 +168,14 @@ export default function ResultadoContent() {
   const planFeatures = plan?.features.map((f) => f.name) ?? [];
 
   const handleCtaTracking = () => {
-    const utmProperties = getSessionUtmProperties();
+    const funnelId = ensureCheckoutFunnelId();
+    const { utmProperties } = resolveCheckoutTrackingContext();
+
     trackCompleteRegistration();
 
     posthog.capture(posthogEvents.DIAGNOSIS_CTA_CLICKED, {
       status: result.status,
+      funnel_id: funnelId,
       ...utmProperties,
     });
   };

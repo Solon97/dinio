@@ -30,6 +30,10 @@ export async function POST(req: NextRequest) {
       data: { user },
     } = await supabase.auth.getUser();
 
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const {
       mode,
       successUrl,
@@ -42,6 +46,7 @@ export async function POST(req: NextRequest) {
       utm_medium,
       utm_campaign,
       utm_content,
+      funnel_id,
     } = body;
     const clientIp =
       req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
@@ -99,8 +104,9 @@ export async function POST(req: NextRequest) {
       utmMedium: utm_medium,
       utmCampaign: utm_campaign,
       utmContent: utm_content,
+      funnelId: funnel_id,
       // If user is logged in, it will pass the user ID to the Stripe Session so it can be retrieved in the webhook later
-      clientReferenceId: user?.id,
+      clientReferenceId: user.id,
       user: profileUser,
       trialPeriodDays,
     });

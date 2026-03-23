@@ -77,8 +77,11 @@ export async function POST(req: NextRequest) {
         const customer = (await stripe.customers.retrieve(
           customerId as string,
         )) as Stripe.Customer;
-        const distinctId =
-          typeof userId === "string" && userId ? userId : customerId;
+        const hasUserDistinctId = typeof userId === "string" && userId;
+        const distinctId = hasUserDistinctId ? userId : customerId;
+        const distinctIdSource = hasUserDistinctId
+          ? "client_reference_id"
+          : "customer_id";
 
         const customerEmail =
           stripeObject.customer_details?.email ||
@@ -103,19 +106,23 @@ export async function POST(req: NextRequest) {
           })
           .eq("id", user?.id);
 
-        const metadata = stripeObject.metadata || {};
+        const metadata = session?.metadata || stripeObject.metadata || {};
         const utmProperties = {
           utm_source: metadata.utm_source || "",
           utm_medium: metadata.utm_medium || "",
           utm_campaign: metadata.utm_campaign || "",
           utm_content: metadata.utm_content || "",
         };
+        const funnelId = metadata.funnel_id || "";
 
         await captureServerEvent(distinctId, posthogEvents.SUBSCRIPTION_CREATED, {
           revenue: contractedPlanValue,
           currency: "BRL",
           plan: priceId,
           eventId: stripeObject.id,
+          funnel_id: funnelId,
+          distinct_id_source: distinctIdSource,
+          ...utmProperties,
         });
 
         if (subscriptionId) {
@@ -127,6 +134,8 @@ export async function POST(req: NextRequest) {
             await captureServerEvent(distinctId, posthogEvents.TRIAL_STARTED, {
               plan: priceId,
               eventId: stripeObject.id,
+              funnel_id: funnelId,
+              distinct_id_source: distinctIdSource,
               ...utmProperties,
             });
           }

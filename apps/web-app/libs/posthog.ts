@@ -5,6 +5,7 @@ export const posthogEvents = {
   DIAGNOSIS_CTA_CLICKED: "diagnosis_cta_clicked",
   CHECKOUT_SIGNIN_VIEWED: "checkout_signin_viewed",
   CHECKOUT_INITIATED: "checkout_initiated",
+  CHECKOUT_MISSING_PLAN: "checkout_missing_plan",
   TRIAL_STARTED: "trial_started",
   SUBSCRIPTION_CREATED: "subscription_created",
   ONBOARDING_COMPLETED: "onboarding_completed",

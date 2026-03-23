@@ -1,6 +1,6 @@
-const UTM_STORAGE_KEY = "dinio:utm:session";
+export const UTM_STORAGE_KEY = "dinio:utm:session";
 
-const UTM_KEYS = [
+export const UTM_KEYS = [
   "utm_source",
   "utm_medium",
   "utm_campaign",
@@ -9,7 +9,7 @@ const UTM_KEYS = [
 
 export type UtmProperties = Record<(typeof UTM_KEYS)[number], string>;
 
-const emptyUtmProperties: UtmProperties = {
+export const emptyUtmProperties: UtmProperties = {
   utm_source: "",
   utm_medium: "",
   utm_campaign: "",

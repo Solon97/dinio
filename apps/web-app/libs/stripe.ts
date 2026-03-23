@@ -15,6 +15,7 @@ interface CreateCheckoutParams {
   utmMedium?: string;
   utmCampaign?: string;
   utmContent?: string;
+  funnelId?: string;
   clientReferenceId?: string;
   user?: {
     customerId?: string;
@@ -45,6 +46,7 @@ export const createCheckout = async ({
   utmMedium,
   utmCampaign,
   utmContent,
+  funnelId,
 }: CreateCheckoutParams): Promise<string> => {
   try {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
@@ -86,6 +88,7 @@ export const createCheckout = async ({
     if (typeof utmMedium === "string") metadata.utm_medium = utmMedium;
     if (typeof utmCampaign === "string") metadata.utm_campaign = utmCampaign;
     if (typeof utmContent === "string") metadata.utm_content = utmContent;
+    if (typeof funnelId === "string") metadata.funnel_id = funnelId;
 
     const stripeSession = await stripe.checkout.sessions.create({
       mode,
