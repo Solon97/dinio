@@ -10,7 +10,7 @@ interface ReactivationProfileRow {
 
 const subject = "O que aconteceu?";
 
-function extractFirstNameFromMetadata(metadata: unknown): string | null {
+function extractFirstNameFromMetadata(metadata?: unknown): string | null {
   if (!metadata || typeof metadata !== "object") {
     return null;
   }
@@ -89,43 +89,22 @@ async function handler(_request: Request) {
       row.email.length > 0,
   );
 
-  const firstNameByUserId = new Map<string, string>();
-
-  if (candidates.length > 0) {
-    const candidateIds = candidates.map((candidate) => candidate.id);
-
-    const { data: authUsers, error: authUsersError } = await supabase
-      .schema("auth")
-      .from("users")
-      .select("id, raw_user_meta_data")
-      .in("id", candidateIds);
-
-    if (authUsersError) {
-      console.error("Failed to fetch auth metadata for reactivation emails", {
-        error: authUsersError,
-      });
-    } else {
-      for (const user of authUsers ?? []) {
-        if (typeof user.id !== "string") {
-          continue;
-        }
-
-        const firstName = extractFirstNameFromMetadata(user.raw_user_meta_data);
-
-        if (firstName) {
-          firstNameByUserId.set(user.id, firstName);
-        }
-      }
-    }
-  }
-
   let emailsSent = 0;
   let markedAsSent = 0;
   const failedUserIds: string[] = [];
 
   for (const profile of candidates) {
     try {
-      const firstName = firstNameByUserId.get(profile.id);
+      const authResult = await supabase.auth.admin
+        .getUserById(profile.id)
+        .catch((e): null => {
+          console.error("Failed to fetch auth user metadata", {
+            userId: profile.id,
+          });
+          return null;
+        });
+      const user = authResult?.data?.user ? authResult.data.user : null;
+      const firstName = extractFirstNameFromMetadata(user?.user_metadata);
       const plainTextMessage = buildPlainTextMessage(firstName);
       const minimalHtmlMessage = toMinimalHtml(plainTextMessage);
 
@@ -137,7 +116,9 @@ async function handler(_request: Request) {
       });
 
       if (!delivery) {
-        throw new Error("Email delivery skipped because RESEND_API_KEY is not set");
+        throw new Error(
+          "Email delivery skipped because RESEND_API_KEY is not set",
+        );
       }
 
       const { error: updateError } = await supabase
