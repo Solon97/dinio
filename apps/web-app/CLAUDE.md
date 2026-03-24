@@ -50,6 +50,12 @@
 - Crossing Client/Server component boundaries incorrectly causes build failures.
 - Missing env vars breaks auth, Supabase, or Stripe flows.
 
+## Cron Jobs (QStash)
+- Cron endpoints in `app/api/cron/**` use QStash signature verification (`verifySignatureAppRouter`) with local fallback only when signing keys are missing.
+- Reactivation email cron route: `POST /api/cron/reactivation-email`.
+- Eligibility for reactivation email must remain strict: `has_access = false`, `customer_id IS NULL`, `reactivation_email_sent_at IS NULL`, and non-null email.
+- Process in bounded batches (currently max 500 users per run) to reduce timeout and provider rate-limit risk.
+
 ## Dashboard Onboarding Flow
 - Do not run onboarding tours before budget setup.
 - Do not run onboarding tours inside `BudgetSetupWizard`.

@@ -21,7 +21,7 @@ export const sendEmail = async ({
   to: string | string[];
   subject: string;
   text: string;
-  html: string;
+  html?: string;
   replyTo?: string | string[];
 }) => {
   const resend = getResendClient();
@@ -36,7 +36,7 @@ export const sendEmail = async ({
     to,
     subject,
     text,
-    html,
+    ...(html && { html }),
     ...(replyTo && { replyTo }),
   });
 

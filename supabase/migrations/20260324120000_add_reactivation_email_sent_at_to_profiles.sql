@@ -1,0 +1,2 @@
+ALTER TABLE profiles
+  ADD COLUMN IF NOT EXISTS reactivation_email_sent_at TIMESTAMPTZ DEFAULT NULL;
