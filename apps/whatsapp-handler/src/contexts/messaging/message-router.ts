@@ -5,7 +5,6 @@ import {
   resolveUserByPhone,
   ResolveUserResponse,
 } from "../dinio/dinio-api-client";
-import { handleUnknown } from "../intents/handlers/unknown.handler";
 import { dispatchIntent } from "../intents/intent-dispatcher";
 import { ParsedIntent } from "../intents/types";
 import {

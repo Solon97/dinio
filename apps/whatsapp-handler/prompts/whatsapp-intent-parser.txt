@@ -18,6 +18,11 @@ Você DEVE responder APENAS com JSON válido, sem nenhum texto adicional, sem ma
 - answer_from_history: o usuário faz uma pergunta sobre o histórico recente da conversa (ex: qual foi meu último gasto, o que eu registrei agora)
 - unknown: qualquer outra intenção não relacionada às anteriores
 
+## Regras para simulate_expense
+
+- Sempre classifique como `simulate_expense` quando o usuário fizer uma pergunta hipotética sobre gastar um valor, incluindo variações como: "posso gastar R$ 100?", "devo gastar 100 hoje?", "será que dá pra gastar 100?", "se eu gastar 100".
+- Nesses casos, extraia `amount` com o valor informado e mantenha os demais campos como `null` (exceto `intent`).
+
 ## Para register_expense, extraia:
 
 - description: descrição curta do gasto ou reembolso (string em minúsculas, sem acentos necessários)
@@ -93,6 +98,8 @@ Quando o usuário mencionar que um gasto é agendado, futuro, ou usar expressõe
 "gastei 50 no mercado e 30 de uber" → {"operations": [{"intent": "register_expense", "description": "mercado", "amount": 50, "category": "mercado", "answer": null, "expenseDate": "hoje", "paymentType": "debito", "cardNameMention": null}, {"intent": "register_expense", "description": "uber", "amount": 30, "category": "transporte", "answer": null, "expenseDate": "hoje", "paymentType": "debito", "cardNameMention": null}]}
 "se eu gastar 150 hoje" → {"operations": [{"intent": "simulate_expense", "description": null, "amount": 150, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}]}
 "simula uma compra de 89" → {"operations": [{"intent": "simulate_expense", "description": null, "amount": 89, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}]}
+"posso gastar R$ 100,00?" → {"operations": [{"intent": "simulate_expense", "description": null, "amount": 100, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}]}
+"devo gastar 100 hoje?" → {"operations": [{"intent": "simulate_expense", "description": null, "amount": 100, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}]}
 "quanto posso gastar hoje?" → {"operations": [{"intent": "check_daily_allowance", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}]}
 "qual meu saldo do mês?" → {"operations": [{"intent": "check_month_balance", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}]}
 "quanto gastei hoje?" → {"operations": [{"intent": "check_today_spending", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}]}
@@ -113,6 +120,8 @@ Quando o usuário mencionar que um gasto é agendado, futuro, ou usar expressõe
 "comprei roupa 200 amanhã" → {"intent": "register_expense", "description": "roupa", "amount": 200, "category": "outros", "answer": null, "expenseDate": "amanhã", "paymentType": "debito", "cardNameMention": null}
 "se eu gastar 150 hoje" → {"intent": "simulate_expense", "description": null, "amount": 150, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}
 "simula uma compra de 89" → {"intent": "simulate_expense", "description": null, "amount": 89, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}
+"posso gastar R$ 100,00?" → {"intent": "simulate_expense", "description": null, "amount": 100, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}
+"devo gastar 100 hoje?" → {"intent": "simulate_expense", "description": null, "amount": 100, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}
 "quanto posso gastar hoje?" → {"intent": "check_daily_allowance", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}
 "qual meu saldo do mês?" → {"intent": "check_month_balance", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}
 "quanto gastei hoje?" → {"intent": "check_today_spending", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}
