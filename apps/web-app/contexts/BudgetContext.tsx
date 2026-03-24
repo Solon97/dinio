@@ -154,9 +154,12 @@ export function BudgetProvider({ children }: BudgetProviderProps) {
       try {
         // Use PUT for existing configs, POST for new ones
         const isEditing = currentConfig?.isConfigured ?? false;
-        const { data: responseData } = isEditing
+        const responseData = (isEditing
           ? await apiClient.put<BudgetConfigResponse>("/budget", payload)
-          : await apiClient.post<BudgetConfigResponse>("/budget", payload);
+          : await apiClient.post<BudgetConfigResponse>(
+              "/budget",
+              payload,
+            )) as unknown as BudgetConfigResponse;
 
         // Invalidate cache for this month and year
         invalidateMonthCache(user.id, payload.month, payload.year);
