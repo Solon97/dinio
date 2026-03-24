@@ -60,6 +60,7 @@ export interface ConfigProps {
   resend: {
     fromNoReply: string;
     fromAdmin: string;
+    replyToAdmin?: string;
     supportEmail?: string;
   };
   colors: {

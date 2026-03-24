@@ -50,6 +50,8 @@ const config: ConfigProps = {
     fromNoReply: `Dinio <noreply@resend.dinio.com.br>`,
     // REQUIRED — Email 'From' field to be used when sending other emails, like abandoned carts, updates etc..
     fromAdmin: `Solon do Dinio <solon@resend.dinio.com.br>`,
+    // Optional reply-to field for admin emails (e.g., for abandoned cart follow-ups). If not set, replies will go to the 'fromAdmin' address.
+    replyToAdmin: `Solon do Dinio <solon@dinio.com.br>`,
     // Email shown to customer if need support. Leave empty if not needed => if empty, set up Crisp above, otherwise you won't be able to offer customer support."
     supportEmail: "contato@dinio.com.br",
   },

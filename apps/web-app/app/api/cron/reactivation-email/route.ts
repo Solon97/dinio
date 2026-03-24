@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { verifySignatureAppRouter } from "@upstash/qstash/nextjs";
 import { createAdminClient } from "@/libs/supabase/admin";
 import { sendEmail } from "@/libs/resend";
+import config from "@/config";
 
 interface ReactivationProfileRow {
   id: string;
@@ -113,6 +114,7 @@ async function handler(_request: Request) {
         subject,
         text: plainTextMessage,
         html: minimalHtmlMessage,
+        replyTo: config.resend.replyToAdmin || config.resend.fromAdmin,
       });
 
       if (!delivery) {
