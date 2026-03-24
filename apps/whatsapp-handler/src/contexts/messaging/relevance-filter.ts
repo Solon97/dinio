@@ -91,8 +91,6 @@ export function isMessageRelevant(
  * Friendly, judgment-free, and guides the user back to Dinio's purpose.
  */
 export const IRRELEVANT_MESSAGE_RESPONSE = [
-  "Oi! Sou o assistente financeiro do Dinio 💰",
-  "",
   "Eu sou especializado em ajudar você a controlar gastos, checar seu saldo diário e registrar despesas.",
   "",
   "Tente me enviar algo como:",

@@ -41,6 +41,16 @@ const LINK_MESSAGE_ERROR = [
   "Tente novamente em alguns instantes que deve funcionar.",
 ].join("\n");
 
+export const IRRELEVANT_MESSAGE_RESPONSE = [
+  LINK_MESSAGE_PREFIX,
+  "Eu sou especializado em ajudar você a controlar gastos, checar seu saldo diário e registrar despesas.",
+  "",
+  "Tente me enviar algo como:",
+  '• "Gastei 50 no uber"',
+  '• "Quanto posso gastar hoje?"',
+  '• "Qual meu saldo?"',
+].join("\n");
+
 export async function routeMessage(
   message: IncomingMessage,
   log: FastifyBaseLogger,
@@ -116,7 +126,7 @@ export async function routeMessage(
     !isInteractiveReply &&
     !isMessageRelevant(message.text, log)
   ) {
-    await handleUnknown(reply);
+    await reply(IRRELEVANT_MESSAGE_RESPONSE);
     log.info(
       { messageId: message.messageId },
       "message rejected by relevance filter",
