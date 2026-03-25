@@ -37,7 +37,7 @@ export async function getUserData(): Promise<UserData | null> {
   const { data: profile } = await supabase
     .from("profiles")
     .select(
-      "email, has_access, customer_id, onboarding_setup_completed, onboarding_daily_completed, onboarding_monthly_completed, onboarding_yearly_completed",
+      "name, email, has_access, customer_id, onboarding_setup_completed, onboarding_daily_completed, onboarding_monthly_completed, onboarding_yearly_completed",
     )
     .eq("id", user.id)
     .single();
@@ -55,9 +55,10 @@ export async function getUserData(): Promise<UserData | null> {
     .eq("user_id", user.id);
 
   // Compute display name with fallback logic
+  const profileName = profile?.name || null;
   let displayName = "Usuário";
-  if (user.user_metadata?.name) {
-    displayName = user.user_metadata.name;
+  if (profileName) {
+    displayName = profileName;
   } else if (user.email) {
     const emailName = user.email.split("@")[0];
     displayName = emailName.charAt(0).toUpperCase() + emailName.slice(1);
@@ -68,7 +69,7 @@ export async function getUserData(): Promise<UserData | null> {
     email: profile?.email || user.email,
     isPremium: profile?.has_access || false,
     wasSubscriber: !!profile?.customer_id || false,
-    name: user.user_metadata?.name || null,
+    name: profileName,
     avatarUrl: user.user_metadata?.avatar_url || null,
     displayName: displayName,
     whatsappLinked: !!whatsappLink,
