@@ -1,12 +1,13 @@
+import { sendWelcomeTrialEmail } from "@/libs/emails/welcomeTrialEmail";
 import { sendMetaSubscribeEvent } from "@/libs/meta";
+import { posthogEvents } from "@/libs/posthog";
+import { captureServerEvent } from "@/libs/posthogServer";
 import { findCheckoutSession, getAnnualPriceId } from "@/libs/stripe";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { headers } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { getProfile } from "./get-user";
-import { captureServerEvent } from "@/libs/posthogServer";
-import { posthogEvents } from "@/libs/posthog";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2023-08-16",
@@ -115,20 +116,23 @@ export async function POST(req: NextRequest) {
         };
         const funnelId = metadata.funnel_id || "";
 
-        await captureServerEvent(distinctId, posthogEvents.SUBSCRIPTION_CREATED, {
-          revenue: contractedPlanValue,
-          currency: "BRL",
-          plan: priceId,
-          eventId: stripeObject.id,
-          funnel_id: funnelId,
-          distinct_id_source: distinctIdSource,
-          ...utmProperties,
-        });
+        await captureServerEvent(
+          distinctId,
+          posthogEvents.SUBSCRIPTION_CREATED,
+          {
+            revenue: contractedPlanValue,
+            currency: "BRL",
+            plan: priceId,
+            eventId: stripeObject.id,
+            funnel_id: funnelId,
+            distinct_id_source: distinctIdSource,
+            ...utmProperties,
+          },
+        );
 
         if (subscriptionId) {
-          const subscription = await stripe.subscriptions.retrieve(
-            subscriptionId,
-          );
+          const subscription =
+            await stripe.subscriptions.retrieve(subscriptionId);
 
           if (subscription.status === "trialing") {
             await captureServerEvent(distinctId, posthogEvents.TRIAL_STARTED, {
@@ -138,6 +142,39 @@ export async function POST(req: NextRequest) {
               distinct_id_source: distinctIdSource,
               ...utmProperties,
             });
+
+            const profileId = user?.id;
+            const welcomeAlreadySent = user?.welcome_email_sent_at;
+
+            if (customerEmail && profileId && !welcomeAlreadySent) {
+              try {
+                const delivery = await sendWelcomeTrialEmail({
+                  to: customerEmail,
+                  name: user?.name,
+                });
+
+                if (!delivery) {
+                  throw new Error(
+                    "Email delivery skipped because RESEND_API_KEY is not set",
+                  );
+                }
+
+                await supabase
+                  .from("profiles")
+                  .update({ welcome_email_sent_at: new Date().toISOString() })
+                  .eq("id", profileId);
+              } catch (emailError) {
+                console.error(
+                  "[welcome-email] Failed to send welcome trial email",
+                  {
+                    profileId,
+                    customerEmail,
+                    eventId: stripeObject.id,
+                    error: emailError,
+                  },
+                );
+              }
+            }
           }
         }
 

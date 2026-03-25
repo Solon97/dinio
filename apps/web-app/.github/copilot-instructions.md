@@ -52,8 +52,10 @@
 
 ## Cron Jobs (QStash)
 - Cron endpoints in `app/api/cron/**` use QStash signature verification (`verifySignatureAppRouter`) with local fallback only when signing keys are missing.
+- Welcome email cron route: `POST /api/cron/welcome-email`.
 - Reactivation email cron route: `POST /api/cron/reactivation-email`.
 - Eligibility for reactivation email must remain strict: `has_access = false`, `customer_id IS NULL`, `reactivation_email_sent_at IS NULL`, and non-null email.
+- Eligibility for welcome email cron must remain strict: `has_access = true`, `welcome_email_sent_at IS NULL`, and non-null email.
 - Process in bounded batches (currently max 500 users per run) to reduce timeout and provider rate-limit risk.
 
 ## Dashboard Onboarding Flow
@@ -64,6 +66,14 @@
   - configure month
 - After the month is configured, onboarding starts from post-setup phases only: daily -> monthly -> yearly.
 - Reuse `getWhatsappBindLink` from `libs/whatsappLink.ts` for all WhatsApp bind CTAs.
+
+## Email Conventions
+- Email templates are built with React Email components and rendered via `libs/emails/renderEmailTemplate.ts`.
+- Shared layout lives in `components/email/BaseEmail.tsx` and already includes `EmailSignature` from `@/components/email/EmailSignature` in the footer.
+- Every email sent via Resend must set `replyTo` to `config.resend.replyToAdmin || config.resend.fromAdmin` — never create a new `replyTo` value.
+- Utility functions for sending specific email types live in `libs/emails/`. Each file owns one email type and should co-locate the React Email template with the send function.
+- Welcome trial email: `libs/emails/welcomeTrialEmail.tsx` — auto-sent from Stripe webhook when `subscription.status === 'trialing'` and also backfilled by the daily cron; deduplication via `profiles.welcome_email_sent_at`.
+- Reactivation email: `libs/emails/reactivationEmail.tsx` — sent only from the daily cron; deduplication via `profiles.reactivation_email_sent_at`.
 
 ## Acquisition Tracking Conventions
 - Keep event names in `snake_case` and use `diagnosis_*` prefix for diagnosis funnel events.
