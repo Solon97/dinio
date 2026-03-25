@@ -73,35 +73,24 @@ export async function handleSimulateExpense(
 
     const isInsideBudget = simulation.new_month_balance >= 0;
     if (isInsideBudget) {
-      //? Se o gasto simulado deixa o mês dentro do orçamento, a mensagem é mais tranquila, falando do impacto no saldo do mês e no valor recomendado para os próximos dias.
-      const guidanceMessage =
-        simulation.new_projection < 0
-          ? `Você pode gastar ${simulatedAmount}, mas deve ter cuidado nos próximos dias. ⚠️`
-          : `Você pode gastar ${simulatedAmount} com tranquilidade 👍`;
-
-      const projectionMessage =
-        simulation.new_projection < 0
-          ? `⚠️ Se mantiver esse ritmo, no fim do mês você precisaria completar com ${formatCurrencyFromCents(Math.abs(simulation.new_projection))} da sua reserva.`
-          : `💰 Se mantiver esse ritmo, você pode terminar o mês com +${formatCurrencyFromCents(simulation.new_projection)} na sua reserva.`;
-
+      //? O gasto ultrapassa a média recomendada de hoje, mas o orçamento do mês ainda aguenta.
+      //? A mensagem foca no impacto na média diária dos próximos dias.
       await reply(
         [
-          guidanceMessage,
-          `Depois desse gasto, seu saldo disponível no mês ficaria em ${formatCurrencyFromCents(simulation.new_month_balance)}.`,
-          `Sua média recomendada por dia passaria de ${formatCurrencyFromCents(currentStatus.recommended_today)} para ${formatCurrencyFromCents(simulation.new_future_recommendation)}.\n\n`,
-          projectionMessage,
+          `⚠️ Esse gasto de ${simulatedAmount} está acima da sua média recomendada para hoje (${formatCurrencyFromCents(currentStatus.recommended_today)}).`,
+          "",
+          `Para ficar dentro do limite, você precisará gastar em média ${formatCurrencyFromCents(simulation.new_future_recommendation)} por dia nos próximos ${currentStatus.days_left} dias do mês.`,
         ].join("\n"),
       );
       return;
     }
-    //? Se o gasto simulado deixa o mês no negativo, é porque ele ultrapassa o limite que o usuário definiu para o mês.
-    //? A mensagem é de alerta, sem falar do valor recomendado para os próximos dias, já que o usuário teria que cortar todos os gastos para não estourar o limite do mês.
+    //? O gasto simulado deixa o mês no negativo — ultrapassa o limite mensal definido pelo usuário.
+    //? Alerta mais grave: mostra o saldo negativo que resultaria.
     await reply(
       [
-        `Se gastar ${simulatedAmount} agora, você passa do limite que definiu para este mês. ⚠️`,
+        `🚨 Cuidado! Se gastar ${simulatedAmount} agora, você vai estourar o limite que definiu para este mês.`,
         "",
-        `Depois desse gasto, seu saldo do mês ficaria em ${formatCurrencyFromCents(simulation.new_month_balance)}.`,
-        "Na prática, não sobraria valor disponível para os próximos dias deste mês.",
+        `Seu saldo ficaria em ${formatCurrencyFromCents(simulation.new_month_balance)} — você entraria no negativo.`,
         "",
         "Se puder, vale deixar esse gasto para o próximo mês.",
       ].join("\n"),
