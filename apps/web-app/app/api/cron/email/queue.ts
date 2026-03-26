@@ -5,6 +5,7 @@ import { createAdminClient } from "@/libs/supabase/admin";
 import { sendReactivationEmail } from "@/libs/emails/reactivationEmail";
 import { sendWelcomeTrialEmail } from "@/libs/emails/welcomeTrialEmail";
 
+const QUEUE_NAME = "emails";
 export const MAX_EMAILS_PER_RUN = 500;
 
 export const emailTypeSchema = z.enum(["welcome", "reactivation"]);
@@ -24,11 +25,6 @@ interface EmailCandidate {
   email: string;
   name: string | null;
 }
-
-const QUEUE_NAME_BY_TYPE: Record<EmailType, string> = {
-  welcome: "welcome_emails",
-  reactivation: "reactivation_emails",
-};
 
 function createQStashClient() {
   const token = process.env.QSTASH_TOKEN;
@@ -111,7 +107,7 @@ export async function dispatchEmailType(emailType: EmailType) {
       selectedCount: 0,
       acceptedCount: 0,
       deduplicatedCount: 0,
-      queueName: QUEUE_NAME_BY_TYPE[emailType],
+      queueName: QUEUE_NAME,
     };
   }
 
@@ -121,7 +117,7 @@ export async function dispatchEmailType(emailType: EmailType) {
 
   const results = await client.batchJSON(
     candidates.map((candidate) => ({
-      queueName: QUEUE_NAME_BY_TYPE[emailType],
+      queueName: QUEUE_NAME,
       url: processUrl,
       deduplicationId: `${emailType}-${candidate.id}-${dateKey}`,
       body: {
@@ -141,7 +137,7 @@ export async function dispatchEmailType(emailType: EmailType) {
     selectedCount: candidates.length,
     acceptedCount: results.length - deduplicatedCount,
     deduplicatedCount,
-    queueName: QUEUE_NAME_BY_TYPE[emailType],
+    queueName: QUEUE_NAME,
   };
 }
 
