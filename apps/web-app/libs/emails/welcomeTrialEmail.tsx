@@ -1,6 +1,7 @@
 import {
   Button,
   Hr,
+  Img,
   Link,
   Section,
   Text,
@@ -12,7 +13,7 @@ import { renderEmailTemplate } from "@/libs/emails/renderEmailTemplate";
 import { sendEmail } from "@/libs/resend";
 
 const SUBJECT = "Seu período de teste começou — comece agora 🚀";
-const CTA_URL = "https://app.dinio.com.br";
+const CTA_URL = "https://dinio.com.br/dashboard";
 const INSTAGRAM_URL = "https://instagram.com/diniobr";
 
 const paragraphStyle = {
@@ -44,6 +45,14 @@ const dividerStyle = {
 const linkStyle = {
   color: "#0d9488",
   textDecoration: "none",
+};
+
+const instagramIconStyle = {
+  display: "inline-block",
+  height: "14px",
+  marginRight: "6px",
+  verticalAlign: "-2px",
+  width: "14px",
 };
 
 export interface WelcomeTrialEmailProps {
@@ -95,7 +104,13 @@ export function WelcomeTrialEmail({ firstName }: WelcomeTrialEmailProps) {
         <br />
         E se quiser acompanhar dicas e novidades do Dinio, pode seguir a gente lá também.
         <br />
-        📷 <Link href={INSTAGRAM_URL} style={linkStyle}>@diniobr</Link>
+        <br />
+        <Img
+          alt="Instagram"
+          src="https://cdn.simpleicons.org/instagram/0d9488"
+          style={instagramIconStyle}
+        />
+        <Link href={INSTAGRAM_URL} style={linkStyle}>@diniobr</Link>
       </Text>
       <Hr style={dividerStyle} />
       <Text style={paragraphStyle}>Bom período de teste. 🙌</Text>

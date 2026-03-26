@@ -1,4 +1,4 @@
-import { Link, Section, Text } from "@react-email/components";
+import { Img, Link, Section, Text } from "@react-email/components";
 
 const INSTAGRAM_URL = "https://instagram.com/diniobr";
 const WEBSITE_URL = "https://dinio.com.br";
@@ -27,6 +27,14 @@ const linkStyle = {
   textDecoration: "none",
 };
 
+const instagramIconStyle = {
+  display: "inline-block",
+  height: "14px",
+  marginRight: "6px",
+  verticalAlign: "-2px",
+  width: "14px",
+};
+
 export function EmailSignature() {
   return (
     <Section style={sectionStyle}>
@@ -39,7 +47,12 @@ export function EmailSignature() {
         🌐 <Link href={WEBSITE_URL} style={linkStyle}>dinio.com.br</Link>
       </Text>
       <Text style={detailStyle}>
-        📷 <Link href={INSTAGRAM_URL} style={linkStyle}>@diniobr</Link>
+        <Img
+          alt="Instagram"
+          src="https://cdn.simpleicons.org/instagram/0d9488"
+          style={instagramIconStyle}
+        />
+        <Link href={INSTAGRAM_URL} style={linkStyle}>@diniobr</Link>
       </Text>
     </Section>
   );
