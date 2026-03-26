@@ -123,7 +123,7 @@ export async function dispatchEmailType(emailType: EmailType) {
     candidates.map((candidate) => ({
       queueName: QUEUE_NAME_BY_TYPE[emailType],
       url: processUrl,
-      deduplicationId: `${emailType}:${candidate.id}:${dateKey}`,
+      deduplicationId: `${emailType}-${candidate.id}-${dateKey}`,
       body: {
         profileId: candidate.id,
         email: candidate.email,
