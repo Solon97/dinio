@@ -52,11 +52,14 @@
 
 ## Cron Jobs (QStash)
 - Cron endpoints in `app/api/cron/**` use QStash signature verification (`verifySignatureAppRouter`) with local fallback only when signing keys are missing.
-- Welcome email cron route: `POST /api/cron/welcome-email`.
-- Reactivation email cron route: `POST /api/cron/reactivation-email`.
+- Welcome email cron route: `POST /api/cron/welcome-email` (dispatch-only, enqueues jobs).
+- Reactivation email cron route: `POST /api/cron/reactivation-email` (dispatch-only, enqueues jobs).
+- Consolidated dispatch route: `POST /api/cron/email/dispatch` (enqueues both email types in a single run).
+- Queue processor route: `POST /api/cron/email/process` (processes one enqueued email job at a time).
 - Eligibility for reactivation email must remain strict: `has_access = false`, `customer_id IS NULL`, `reactivation_email_sent_at IS NULL`, and non-null email.
 - Eligibility for welcome email cron must remain strict: `has_access = true`, `welcome_email_sent_at IS NULL`, and non-null email.
-- Process in bounded batches (currently max 500 users per run) to reduce timeout and provider rate-limit risk.
+- Process in bounded batches (currently max 500 users per run and per email type) to reduce timeout and provider rate-limit risk.
+- Email jobs are queued with dedicated QStash queues (`welcome_emails` and `reactivation_emails`), deduplication IDs, and incremental delay to smooth Resend throughput.
 
 ## Dashboard Onboarding Flow
 - Do not run onboarding tours before budget setup.
