@@ -43,12 +43,13 @@ const LINK_MESSAGE_ERROR = [
 
 export const IRRELEVANT_MESSAGE_RESPONSE = [
   LINK_MESSAGE_PREFIX,
-  "Eu sou especializado em ajudar você a controlar gastos, checar seu saldo diário e registrar despesas.",
+  "Estou aqui pra te ajudar a saber quanto você pode gastar — sem enrolação.",
   "",
   "Tente me enviar algo como:",
-  '• "Gastei 50 no uber"',
+  '• "Gastei 50 no mercado"',
   '• "Quanto posso gastar hoje?"',
   '• "Qual meu saldo?"',
+  '• "Posso gastar 50 com delivery ?"',
 ].join("\n");
 
 export async function routeMessage(

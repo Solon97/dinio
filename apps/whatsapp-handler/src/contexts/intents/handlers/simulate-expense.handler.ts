@@ -32,36 +32,14 @@ export async function handleSimulateExpense(
   context.session.operation = null
 
   try {
-    await reply("Deixa eu simular esse gasto rapidinho… 📊");
     const currentStatus = await getStatus(context.userId);
     const intentAmountInCents = Math.round(intent.amount * 100);
     const projectedSpend = intentAmountInCents + currentStatus.today_spent;
-    const simulatedAmount = formatCurrencyFromCents(intentAmountInCents);
     const isInsideTodayBudget =
       projectedSpend <= currentStatus.recommended_today;
 
     if (isInsideTodayBudget) {
-      await insideTodayBudget(
-        {
-          projectedSpend,
-          currentStatus,
-          simulatedAmount,
-        },
-        reply,
-      );
-      return;
-    }
-
-    const isLastDayOfMonth = currentStatus.days_left <= 0;
-    if (isLastDayOfMonth) {
-      await reply(
-        [
-          `Se gastar ${simulatedAmount} agora, você passa do limite que definiu para este mês. ⚠️`,
-          "",
-          `Hoje é o último dia do mês, e esse gasto está acima do saldo restante (${formatCurrencyFromCents(currentStatus.month_balance)}).`,
-          "Se puder, vale deixar esse gasto para o próximo mês.",
-        ].join("\n"),
-      );
+      await insideTodayBudget({ projectedSpend, currentStatus }, reply);
       return;
     }
 
@@ -73,26 +51,19 @@ export async function handleSimulateExpense(
 
     const isInsideBudget = simulation.new_month_balance >= 0;
     if (isInsideBudget) {
-      //? O gasto ultrapassa a média recomendada de hoje, mas o orçamento do mês ainda aguenta.
-      //? A mensagem foca no impacto na média diária dos próximos dias.
       await reply(
         [
-          `⚠️ Esse gasto de ${simulatedAmount} está acima da sua média recomendada para hoje (${formatCurrencyFromCents(currentStatus.recommended_today)}).`,
-          "",
-          `Para ficar dentro do limite, você precisará gastar em média ${formatCurrencyFromCents(simulation.new_future_recommendation)} por dia nos próximos ${currentStatus.days_left} dias do mês.`,
+          `Com esse gasto, o total do dia iria para ${formatCurrencyFromCents(projectedSpend)} — acima do teto de ${formatCurrencyFromCents(currentStatus.recommended_today)}.`,
+          `Você ainda tem ${formatCurrencyFromCents(simulation.new_month_balance)} no mês e o teto dos próximos dias cairia para ${formatCurrencyFromCents(simulation.new_future_recommendation)}.`,
         ].join("\n"),
       );
       return;
     }
-    //? O gasto simulado deixa o mês no negativo — ultrapassa o limite mensal definido pelo usuário.
-    //? Alerta mais grave: mostra o saldo negativo que resultaria.
+
     await reply(
       [
-        `🚨 Cuidado! Se gastar ${simulatedAmount} agora, você vai estourar o limite que definiu para este mês.`,
-        "",
-        `Seu saldo ficaria em ${formatCurrencyFromCents(simulation.new_month_balance)} — você entraria no negativo.`,
-        "",
-        "Se puder, vale deixar esse gasto para o próximo mês.",
+        `Com esse gasto, o total do dia iria para ${formatCurrencyFromCents(projectedSpend)} — acima do teto de ${formatCurrencyFromCents(currentStatus.recommended_today)}.`,
+        `Se gastar agora, o mês fecha no negativo em ${formatCurrencyFromCents(Math.abs(simulation.new_month_balance))}.`,
       ].join("\n"),
     );
   } catch (error) {
@@ -104,25 +75,13 @@ async function insideTodayBudget(
   {
     projectedSpend,
     currentStatus,
-    simulatedAmount,
   }: {
     projectedSpend: number;
     currentStatus: BotStatusResponse;
-    simulatedAmount: string;
   },
   reply: ReplyFunction,
 ) {
-  const conclusionMessage = `Esse gasto de ${simulatedAmount} cabe na sua média recomendada de hoje ✅\n\n`;
-  const todaySpentMessage =
-    currentStatus.today_spent > 0
-      ? `Hoje você já gastou ${formatCurrencyFromCents(currentStatus.today_spent)}.\n`
-      : "";
-
-  let message =
-    conclusionMessage +
-    todaySpentMessage +
-    `Com esse gasto de ${simulatedAmount}, o total do dia iria para ${formatCurrencyFromCents(projectedSpend)}.` +
-    `\nSua média recomendada para hoje é ${formatCurrencyFromCents(currentStatus.recommended_today)}`;
-
-  await reply(message);
+  await reply(
+    `Com esse gasto, você teria usado ${formatCurrencyFromCents(projectedSpend)} dos ${formatCurrencyFromCents(currentStatus.recommended_today)} de hoje — dentro do teto. 💚`,
+  );
 }

@@ -243,29 +243,13 @@ async function persistExpense(
       invoiceDueMonthId: pendingData.invoiceDueMonthId,
     });
 
-    const amountDisplay = formatCurrencyFromCents(Math.round(pendingData.amountInReais * 100));
-
-    if (pendingData.isRefund) {
-      await reply(
-        [
-          "Pronto! 💚",
-          "",
-          `Já anotei o reembolso de ${amountDisplay} de ${capitalizeFirst(pendingData.description)}.`,
-          `Hoje você já gastou ${formatCurrencyFromCents(apiResponse.today_spent)} e ainda tem ${formatCurrencyFromCents(apiResponse.month_balance)} no mês.`,
-          `Seu valor mais seguro para hoje ficou em ${formatCurrencyFromCents(apiResponse.recommended_today)} 👍`,
-        ].join("\n"),
-      );
-    } else {
-      await reply(
-        [
-          "Pronto! 💸",
-          "",
-          `Já anotei os ${amountDisplay} de ${capitalizeFirst(pendingData.description)}.`,
-          `Hoje você já gastou ${formatCurrencyFromCents(apiResponse.today_spent)} e ainda tem ${formatCurrencyFromCents(apiResponse.month_balance)} no mês.`,
-          `Seu valor mais seguro para hoje ficou em ${formatCurrencyFromCents(apiResponse.recommended_today)} 👍`,
-        ].join("\n"),
-      );
-    }
+    const emoji = pendingData.isRefund ? "💚" : "💸";
+    const remainingBudget = apiResponse.recommended_today - apiResponse.today_spent;
+    const secondLine =
+      remainingBudget > 0
+        ? `Você gastou ${formatCurrencyFromCents(apiResponse.today_spent)} hoje. Ainda pode gastar ${formatCurrencyFromCents(remainingBudget)} hoje e se manter dentro do orçamento.`
+        : `Você gastou ${formatCurrencyFromCents(apiResponse.today_spent)} hoje — o teto de hoje foi atingido.`;
+    await reply([`Anotado. ${emoji}`, secondLine].join("\n"));
   } catch (error) {
     await reply(resolveApiErrorMessage(error, "register"));
   }

@@ -8,51 +8,23 @@ export type StatusQueryType =
   | 'check_month_balance'
   | 'check_today_spending'
 
-function buildRecommendationLines(status: BotStatusResponse): string[] {
-  if (status.month_balance <= 0) {
-    return [
-      'Seu limite de gastos planejado para o mês já foi atingido.',
-      'Para fechar o mês com mais tranquilidade, o melhor é evitar novos gastos hoje.',
-    ]
-  }
-
-  if (status.today_spent > status.recommended_today) {
-    return [
-      `Hoje a recomendação era ${formatCurrencyFromCents(status.recommended_today)}.`,
-      'Sem problema: dá para ajustar os próximos dias com calma.',
-    ]
-  }
-
-  return [
-    `O ideal seria gastar até ${formatCurrencyFromCents(status.recommended_today)} hoje.`,
-    'Assim o mês segue no controle.',
-  ]
-}
-
 function buildStatusMessage(type: StatusQueryType, status: BotStatusResponse): string {
-  const recommendationLines = buildRecommendationLines(status)
-
   switch (type) {
     case 'check_daily_allowance':
       return [
-        ...recommendationLines,
-        '',
-        `Você já gastou ${formatCurrencyFromCents(status.today_spent)} hoje e ainda tem ${formatCurrencyFromCents(status.month_balance)} no mês.`,
+        `Hoje você pode gastar até ${formatCurrencyFromCents(status.recommended_today)}. 💚`,
+        `Você já gastou ${formatCurrencyFromCents(status.today_spent)} e ainda pode gastar ${formatCurrencyFromCents(status.month_balance)} no mês.`,
       ].join('\n')
     case 'check_month_balance':
       return [
-        `Você ainda tem ${formatCurrencyFromCents(status.month_balance)} no mês 📅`,
-        '',
-        ...recommendationLines,
-        `Até agora você já gastou ${formatCurrencyFromCents(status.today_spent)}.`,
+        `Você ainda tem ${formatCurrencyFromCents(status.month_balance)} pra usar no mês.`,
+        `Distribuindo pelos dias que faltam, o recomendado para hoje é ${formatCurrencyFromCents(status.recommended_today)} e você já gastou ${formatCurrencyFromCents(status.today_spent)}.`,
       ].join('\n')
     case 'check_today_spending':
       return [
         `Você gastou ${formatCurrencyFromCents(status.today_spent)} 💸`,
         '',
-        ...recommendationLines,
-        '',
-        `Seu saldo no mês está em ${formatCurrencyFromCents(status.month_balance)}.`,
+        `Seu saldo no mês está em ${formatCurrencyFromCents(status.month_balance)} e o recomendado para hoje é ${formatCurrencyFromCents(status.recommended_today)}.`,
       ].join('\n')
   }
 }
