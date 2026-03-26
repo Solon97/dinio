@@ -38,6 +38,21 @@ async function postToWhatsApp(phoneId: string, token: string, payload: unknown):
   }
 }
 
+export async function sendTypingIndicator(to: string, messageId: string): Promise<void> {
+  try {
+    const { token, phoneId } = getConfig()
+    await postToWhatsApp(phoneId, token, {
+      messaging_product: 'whatsapp',
+      status: 'read',
+      message_id: messageId,
+      typing_indicator: { type: 'text' },
+    })
+    await new Promise<void>((resolve) => setTimeout(resolve, 1500 + Math.random() * 1000))
+  } catch {
+    // Silent failure — message delivery must not be blocked
+  }
+}
+
 export async function sendTextMessage(to: string, body: string): Promise<void> {
   const { token, phoneId } = getConfig()
   await postToWhatsApp(phoneId, token, {

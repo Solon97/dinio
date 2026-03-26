@@ -13,10 +13,11 @@ import {
   getSession,
   saveSession,
 } from "../session/chatSessionStore";
+import { buildIntentContext } from "../session/contextBuilder";
 import {
-  buildIntentContext
-} from "../session/contextBuilder";
-import { sendTextMessage } from "../whatsapp/whatsapp-client";
+  sendTextMessage,
+  sendTypingIndicator,
+} from "../whatsapp/whatsapp-client";
 import { isMessageRelevant } from "./relevance-filter";
 
 const LINK_MESSAGE_PREFIX = [
@@ -55,6 +56,7 @@ export async function routeMessage(
   log: FastifyBaseLogger,
 ): Promise<void> {
   log.info({ messageId: message.messageId }, "routing incoming message");
+  await sendTypingIndicator(message.phone, message.messageId);
 
   let resolveResult: ResolveUserResponse;
   try {
@@ -119,7 +121,6 @@ export async function routeMessage(
   // -------------------------------------------------------------------------
   const hasActiveFlow = !!session.state;
   const isInteractiveReply = !!message.interactiveReplyId;
-  
   if (
     !hasActiveFlow &&
     !isInteractiveReply &&

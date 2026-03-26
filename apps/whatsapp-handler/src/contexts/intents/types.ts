@@ -48,7 +48,7 @@ export interface IntentContext {
   userId: string
   /** Phone number of the user (E.164 format without the + prefix). */
   phone: string
-  /**
+/**
    * Active session for the current user.
    * Handlers may set `session.state` and `session.operation` to initiate a
    * multi-turn flow. The message router persists the session after dispatch.
