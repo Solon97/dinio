@@ -59,7 +59,7 @@
 - Eligibility for reactivation email must remain strict: `has_access = false`, `customer_id IS NULL`, `reactivation_email_sent_at IS NULL`, and non-null email.
 - Eligibility for welcome email cron must remain strict: `has_access = true`, `welcome_email_sent_at IS NULL`, and non-null email.
 - Process in bounded batches (currently max 500 users per run and per email type) to reduce timeout and provider rate-limit risk.
-- Email jobs are queued with dedicated QStash queues (`welcome_emails` and `reactivation_emails`), deduplication IDs, and incremental delay to smooth Resend throughput.
+- Email jobs are queued with dedicated QStash queues (`welcome_emails` and `reactivation_emails`) and deduplication IDs. Throughput smoothing must be configured at queue level in QStash.
 
 ## Dashboard Onboarding Flow
 - Do not run onboarding tours before budget setup.

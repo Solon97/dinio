@@ -120,10 +120,9 @@ export async function dispatchEmailType(emailType: EmailType) {
   const dateKey = new Date().toISOString().slice(0, 10);
 
   const results = await client.batchJSON(
-    candidates.map((candidate, index) => ({
+    candidates.map((candidate) => ({
       queueName: QUEUE_NAME_BY_TYPE[emailType],
       url: processUrl,
-      delay: index,
       deduplicationId: `${emailType}:${candidate.id}:${dateKey}`,
       body: {
         profileId: candidate.id,
