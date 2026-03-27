@@ -13,7 +13,7 @@ function buildStatusMessage(type: StatusQueryType, status: BotStatusResponse): s
     case 'check_daily_allowance':
       return [
         `Hoje você pode gastar até ${formatCurrencyFromCents(status.recommended_today)}. 💚`,
-        `Você já gastou ${formatCurrencyFromCents(status.today_spent)} e ainda pode gastar ${formatCurrencyFromCents(status.month_balance)} no mês.`,
+        `Você já gastou ${formatCurrencyFromCents(status.today_spent)} e ainda pode gastar ${formatCurrencyFromCents(status.recommended_today - status.today_spent)}.`,
       ].join('\n')
     case 'check_month_balance':
       return [
