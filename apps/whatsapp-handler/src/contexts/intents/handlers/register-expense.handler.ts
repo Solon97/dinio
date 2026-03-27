@@ -247,8 +247,8 @@ async function persistExpense(
     const remainingBudget = apiResponse.recommended_today - apiResponse.today_spent;
     const secondLine =
       remainingBudget > 0
-        ? `Você gastou ${formatCurrencyFromCents(apiResponse.today_spent)} hoje. Ainda pode gastar ${formatCurrencyFromCents(remainingBudget)} hoje e se manter dentro do orçamento.`
-        : `Você gastou ${formatCurrencyFromCents(apiResponse.today_spent)} hoje — o teto de hoje foi atingido.`;
+        ? `Você gastou ${formatCurrencyFromCents(apiResponse.today_spent)}. Ainda pode gastar ${formatCurrencyFromCents(remainingBudget)} hoje e se manter dentro do orçamento.`
+        : `Você gastou ${formatCurrencyFromCents(apiResponse.today_spent)} — o teto de hoje foi atingido.`;
     await reply([`Anotado. ${emoji}`, secondLine].join("\n"));
   } catch (error) {
     await reply(resolveApiErrorMessage(error, "register"));
