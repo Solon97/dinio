@@ -1,31 +1,39 @@
-import { BotStatusResponse, getStatus } from '../../dinio/dinio-api-client'
-import { formatCurrencyFromCents } from '../../responses/formatters'
-import { IntentContext, ReplyFunction } from '../types'
-import { resolveApiErrorMessage } from './helpers'
+import { BotStatusResponse, getStatus } from "../../dinio/dinio-api-client";
+import { formatCurrencyFromCents } from "../../responses/formatters";
+import { IntentContext, ReplyFunction } from "../types";
+import { resolveApiErrorMessage } from "./helpers";
 
 export type StatusQueryType =
-  | 'check_daily_allowance'
-  | 'check_month_balance'
-  | 'check_today_spending'
+  | "check_daily_allowance"
+  | "check_month_balance"
+  | "check_today_spending";
 
-function buildStatusMessage(type: StatusQueryType, status: BotStatusResponse): string {
+function buildStatusMessage(
+  type: StatusQueryType,
+  status: BotStatusResponse,
+): string {
+  const remainingBudget = status.recommended_today - status.today_spent;
+  const secondLine =
+    remainingBudget > 0
+      ? `Você já gastou ${formatCurrencyFromCents(status.today_spent)} hoje e ainda pode gastar ${formatCurrencyFromCents(remainingBudget)}.`
+      : `Você gastou ${formatCurrencyFromCents(status.today_spent)} — o teto de hoje foi atingido.`;
   switch (type) {
-    case 'check_daily_allowance':
+    case "check_daily_allowance":
       return [
         `Hoje você pode gastar até ${formatCurrencyFromCents(status.recommended_today)}. 💚`,
-        `Você já gastou ${formatCurrencyFromCents(status.today_spent)} e ainda pode gastar ${formatCurrencyFromCents(status.recommended_today - status.today_spent)}.`,
-      ].join('\n')
-    case 'check_month_balance':
+        secondLine,
+      ].join("\n");
+    case "check_month_balance":
       return [
         `Você ainda tem ${formatCurrencyFromCents(status.month_balance)} pra usar no mês.`,
         `Distribuindo pelos dias que faltam, o recomendado para hoje é ${formatCurrencyFromCents(status.recommended_today)} e você já gastou ${formatCurrencyFromCents(status.today_spent)}.`,
-      ].join('\n')
-    case 'check_today_spending':
+      ].join("\n");
+    case "check_today_spending":
       return [
         `Você gastou ${formatCurrencyFromCents(status.today_spent)} 💸`,
-        '',
+        "",
         `Seu saldo no mês está em ${formatCurrencyFromCents(status.month_balance)} e o recomendado para hoje é ${formatCurrencyFromCents(status.recommended_today)}.`,
-      ].join('\n')
+      ].join("\n");
   }
 }
 
@@ -35,10 +43,10 @@ export async function handleStatusQuery(
   reply: ReplyFunction,
 ): Promise<void> {
   try {
-    const status = await getStatus(context.userId)
+    const status = await getStatus(context.userId);
 
-    await reply(buildStatusMessage(type, status))
+    await reply(buildStatusMessage(type, status));
   } catch (error) {
-    await reply(resolveApiErrorMessage(error, 'status'))
+    await reply(resolveApiErrorMessage(error, "status"));
   }
 }

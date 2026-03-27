@@ -34,8 +34,9 @@ const WhatsAppMockup = () => (
         <div className="bg-white rounded-2xl rounded-tl-sm px-3.5 py-2.5 max-w-[85%] shadow-sm">
           <p className="text-[#111b21] text-sm leading-relaxed">
             Bom dia! 👋<br />
-            Sua média de hoje é <strong>R$&nbsp;87</strong>. Você já gastou R$&nbsp;35.<br /><br />
-            ✅ Ainda pode gastar <strong>R$&nbsp;52</strong> com tranquilidade.
+            Hoje você pode gastar até <strong>R$&nbsp;87,00</strong>. 💚
+            <br />
+            Você já gastou R$&nbsp;35,00 e ainda pode gastar <strong>R$&nbsp;52,00</strong>.
           </p>
           <p className="text-[10px] text-[#667781] text-right mt-1">09:12</p>
         </div>
@@ -44,7 +45,7 @@ const WhatsAppMockup = () => (
       {/* User bubble 2 */}
       <div className="flex justify-end">
         <div className="bg-[#DCF8C6] rounded-2xl rounded-tr-sm px-3.5 py-2 max-w-[78%] shadow-sm">
-          <p className="text-[#111b21] text-sm">Gastei R$ 28 no mercado</p>
+          <p className="text-[#111b21] text-sm">Gastei 28 no mercado</p>
           <p className="text-[10px] text-[#667781] text-right mt-0.5">14:47 ✓✓</p>
         </div>
       </div>
@@ -53,8 +54,8 @@ const WhatsAppMockup = () => (
       <div className="flex justify-start">
         <div className="bg-white rounded-2xl rounded-tl-sm px-3.5 py-2.5 max-w-[85%] shadow-sm">
           <p className="text-[#111b21] text-sm leading-relaxed">
-            Anotado! 🟢<br />
-            Ainda sobram <strong>R$&nbsp;24</strong> hoje.<br />
+            Anotado! 💸<br />
+            Ainda sobram <strong>R$&nbsp;24,00</strong> hoje.<br />
             O mês segue no controle.
           </p>
           <p className="text-[10px] text-[#667781] text-right mt-1">14:47</p>
