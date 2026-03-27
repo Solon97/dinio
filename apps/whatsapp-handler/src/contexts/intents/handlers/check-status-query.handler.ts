@@ -15,8 +15,8 @@ function buildStatusMessage(
   const remainingBudget = status.recommended_today - status.today_spent;
   const secondLine =
     remainingBudget > 0
-      ? `Você já gastou ${formatCurrencyFromCents(status.today_spent)} hoje e ainda pode gastar ${formatCurrencyFromCents(remainingBudget)}.`
-      : `Você gastou ${formatCurrencyFromCents(status.today_spent)} — o teto de hoje foi atingido.`;
+      ? `Você já gastou ${formatCurrencyFromCents(status.today_spent)} e ainda pode gastar ${formatCurrencyFromCents(remainingBudget)}.`
+      : `Você já gastou ${formatCurrencyFromCents(status.today_spent)} e o teto foi atingido.`;
   switch (type) {
     case "check_daily_allowance":
       return [
