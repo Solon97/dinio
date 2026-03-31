@@ -34,7 +34,7 @@ const TrialSection = () => {
                   </span>
                   <span className="text-base text-neutral-400 font-medium">/mês*</span>
                 </div>
-                <p className="text-xs text-neutral-400 mt-2">*Depois do trial, será cobrado {formatBRL(plan?.price)}/ano, o que equivale a {formatBRL(plan?.equivalentMonthlyPrice)}/mês</p>
+                <p className="text-xs text-neutral-400 mt-2">*Assinatura anual no valor de {formatBRL(plan?.price)}</p>
               </div>
 
               {/* Feature list */}
