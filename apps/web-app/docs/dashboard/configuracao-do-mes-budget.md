@@ -30,35 +30,31 @@ Regras:
 - o total de receitas do mes e calculado a partir da soma das fontes
 - a etapa exige valores validos para avancar
 
-## 2. Cartoes de Credito
+## 2. Cartoes de Credito e Gastos Fixos
 
-Titulo na interface: `2. Cartoes de Credito`.
+Titulo na interface: `2. Cartoes e Gastos Fixos`.
 
 Regras:
 
-- cada cartao possui nome, dia de vencimento e cor
+- cada cartao possui nome, dia de vencimento, dia de fechamento e cor
+- os gastos fixos de cada cartao aparecem diretamente abaixo da configuracao do cartao
 - cartoes sem nome bloqueiam o avancar
-
-Regra do primeiro mes de uso:
-
-- quando nao existe mes anterior configurado, aparece a secao `Total da fatura a pagar neste mes`
-- esse valor representa saldo acumulado anterior ao uso do Dinio
-- o sistema compoe esse saldo no planejamento do mes
-
-## 3. Gastos Fixos
-
-Titulo na interface: `3. Gastos Fixos`.
-
-Regras:
-
+- gastos sem nome ou valor bloqueiam o avancar
 - gastos podem ser vinculados a cartao ou ser avulsos (`Debito / Boleto / PIX`)
 - classificacao de tipo: `Obrigatorio` ou `Dispensavel`
 - existe importacao em massa (`Adicionar Varios`) com parser de linhas
 - parcelamentos sao suportados com metadados de parcela atual e total
+- o resumo `Renda` / `Total Fixos` e exibido no rodape da etapa
 
-## 4. Distribuicao
+Regra do primeiro mes de uso:
 
-Titulo na interface: `4. Distribuicao`.
+- quando nao existe mes anterior configurado, aparece a secao `Total da fatura a pagar neste mes` por cartao
+- esse valor representa saldo acumulado anterior ao uso do Dinio
+- o sistema compoe esse saldo no planejamento do mes
+
+## 3. Distribuicao
+
+Titulo na interface: `3. Distribuicao`.
 
 Regras:
 

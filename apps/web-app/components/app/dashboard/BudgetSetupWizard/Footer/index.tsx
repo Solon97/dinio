@@ -15,14 +15,14 @@ export function BudgetSetupWizardFooter({ onFinish }: FooterProps) {
   const activeExpenses = expenses.filter((e) => !e.markedForDeletion);
   const isNextDisabled =
     (step === 1 && totalIncome === 0) ||
-    (step === 2 && creditCards.some((c) => !c.name.trim())) ||
-    (step === 3 &&
-      activeExpenses.some((e) => !e.name.trim() || !e.amount));
+    (step === 2 &&
+      (creditCards.some((c) => !c.name.trim()) ||
+        activeExpenses.some((e) => !e.name.trim() || !e.amount)));
 
   const nextTitle =
     step === 2 && creditCards.some((c) => !c.name.trim())
       ? "Dê um nome a todos os cartões antes de continuar"
-      : step === 3 && activeExpenses.some((e) => !e.name.trim() || !e.amount)
+      : step === 2 && activeExpenses.some((e) => !e.name.trim() || !e.amount)
         ? "Preencha nome e valor de todos os gastos fixos antes de continuar"
         : undefined;
 

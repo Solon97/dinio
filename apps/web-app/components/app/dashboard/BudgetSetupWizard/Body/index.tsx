@@ -2,7 +2,6 @@ import { useBudgetSetupWizard } from "../Context";
 import { Step1 } from "./steps/step1";
 import { Step2 } from "./steps/step2";
 import { Step3 } from "./steps/step3";
-import { Step4 } from "./steps/step4";
 
 export function BudgetSetupWizardBody() {
   const { step } = useBudgetSetupWizard();
@@ -11,14 +10,11 @@ export function BudgetSetupWizardBody() {
       {/* STEP 1: INCOME */}
       {step === 1 && <Step1 />}
 
-      {/* STEP 2: CREDIT CARDS */}
+      {/* STEP 2: CREDIT CARDS + EXPENSES */}
       {step === 2 && <Step2 />}
 
-      {/* STEP 3: EXPENSES */}
+      {/* STEP 3: ALLOCATION */}
       {step === 3 && <Step3 />}
-
-      {/* STEP 4: ALLOCATION */}
-      {step === 4 && <Step4 />}
     </div>
   );
 }

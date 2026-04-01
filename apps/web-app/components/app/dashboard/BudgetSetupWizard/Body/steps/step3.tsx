@@ -1,272 +1,213 @@
-import { List, Plus, CreditCard as CreditCardIcon, Wallet } from "lucide-react";
-import React, { useRef, useState } from "react";
 import { useBudgetSetupWizard } from "../../Context";
-import { ExpenseItem } from "../../shared/ExpenseItem";
-import {
-  getCardExpenses,
-  getStandaloneExpenses,
-  parseExpenseBulkText,
-} from "../../shared/utils";
-
-const BULK_STANDALONE = "__standalone__";
+import { MoneyInput } from "@/components/shared/MoneyInput";
 
 export function Step3() {
   const {
-    creditCards,
-    expenses,
-    addFixedExpense,
-    addFixedExpensesBulk,
-    updateExpense,
-    removeExpense,
-    totalIncome,
+    allocation,
+    dailyProportionOfAvailable,
+    handleAllocationChange,
     totalFixed,
+    availableCents,
+    isPartialMonth,
+    isEditing,
+    partialMonthInfo,
+    targetRemaining,
+    setTargetRemaining,
   } = useBudgetSetupWizard();
 
-  const standaloneExpenses = getStandaloneExpenses(expenses);
-  const [bulkSectionId, setBulkSectionId] = useState<string | null>(null);
-  const [bulkText, setBulkText] = useState("");
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { currentDay, remainingDays } = partialMonthInfo;
 
-  const openBulk = (sectionId: string) => {
-    setBulkSectionId(sectionId);
-    setBulkText("");
-    setTimeout(() => textareaRef.current?.focus(), 50);
-  };
+  // Calculate daily allocation in cents first (integer math), then convert to reais
+  // This prevents floating-point precision issues, similar to normalizeAllocation
+  const dailyAllocationCents = Math.round(
+    (dailyProportionOfAvailable * availableCents) / 100,
+  );
+  const dailyAllocationAmount = dailyAllocationCents / 100;
 
-  const cancelBulk = () => {
-    setBulkSectionId(null);
-    setBulkText("");
-  };
+  // Calculate reserve amount in cents for precision
+  const reserveAllocationCents = availableCents - dailyAllocationCents;
+  const reserveAllocationAmount = reserveAllocationCents / 100;
 
-  const handleImport = (cardId?: string) => {
-    const items = parseExpenseBulkText(bulkText);
-    if (items.length > 0) {
-      addFixedExpensesBulk(items, cardId);
-    }
-    cancelBulk();
-  };
+  // Calculate daily amount from target remaining (in cents for precision)
+  const dailyFromTargetCents =
+    targetRemaining !== null && remainingDays > 0
+      ? Math.round((targetRemaining * 100) / remainingDays)
+      : 0;
+  const dailyFromTarget = dailyFromTargetCents / 100;
 
   return (
     <div
       id="onboarding-wizard-step-3"
-      className="space-y-8 animate-in fade-in slide-in-from-right-8 duration-300"
+      className="space-y-6 animate-in fade-in slide-in-from-right-8 duration-300"
     >
       <div className="bg-teal-50 p-4 rounded-xl border border-teal-100 mb-4">
         <h3 className="font-bold text-teal-800 text-lg mb-1">
-          3. Gastos Fixos
+          3. Distribuição
         </h3>
         <p className="text-teal-600 text-sm">
-          Organize suas contas recorrentes por cartão ou avulso. Nos cartões,
-          inclua apenas os gastos da fatura que será paga neste mês, e em
-          compras parceladas, registre o parcelamento começando pela parcela da
-          fatura que será paga neste mês.
+          Defina quanto sobrará para gastar por dia.
         </p>
       </div>
 
-      {/* Groups per Credit Card */}
-      {creditCards.map((card) => (
-        <div key={card.id} className="space-y-4">
-          <div
-            className="flex items-center gap-3 border-b-2 pb-2"
-            style={{ borderColor: card.color }}
-          >
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
-              style={{ backgroundColor: card.color }}
-            >
-              <CreditCardIcon size={16} className="text-white" />
+      <div className="grid grid-cols-1 gap-4">
+        {/* Fixed (Locked) */}
+        <div className="bg-white p-4 rounded-xl border border-slate-200 opacity-70 shadow-sm">
+          <div className="flex justify-between items-center mb-2">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-slate-500" />
+              <span className="font-bold text-slate-700">Gastos Fixos</span>
+              <span className="text-xs bg-slate-200 text-slate-600 px-2 py-0.5 rounded">
+                Automático
+              </span>
             </div>
             <span className="font-bold text-slate-700">
-              {card.name || "Cartão sem nome"}
-            </span>
-            <span className="text-xs text-slate-400">
-              Venc. dia {card.dueDay}
+              {allocation.fixedPercent}%
             </span>
           </div>
+          <p className="text-sm text-slate-500">
+            R$ {totalFixed.toLocaleString("pt-BR")}
+          </p>
+        </div>
 
-          <div className="space-y-3 pl-2">
-            {getCardExpenses(expenses, card.id).length === 0 ? (
-              <p className="text-slate-400 text-sm italic py-2">
-                Nenhum gasto neste cartão.
+        {/* Adjustable Slider Area */}
+        <div className="bg-white p-4 md:p-6 rounded-xl border border-teal-100 shadow-sm">
+          <h4 className="font-bold text-slate-800 mb-4 md:mb-6">
+            Ajuste o equilíbrio:
+          </h4>
+
+          <input
+            type="range"
+            min="0"
+            max="100"
+            step="1"
+            value={dailyProportionOfAvailable}
+            onChange={(e) => handleAllocationChange(parseFloat(e.target.value))}
+            disabled={availableCents === 0}
+            className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-teal-500 mb-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          />
+
+          {availableCents === 0 && (
+            <p className="text-xs text-amber-600 text-center mb-4 italic">
+              Sem saldo disponível para distribuir. Ajuste suas receitas ou
+              gastos fixos.
+            </p>
+          )}
+
+          {availableCents > 0 && (
+            <p className="text-xs text-slate-500 text-center mb-4 md:mb-6">
+              Mova o controle para ajustar a distribuição do valor disponível
+            </p>
+          )}
+
+          <div className="grid grid-cols-2 gap-4">
+            {/* Daily */}
+            <div className="p-3 bg-teal-50 rounded-lg border border-teal-200">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-3 h-3 rounded-full bg-teal-500" />
+                <span className="font-bold text-teal-800 text-xs md:text-sm">
+                  Dia a dia
+                </span>
+              </div>
+              <p className="text-xl md:text-2xl font-bold text-teal-700">
+                {dailyProportionOfAvailable.toFixed(0)}%
               </p>
-            ) : (
-              getCardExpenses(expenses, card.id).map((expense) => (
-                <ExpenseItem
-                  key={expense.id}
-                  expense={expense}
-                  updateExpense={updateExpense}
-                  removeExpense={removeExpense}
-                  isCardExpense={true}
-                />
-              ))
-            )}
+              <p className="text-xs md:text-sm text-teal-600">
+                R${" "}
+                {dailyAllocationAmount.toLocaleString("pt-BR", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </p>
+              <p className="text-xs text-teal-500 italic mt-1">
+                {allocation.dailyPercent.toFixed(1)}% da renda total
+              </p>
+            </div>
 
-            {bulkSectionId === card.id ? (
-              <BulkImportArea
-                textareaRef={textareaRef}
-                bulkText={bulkText}
-                onTextChange={setBulkText}
-                onImport={() => handleImport(card.id)}
-                onCancel={cancelBulk}
+            {/* Reserve */}
+            <div className="p-3 bg-amber-50 rounded-lg border border-amber-200">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="w-3 h-3 rounded-full bg-amber-400" />
+                <span className="font-bold text-amber-800 text-xs md:text-sm">
+                  Reserva
+                </span>
+              </div>
+              <p className="text-xl md:text-2xl font-bold text-amber-600">
+                {(100 - dailyProportionOfAvailable).toFixed(0)}%
+              </p>
+              <p className="text-xs md:text-sm text-amber-600">
+                R${" "}
+                {reserveAllocationAmount.toLocaleString("pt-BR", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </p>
+              <p className="text-xs text-amber-500 italic mt-1">
+                {allocation.reservePercent.toFixed(1)}% da renda total
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Partial Month Adjustment (only if current month and day > 10) */}
+      {isPartialMonth && !isEditing && (
+        <div className="mt-6 p-6 bg-gradient-to-br from-teal-50 to-blue-50 rounded-2xl border-2 border-teal-200 shadow-md">
+          <h4 className="font-bold text-teal-800 text-lg mb-2">
+            Agora, vamos para a realidade deste mês
+          </h4>
+          <p className="text-sm text-slate-600 mb-4">
+            Pelo planejamento, você poderia gastar{" "}
+            <span className="font-bold text-teal-700">
+              R${" "}
+              {dailyAllocationAmount.toLocaleString("pt-BR", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </span>{" "}
+            até o fim do mês. Mas como estamos no meio do mês (dia {currentDay}
+            ), você pode ajustar quanto quer gastar daqui pra frente.
+          </p>
+
+          <div className="space-y-3">
+            <label className="block">
+              <span className="text-sm font-medium text-slate-700 mb-1 block">
+                Quanto você quer gastar até o fim do mês?
+              </span>
+              <MoneyInput
+                value={targetRemaining || 0}
+                onChange={(value) =>
+                  setTargetRemaining(value > 0 ? value : null)
+                }
+                placeholder={dailyAllocationAmount.toFixed(2)}
+                className="pl-10 pr-4 py-3 bg-white rounded-xl border-2 border-teal-200 focus:border-transparent font-bold text-slate-700"
               />
-            ) : (
-              <div className="flex flex-col sm:flex-row gap-2">
-                <button
-                  onClick={() => addFixedExpense(card.id)}
-                  className="flex-1 py-2.5 border border-dashed border-slate-300 text-slate-500 rounded-lg hover:bg-slate-50 hover:border-slate-400 transition-all flex items-center justify-center gap-2 text-sm min-h-[44px]"
-                >
-                  <Plus size={16} /> Adicionar no {card.name || "cartão"}
-                </button>
-                <button
-                  onClick={() => openBulk(card.id ?? "")}
-                  className="sm:w-auto py-2.5 px-3 border border-dashed border-teal-200 text-teal-600 rounded-lg hover:bg-teal-50 hover:border-teal-300 transition-all flex items-center justify-center gap-2 text-sm min-h-[44px]"
-                >
-                  <List size={16} /> Adicionar Vários
-                </button>
+            </label>
+
+            {targetRemaining !== null && targetRemaining > 0 && (
+              <div className="p-4 bg-white/80 rounded-lg border border-teal-100">
+                <p className="text-sm text-slate-600">
+                  Isso dá{" "}
+                  <span className="font-bold text-teal-700 text-lg">
+                    R${" "}
+                    {dailyFromTarget.toLocaleString("pt-BR", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                  </span>{" "}
+                  por dia até o fim do mês ({remainingDays} dias)
+                </p>
               </div>
             )}
+
+            {targetRemaining === null && (
+              <p className="text-xs text-slate-500 italic">
+                Deixe vazio para usar o valor planejado (
+                {dailyAllocationAmount.toFixed(2)})
+              </p>
+            )}
           </div>
         </div>
-      ))}
-
-      {/* Standalone (Avulso) Group */}
-      <div className="space-y-4 pt-4">
-        <div className="flex items-center gap-3 border-b-2 border-slate-300 pb-2">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-slate-600 shrink-0">
-            <Wallet size={16} className="text-white" />
-          </div>
-          <span className="font-bold text-slate-700">
-            Débito / Boleto / PIX
-          </span>
-          <span className="text-xs text-slate-400">Gastos avulsos</span>
-        </div>
-
-        <div className="space-y-3 pl-2">
-          {standaloneExpenses.length === 0 ? (
-            <p className="text-slate-400 text-sm italic py-2">
-              Nenhum gasto avulso.
-            </p>
-          ) : (
-            standaloneExpenses.map((expense) => (
-              <ExpenseItem
-                key={expense.id}
-                expense={expense}
-                updateExpense={updateExpense}
-                removeExpense={removeExpense}
-                isCardExpense={false}
-              />
-            ))
-          )}
-
-          {bulkSectionId === BULK_STANDALONE ? (
-            <BulkImportArea
-              textareaRef={textareaRef}
-              bulkText={bulkText}
-              onTextChange={setBulkText}
-              onImport={() => handleImport(undefined)}
-              onCancel={cancelBulk}
-            />
-          ) : (
-            <div className="flex flex-col sm:flex-row gap-2">
-              <button
-                onClick={() => addFixedExpense()}
-                className="flex-1 py-2.5 border border-dashed border-slate-300 text-slate-500 rounded-lg hover:bg-slate-50 hover:border-slate-400 transition-all flex items-center justify-center gap-2 text-sm min-h-[44px]"
-              >
-                <Plus size={16} /> Adicionar gasto avulso
-              </button>
-              <button
-                onClick={() => openBulk(BULK_STANDALONE)}
-                className="sm:w-auto py-2.5 px-3 border border-dashed border-teal-200 text-teal-600 rounded-lg hover:bg-teal-50 hover:border-teal-300 transition-all flex items-center justify-center gap-2 text-sm min-h-[44px]"
-              >
-                <List size={16} /> Adicionar Vários
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="flex justify-between items-center pt-8 border-t border-slate-200 mt-10">
-        <div className="text-left">
-          <p className="text-slate-400 text-xs uppercase font-bold">Renda</p>
-          <p className="text-base md:text-lg font-bold text-slate-600">
-            R$ {totalIncome.toLocaleString("pt-BR")}
-          </p>
-        </div>
-        <div className="text-right">
-          <p className="text-slate-400 text-xs uppercase font-bold">
-            Total Fixos
-          </p>
-          <p className="text-xl md:text-2xl font-bold text-rose-500">
-            R${" "}
-            {totalFixed.toLocaleString("pt-BR", {
-              minimumFractionDigits: 2,
-            })}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-interface BulkImportAreaProps {
-  textareaRef: React.RefObject<HTMLTextAreaElement | null>;
-  bulkText: string;
-  onTextChange: (text: string) => void;
-  onImport: () => void;
-  onCancel: () => void;
-}
-
-function BulkImportArea({
-  textareaRef,
-  bulkText,
-  onTextChange,
-  onImport,
-  onCancel,
-}: BulkImportAreaProps) {
-  return (
-    <div className="p-3 bg-teal-50 border border-teal-200 rounded-xl space-y-3">
-      <div className="text-xs font-medium text-teal-800 space-y-1">
-        <p>
-          Formato (separado por{" "}
-          <span className="font-mono bg-white px-1 rounded font-bold">;</span>):{" "}
-          <span className="font-mono bg-white px-1 rounded">Nome; Valor</span>
-        </p>
-        <p>
-          Para <b>parcelas</b>:{" "}
-          <span className="font-mono bg-white px-1 rounded">
-            Nome; Valor; Parcela/Total; [T ou P]
-          </span>
-        </p>
-        <p className="text-[10px] text-teal-600 italic">
-          (T = Valor Total [padrão], P = Valor da Parcela)
-        </p>
-      </div>
-      <textarea
-        ref={textareaRef}
-        value={bulkText}
-        onChange={(e) => onTextChange(e.target.value)}
-        placeholder={
-          "Aluguel; 400\nEnergia; 100\nTV; 2400; 12; T (Parcela = 200) \nCelular; 100; 3/12; P (Parcela = 100)"
-        }
-        rows={5}
-        className="w-full text-sm rounded-lg border border-teal-200 bg-white px-3 py-2.5 text-slate-700 focus:outline-none focus:ring-1 focus:ring-teal-400 resize-none font-mono placeholder:text-slate-400/70 leading-relaxed"
-        style={{ fontSize: "16px" }}
-      />
-      <div className="flex gap-2">
-        <button
-          onClick={onImport}
-          disabled={!bulkText.trim()}
-          className="flex-1 py-2.5 bg-teal-600 text-white rounded-lg font-medium text-sm hover:bg-teal-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors min-h-[44px]"
-        >
-          Importar
-        </button>
-        <button
-          onClick={onCancel}
-          className="flex-1 py-2.5 bg-white border border-slate-200 text-slate-600 rounded-lg font-medium text-sm hover:bg-slate-50 transition-colors min-h-[44px]"
-        >
-          Cancelar
-        </button>
-      </div>
+      )}
     </div>
   );
 }

@@ -34,7 +34,7 @@ The plan is based on actual UI exploration and testing, confirming bug fixes and
     - expect: A 'Configurar [Month]' button should be present and enabled
   2. Click the 'Configurar [Month]' button to start the configuration flow
     - expect: A modal should open with the title 'Configurar [Month]'
-    - expect: The modal should display 'Etapa 1 de 4' indicating step 1 of 4
+    - expect: The modal should display 'Etapa 1 de 3' indicating step 1 of 3
     - expect: The modal should show the heading '1. Receitas Fixas'
     - expect: The modal should display a description asking 'Quanto dinheiro vai entrar neste mês?'
     - expect: A pre-filled income entry form should be visible with 'Salário' as the default name
@@ -48,36 +48,31 @@ The plan is based on actual UI exploration and testing, confirming bug fixes and
     - expect: The 'Próximo' button should become enabled
   4. Click the 'Próximo' button to advance to step 2
     - expect: The modal should transition to step 2
-    - expect: The step indicator should update to 'Etapa 2 de 4'
-    - expect: The modal should display the heading '2. Cartões de Crédito'
-    - expect: A description should indicate this step is for registering credit cards
-    - expect: An 'Adicionar Cartão' button should be visible
-    - expect: A message should inform that this step can be skipped
+    - expect: The step indicator should update to 'Etapa 2 de 3'
+    - expect: The modal should display the heading '2. Gastos Fixos e Cartões'
+    - expect: A description should indicate this step is for configuring cards and fixed expenses
+    - expect: An 'Adicionar Cartão' button should be visible at the bottom
+    - expect: A 'Débito / Boleto / PIX' section for direct debits should be visible
     - expect: Both 'Voltar' and 'Próximo' buttons should be visible
     - expect: The 'Próximo' button should be enabled (step can be skipped)
-  5. Click the 'Adicionar Cartão' button to add a credit card
-    - expect: A credit card form should appear
-    - expect: The form should have a 'Nome do cartão' text field
-    - expect: A due date spinner should be visible with a default value (e.g., 10)
-    - expect: Color selection buttons should be available (multiple color options)
-    - expect: The 'Adicionar Cartão' button should remain visible
-    - expect: A delete button should be visible for the card form
-  6. Enter a card name (e.g., 'Visa'), select a color, and click 'Adicionar Cartão'
-    - expect: The card should be added to the list
-    - expect: The added card should display the entered name
-    - expect: A new empty card form should appear below the added card
-    - expect: The card list should maintain all previously added cards
-  7. Click the 'Próximo' button to advance to step 3
-    - expect: The modal should transition to step 3
-    - expect: The step indicator should update to 'Etapa 3 de 4'
-    - expect: The modal should display the heading '3. Gastos Fixos'
-    - expect: A description should explain organizing recurring expenses by card or direct debit
-    - expect: Sections should be displayed for each registered card (e.g., 'Visa')
-    - expect: A 'Débito / Boleto / PIX' section for direct debits should be visible
-    - expect: Each section should show 'Nenhum gasto' or 'Nenhum gasto avulso' initially
-    - expect: Each section should have an 'Adicionar gasto' button
     - expect: A summary panel should display 'Renda' with the total from step 1
     - expect: The summary should show 'Total Fixos' as R$ 0,00 initially
+  5. Click the 'Adicionar Cartão' button to add a credit card
+    - expect: A credit card block should appear with card config at the top
+    - expect: The block should have a 'Nome do cartão' text field
+    - expect: A due date and closing day spinner should be visible with default values
+    - expect: Color selection buttons should be available (multiple color options)
+    - expect: A delete button should be visible for the card
+    - expect: Below the card config, a 'Gastos neste cartão' expense section should appear
+    - expect: 'Adicionar no [cartão]' and 'Adicionar Vários' buttons should be visible in the expense section
+  6. Enter a card name (e.g., 'Visa') and select a color
+    - expect: The card block should display the entered name
+    - expect: The border color of the block should match the selected color
+  7. Click 'Adicionar no Visa' to add an expense to the card within step 2
+    - expect: An expense form should appear within the card's expense section
+    - expect: No step transition occurs — adding expenses happens within step 2
+    - expect: Sections for each registered card are visible alongside their config
+    - expect: The 'Débito / Boleto / PIX' section for direct debits remains visible below
   8. Click 'Adicionar gasto no [Card Name]' to add an expense to a credit card
     - expect: An expense form should appear within the card section
     - expect: The form should have a description field with placeholder text (Ex: Streaming, Internet...)
@@ -103,13 +98,13 @@ The plan is based on actual UI exploration and testing, confirming bug fixes and
     - expect: The expense form should display the entered values
     - expect: A new empty expense form should appear
     - expect: The 'Total Fixos' should update to reflect all added expenses (R$ 300,00)
-  12. Verify the expense summary and click 'Próximo' to advance to step 4
+  12. Verify the expense summary and click 'Próximo' to advance to step 3
     - expect: All added expenses should be visible in their respective sections
     - expect: The 'Total Fixos' should correctly sum all fixed expenses (R$ 300,00)
-    - expect: The modal should transition to step 4
-    - expect: The step indicator should update to 'Etapa 4 de 4'
+    - expect: The modal should transition to step 3
+    - expect: The step indicator should update to 'Etapa 3 de 3'
   13. Review the Distribution step
-    - expect: The modal should display the heading '4. Distribuição'
+    - expect: The modal should display the heading '3. Distribuição'
     - expect: A description should explain defining daily spending ceiling
     - expect: A 'Gastos Fixos' section should show the total fixed expenses with percentage
     - expect: The label 'Automático' should indicate automatic inclusion of fixed expenses
@@ -185,10 +180,10 @@ The plan is based on actual UI exploration and testing, confirming bug fixes and
 **File:** `tests/monthly-configuration/installment-expenses.spec.ts`
 
 **Steps:**
-  1. Complete steps 1-2 of configuration (income and cards)
+  1. Complete step 1 of configuration (income) and proceed to step 2
     - expect: Income is configured (e.g., R$ 5.000)
-    - expect: At least one credit card is added
-    - expect: User is on Step 3 (Gastos Fixos)
+    - expect: At least one credit card is added in step 2
+    - expect: User is on Step 2 (Gastos Fixos e Cartões)
   2. Add a card expense and check 'É parcelamento?' checkbox
     - expect: Checkbox 'É parcelamento?' is checked
     - expect: Additional fields appear: 'Parcela inicial' spinner (default: 1)
@@ -224,7 +219,7 @@ The plan is based on actual UI exploration and testing, confirming bug fixes and
     - expect: Direct debit installments use specified due day instead of card due date
     - expect: Calculations work identically to card installments
   8. Complete configuration and verify installment impact on totals
-    - expect: Step 4 Distribution shows 'Gastos Fixos' with only current month's installment total
+    - expect: Step 3 Distribution shows 'Gastos Fixos' with only current month's installment total
     - expect: Full installment amounts (e.g., R$ 1.200) are NOT included in 'Total Fixos'
     - expect: Only per-month installments (e.g., R$ 100) are counted
     - expect: Distribution calculations are based on reduced fixed expenses
@@ -251,7 +246,7 @@ The plan is based on actual UI exploration and testing, confirming bug fixes and
     - expect: Configuration modal opens
     - expect: Modal title shows 'Configurar [Month]'
     - expect: Modal opens at Step 1 (Receitas Fixas)
-    - expect: 'Etapa 1 de 4' is displayed
+    - expect: 'Etapa 1 de 3' is displayed
   3. Verify Step 1 loads existing income data
     - expect: Previously entered income entries are displayed
     - expect: Income names and amounts match saved configuration
@@ -269,28 +264,32 @@ The plan is based on actual UI exploration and testing, confirming bug fixes and
     - expect: New entry appears in the list
     - expect: 'Total Receitas' updates to include new entry
     - expect: 'Próximo' button remains enabled
-  6. Navigate to Step 2 (Cartões de Crédito)
-    - expect: Step 2 displays all previously added credit cards
-    - expect: Each card shows: name, due date (dia X), selected color
+  6. Navigate to Step 2 (Gastos Fixos e Cartões)
+    - expect: Step 2 displays all previously added credit cards, each with its expense section below
+    - expect: Each card shows: name, due date, closing day, selected color
+    - expect: Each card's fixed expenses are grouped within its block
     - expect: Delete buttons are available for each card
-    - expect: Cards are displayed in the order they were added
+    - expect: 'Débito / Boleto / PIX' standalone section is visible
+    - expect: ✅ BUG FIX CONFIRMED: Fixed expenses NOW LOAD CORRECTLY in edit mode
+    - expect: All previously entered expenses are visible in their respective card sections
+    - expect: Each expense shows: description, amount, due date/card, priority
+    - expect: 'Total Fixos' displays correct sum of all expenses
+    - expect: 'Renda' summary reflects any changes from Step 1
   7. Delete an existing credit card
     - expect: Click delete button for a card
     - expect: Card is removed from the list immediately
     - expect: No confirmation dialog appears
-    - expect: WARNING: Expenses associated with deleted card will also be removed in Step 3
+    - expect: WARNING: Expenses associated with deleted card will also be removed
   8. Add a new credit card in edit mode
-    - expect: New card form accepts data
+    - expect: New card block appears with config + empty expense section
     - expect: New card is added to the list
-    - expect: User can proceed with modified card list
-  9. Navigate to Step 3 (Gastos Fixos)
-    - expect: ✅ BUG FIX CONFIRMED: Fixed expenses NOW LOAD CORRECTLY in edit mode
-    - expect: All previously entered expenses are visible
-    - expect: Expenses are grouped correctly by card or direct debit section
-    - expect: Each expense shows: description, amount, due date/card, priority
-    - expect: 'Total Fixos' displays correct sum of all expenses
-    - expect: Delete buttons are present for each expense
-    - expect: 'Renda' summary reflects any changes from Step 1
+    - expect: User can add expenses to the new card immediately without changing steps
+  9. Delete and add fixed expenses within step 2
+    - expect: Can delete existing expense (click trash icon)
+    - expect: 'Total Fixos' updates in real-time
+    - expect: Can add new expense to existing card (e.g., 'Streaming' R$ 50 to Visa)
+    - expect: Can add new expense to direct debit (e.g., 'Aluguel' R$ 1.000)
+    - expect: All expense forms work identically to initial configuration
   10. Delete a fixed expense
     - expect: Click delete button (trash icon) for an expense
     - expect: Expense is removed immediately from the list
@@ -308,10 +307,10 @@ The plan is based on actual UI exploration and testing, confirming bug fixes and
     - expect: Installment calculation fields appear when checked
     - expect: Can add installment expenses during editing
     - expect: Installment totals calculate correctly
-  13. Navigate to Step 4 (Distribuição)
-    - expect: Step 4 displays distribution interface
+  13. Navigate to Step 3 (Distribuição)
+    - expect: Step 3 displays distribution interface
     - expect: Slider may be at previously configured position
-    - expect: 'Gastos Fixos' section shows updated total based on Step 3 changes
+    - expect: 'Gastos Fixos' section shows updated total based on Step 2 changes
     - expect: Calculations update automatically based on modified income and expenses
     - expect: 'Dia a dia' and 'Reserva' panels show recalculated values
   14. Adjust distribution slider to different percentage
@@ -374,22 +373,22 @@ The plan is based on actual UI exploration and testing, confirming bug fixes and
     - expect: At least one income entry is present
     - expect: 'Total Receitas' > R$ 0
     - expect: 'Próximo' button is enabled
-  2. Skip Step 2 (Credit Cards) without adding any cards
-    - expect: Click 'Próximo' without adding cards
-    - expect: Step 3 opens successfully
+  2. Skip Step 2 (Gastos Fixos e Cartões) without adding cards or expenses
+    - expect: Click 'Próximo' without adding any cards or expenses
+    - expect: Step 3 (Distribuição) opens successfully
     - expect: No error occurs
-    - expect: No credit card sections appear in Step 3, or they show as empty/disabled
-  3. Verify Step 3 with no credit cards added
+    - expect: 'Total Fixos' remains R$ 0,00
+  3. Verify Step 2 with no credit cards added
     - expect: Only 'Débito / Boleto / PIX' section is functional
-    - expect: No credit card sections for adding expenses
+    - expect: No credit card blocks visible
     - expect: User can still add direct debit expenses
     - expect: Can proceed without adding any expenses
-  4. Skip Step 3 (Fixed Expenses) without adding any expenses
+  4. After skipping all expenses, proceed to Step 3
     - expect: Click 'Próximo' without adding expenses
     - expect: 'Total Fixos' remains R$ 0,00
-    - expect: Step 4 opens successfully
+    - expect: Step 3 opens successfully
     - expect: No validation errors
-  5. Complete Step 4 (Distribution) with zero fixed expenses
+  5. Complete Step 3 (Distribution) with zero fixed expenses
     - expect: Distribution slider works normally
     - expect: Available amount equals total income (Income - 0 = Income)
     - expect: Calculations: Day-to-day + Reserve = 100% of income
@@ -416,18 +415,19 @@ The plan is based on actual UI exploration and testing, confirming bug fixes and
 **Steps:**
   1. Complete Step 1 (Fixed Income) and proceed to Step 2
     - expect: Income data is entered
-    - expect: User is on Step 2 (Cartões de Crédito)
-  2. Add at least one credit card in Step 2 and proceed to Step 3
+    - expect: User is on Step 2 (Gastos Fixos e Cartões)
+  2. Add at least one credit card and some expenses in Step 2 and proceed to Step 3
     - expect: Card is added with name, due date, color
-    - expect: User is on Step 3 (Gastos Fixos)
+    - expect: Expenses are added within the card's section in Step 2
+    - expect: User is on Step 3 (Distribuição)
   3. Click 'Voltar' button in Step 3
     - expect: Modal navigates back to Step 2
-    - expect: Step indicator shows 'Etapa 2 de 4'
-    - expect: Previously added credit card is still visible
+    - expect: Step indicator shows 'Etapa 2 de 3'
+    - expect: Previously added credit card and expenses are still visible
     - expect: All card data is intact (name, due date, color)
   4. Click 'Voltar' button again in Step 2 to return to Step 1
     - expect: Modal navigates back to Step 1
-    - expect: Step indicator shows 'Etapa 1 de 4'
+    - expect: Step indicator shows 'Etapa 1 de 3'
     - expect: Previously entered income data is preserved
     - expect: User can view and modify income entries
   5. Modify income data in Step 1 after navigating backward
@@ -438,11 +438,11 @@ The plan is based on actual UI exploration and testing, confirming bug fixes and
   6. Navigate forward again through all steps
     - expect: Click 'Próximo' repeatedly to advance
     - expect: All data from Steps 2-4 remains intact
-    - expect: Modified income from Step 1 is reflected in Step 3 'Renda' summary
-    - expect: Modified income affects Step 4 distribution calculations
+    - expect: Modified income from Step 1 is reflected in Step 2 'Renda' summary
+    - expect: Modified income affects Step 3 distribution calculations
     - expect: No data loss during backward/forward navigation
   7. Complete configuration after navigating backward and forward
-    - expect: Click 'Concluir' in Step 4
+    - expect: Click 'Concluir' in Step 3
     - expect: All modifications are saved
     - expect: Final configuration reflects all changes made during navigation
     - expect: Budget data is correct in all views
@@ -479,7 +479,7 @@ The plan is based on actual UI exploration and testing, confirming bug fixes and
     - expect: Performance remains acceptable
   5. Add maximum reasonable number of credit cards (e.g., 10 cards)
     - expect: System allows adding many cards
-    - expect: Each card is displayed in Step 3 with its own expense section
+    - expect: Each card is displayed in Step 2 with its own expense section
     - expect: Performance remains acceptable
     - expect: All cards can be managed (view, edit, delete)
     - expect: No limit errors or crashes
@@ -492,7 +492,7 @@ The plan is based on actual UI exploration and testing, confirming bug fixes and
   7. Configure budget where fixed expenses exceed income
     - expect: System allows configuration (no blocking validation)
     - expect: User can enter expenses > income
-    - expect: Step 4 distribution may show warning or negative available amount
+    - expect: Step 3 distribution may show warning or negative available amount
     - expect: Budget deficit is visible in calculations
     - expect: System does not crash or corrupt data
     - expect: User can see they are in deficit and adjust accordingly

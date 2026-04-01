@@ -1,6 +1,6 @@
 import { FixedExpense } from "@/types/finance";
 
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 3;
 
 const CARD_COLORS = [
   "#820ad1", // Nubank purple
