@@ -36,9 +36,7 @@ export async function getUserData(): Promise<UserData | null> {
   // Query profile data
   const { data: profile } = await supabase
     .from("profiles")
-    .select(
-      "name, email, has_access, customer_id, onboarding_setup_completed, onboarding_daily_completed, onboarding_monthly_completed, onboarding_yearly_completed",
-    )
+    .select("*")
     .eq("id", user.id)
     .single();
 
