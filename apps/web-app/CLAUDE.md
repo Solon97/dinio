@@ -22,6 +22,7 @@
   - `domain/repositories/`: interfaces/contracts
   - `infrastructure/`: Supabase implementations
 - Frontend dashboard UI lives in `components/app/dashboard/`.
+- Multi-expense capture is orchestrated by `components/app/dashboard/CaptureMenu.tsx`, with per-entry logic in `components/app/dashboard/CaptureMenu/useExpenseEntries.ts` and per-entry UI in `components/app/dashboard/CaptureMenu/ExpenseEntryCard.tsx`.
 - Global budget state and orchestration live in `contexts/BudgetContext.tsx`.
 - Domain and API contracts are centered in `types/finance.ts`, `types/budget.ts`, and `types/monetary.ts`.
 
@@ -106,5 +107,8 @@
 - `libs/api.ts`
 - `types/monetary.ts`
 - `contexts/BudgetContext.tsx`
+- `components/app/dashboard/CaptureMenu.tsx`
+- `components/app/dashboard/CaptureMenu/useExpenseEntries.ts`
+- `components/app/dashboard/CaptureMenu/ExpenseEntryCard.tsx`
 - `app/api/budget/`
 - `libs/creditCardInvoice.ts` (invoice cycle helpers built on top of dinio-shared)

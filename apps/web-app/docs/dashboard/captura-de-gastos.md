@@ -10,12 +10,13 @@ Permitir registro rapido de movimentacoes sem sair da tela principal.
 
 - `CaptureMenu` (botao flutuante)
 
-Ao abrir o modal, o usuario escolhe entre:
+Ao abrir o modal:
 
-- `Diario`
-- `Fixo / Parcelado`
+- uma entrada inicial e criada automaticamente
+- o usuario pode adicionar ate 10 entradas na mesma sessao
+- cada entrada possui seletor proprio entre `Diario` e `Fixo / Parcelado`
 
-## Modo Diario
+## Modo Diario (por entrada)
 
 Campos principais:
 
@@ -38,7 +39,7 @@ Validacoes funcionais:
 - data obrigatoria
 - se cartao for escolhido, fatura tambem deve ser escolhida
 
-## Modo Fixo / Parcelado
+## Modo Fixo / Parcelado (por entrada)
 
 Campos principais:
 
@@ -63,6 +64,13 @@ Validacoes funcionais:
 - despesas diarias respeitam restricao de data minima baseada no estado de configuracao anterior
 
 ## Efeitos apos salvar
+
+Fluxo de envio em batch:
+
+- a validacao roda por entrada
+- o envio e sequencial (na ordem da lista)
+- se uma entrada falhar, o processo para nessa entrada
+- entradas ja enviadas com sucesso ficam marcadas como enviadas e nao sao reenviadas
 
 Despesa diaria:
 

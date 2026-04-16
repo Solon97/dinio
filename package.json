@@ -10,9 +10,12 @@
   },
   "scripts": {
     "build": "turbo run build",
-    "dev": "turbo run dev"
+    "dev": "turbo run dev",
+    "db:local": "bash scripts/seed.sh"
   },
   "devDependencies": {
+    "@supabase/supabase-js": "^2.45.0",
+    "dotenv": "^16.4.0",
     "turbo": "latest"
   }
 }
