@@ -1,18 +1,21 @@
 import { diag, DiagConsoleLogger, DiagLogLevel } from "@opentelemetry/api";
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http";
 import { resourceFromAttributes } from "@opentelemetry/resources";
-import { NodeSDK } from "@opentelemetry/sdk-node";
+import {
+  NodeTracerProvider,
+  SimpleSpanProcessor,
+} from "@opentelemetry/sdk-trace-node";
 import {
   SEMRESATTRS_DEPLOYMENT_ENVIRONMENT,
   SEMRESATTRS_SERVICE_NAME,
 } from "@opentelemetry/semantic-conventions";
 import { observabilityConfig } from "./libs/observability/config";
 
-let sdk: NodeSDK | null = null;
+let providerRegistered = false;
 let warnedAboutMissingAxiom = false;
 
 export async function register() {
-  if (process.env.NEXT_RUNTIME !== "nodejs" || sdk) {
+  if (process.env.NEXT_RUNTIME !== "nodejs" || providerRegistered) {
     return;
   }
 
@@ -30,19 +33,24 @@ export async function register() {
     diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
   }
 
-  sdk = new NodeSDK({
+  const provider = new NodeTracerProvider({
     resource: resourceFromAttributes({
       [SEMRESATTRS_SERVICE_NAME]: observabilityConfig.serviceName,
       [SEMRESATTRS_DEPLOYMENT_ENVIRONMENT]: observabilityConfig.environment,
     }),
-    traceExporter: new OTLPTraceExporter({
-      url: `https://${observabilityConfig.axiom.host}/v1/traces`,
-      headers: {
-        Authorization: `Bearer ${observabilityConfig.axiom.token}`,
-        "X-Axiom-Dataset": String(observabilityConfig.axiom.dataset),
-      },
-    }),
+    spanProcessors: [
+      new SimpleSpanProcessor(
+        new OTLPTraceExporter({
+          url: `https://${observabilityConfig.axiom.host}/v1/traces`,
+          headers: {
+            Authorization: `Bearer ${observabilityConfig.axiom.token}`,
+            "X-Axiom-Dataset": String(observabilityConfig.axiom.dataset),
+          },
+        }),
+      ),
+    ],
   });
 
-  await sdk.start();
+  provider.register();
+  providerRegistered = true;
 }
