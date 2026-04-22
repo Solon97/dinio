@@ -164,7 +164,6 @@ export class BudgetController {
   }
 
   async updateBudget(userId: string, payload: BudgetConfigPayload) {
-    try {
       const {
         month,
         year,
@@ -209,22 +208,5 @@ export class BudgetController {
       });
 
       return NextResponse.json(result);
-    } catch (error) {
-      if (
-        error instanceof Error &&
-        error.message === "Budget configuration not found"
-      ) {
-        return NextResponse.json(
-          { error: "Budget configuration not found. Use POST to create." },
-          { status: 404 },
-        );
-      }
-
-      console.error("Budget PUT error:", error);
-      return NextResponse.json(
-        { error: "Internal server error" },
-        { status: 500 },
-      );
-    }
   }
 }

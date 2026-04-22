@@ -3,6 +3,7 @@ import { createClient } from "@/libs/supabase/server";
 import { BudgetConfigPayload } from "@/types/budget";
 import { createRepositories } from "./infrastructure/repositories/supabase";
 import { BudgetController } from "./presentation/controllers/BudgetController";
+import { start } from "repl";
 
 /**
  * GET /api/budget?month=X&year=Y
@@ -86,16 +87,19 @@ export async function POST(request: Request) {
  * Handles soft deletes for expenses marked for deletion
  */
 export async function PUT(request: Request) {
+  console.log("[budget][route] PUT /api/budget - Start processing request");
     const supabase = await createClient();
-    
+    console.log("[budget][route] PUT /api/budget - Supabase client created");
     const {
       data: { user },
       error: authError,
     } = await supabase.auth.getUser();
-
+    console.log("[budget][route] PUT /api/budget - User authentication checked", { authError, user });
     if (authError || !user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    console.log("[budget][route] PUT /api/budget - User authenticated successfully", { userId: user.id });
 
     const body: BudgetConfigPayload = await request.json();
 
@@ -111,5 +115,10 @@ export async function PUT(request: Request) {
       repositories.creditCardInvoiceRepository,
     );
 
-    return await controller.updateBudget(user.id, body);
+    const response = await controller.updateBudget(user.id, body);
+    console.info("[budget][route] PUT /api/budget", {
+      userId: user.id,
+      status: response.status,
+    });
+    return response;
 }
