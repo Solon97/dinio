@@ -41,6 +41,13 @@
 - Server-side Supabase client must be awaited: `const supabase = await createClient()` from `@/libs/supabase/server`.
 - Client-side Supabase client is synchronous: `createClient()` from `@/libs/supabase/client`.
 
+## Observability Conventions
+- OpenTelemetry bootstrap for web-app lives in `instrumentation.ts` and exports traces to Axiom using OTLP HTTP.
+- Central observability settings live in `libs/observability/config.ts`; do not duplicate Axiom env reads in route files.
+- Structured server logs should use `createLogger` from `libs/observability/logger.ts` instead of ad-hoc `console.log` in API modules.
+- To correlate logs with traces, wrap server operations in `runWithSpan` from `libs/observability/tracing.ts` when adding new instrumented flows.
+- Required env vars for trace export: `AXIOM_HOST`, `AXIOM_TOKEN`, `AXIOM_DATASET`.
+
 ## Styling Conventions
 - Tailwind v4 is CSS-first: configure theme in `app/globals.css` via `@theme` and custom utilities via `@utility`.
 - Do not move theme config to `tailwind.config.js`.

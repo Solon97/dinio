@@ -1,43 +1,67 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/libs/supabase/server";
+import { createLogger } from "@/libs/observability/logger";
+import { runWithSpan } from "@/libs/observability/tracing";
 import { BudgetConfigPayload } from "@/types/budget";
 import { createRepositories } from "./infrastructure/repositories/supabase";
 import { BudgetController } from "./presentation/controllers/BudgetController";
-import { start } from "repl";
+
+const logger = createLogger("api.budget.route");
+
+async function createBudgetController() {
+  const repositories = await createRepositories();
+
+  return new BudgetController(
+    repositories.budgetRepository,
+    repositories.incomeRepository,
+    repositories.expenseRepository,
+    repositories.creditCardRepository,
+    repositories.dailyExpenseRepository,
+    repositories.installmentExpenseRepository,
+    repositories.creditCardInvoiceRepository,
+  );
+}
 
 /**
  * GET /api/budget?month=X&year=Y
  * Returns budget configuration for a specific month
  */
 export async function GET(request: Request) {
-    const supabase = await createClient();
+  return runWithSpan(
+    "api.budget.get",
+    { "http.method": "GET", "http.route": "/api/budget" },
+    async () => {
+      const supabase = await createClient();
 
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
 
-    if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+      if (authError || !user) {
+        logger.warn("budget_get_unauthorized", {
+          hasAuthError: Boolean(authError),
+        });
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
 
-    const { searchParams } = new URL(request.url);
-    const month = parseInt(searchParams.get("month") || "");
-    const year = parseInt(searchParams.get("year") || "");
+      const { searchParams } = new URL(request.url);
+      const month = parseInt(searchParams.get("month") || "", 10);
+      const year = parseInt(searchParams.get("year") || "", 10);
 
-    // Create repositories and controller
-    const repositories = await createRepositories();
-    const controller = new BudgetController(
-      repositories.budgetRepository,
-      repositories.incomeRepository,
-      repositories.expenseRepository,
-      repositories.creditCardRepository,
-      repositories.dailyExpenseRepository,
-      repositories.installmentExpenseRepository,
-      repositories.creditCardInvoiceRepository,
-    );
+      const controller = await createBudgetController();
+      const response = await controller.getBudget(user.id, month, year);
 
-    return await controller.getBudget(user.id, month, year);
+      logger.info("budget_get_completed", {
+        userId: user.id,
+        month,
+        year,
+        status: response.status,
+      });
+
+      return response;
+    },
+  );
 }
 
 /**
@@ -46,39 +70,39 @@ export async function GET(request: Request) {
  */
 export async function POST(request: Request) {
   const start = performance.now();
-  
-    const supabase = await createClient();
 
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
+  return runWithSpan(
+    "api.budget.post",
+    { "http.method": "POST", "http.route": "/api/budget" },
+    async () => {
+      const supabase = await createClient();
 
-    if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
 
-    const body: BudgetConfigPayload = await request.json();
+      if (authError || !user) {
+        logger.warn("budget_post_unauthorized", {
+          hasAuthError: Boolean(authError),
+        });
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
 
-    // Create repositories and controller
-    const repositories = await createRepositories();
-    const controller = new BudgetController(
-      repositories.budgetRepository,
-      repositories.incomeRepository,
-      repositories.expenseRepository,
-      repositories.creditCardRepository,
-      repositories.dailyExpenseRepository,
-      repositories.installmentExpenseRepository,
-      repositories.creditCardInvoiceRepository,
-    );
+      const body: BudgetConfigPayload = await request.json();
 
-    const response = await controller.createBudget(user.id, body);
-    console.info("[budget][route] POST /api/budget", {
-      userId: user.id,
-      durationMs: Math.round(performance.now() - start),
-      status: response.status,
-    });
-    return response;
+      const controller = await createBudgetController();
+      const response = await controller.createBudget(user.id, body);
+
+      logger.info("budget_post_completed", {
+        userId: user.id,
+        durationMs: Math.round(performance.now() - start),
+        status: response.status,
+      });
+
+      return response;
+    },
+  );
 }
 
 /**
@@ -87,38 +111,37 @@ export async function POST(request: Request) {
  * Handles soft deletes for expenses marked for deletion
  */
 export async function PUT(request: Request) {
-  console.log("[budget][route] PUT /api/budget - Start processing request");
-    const supabase = await createClient();
-    console.log("[budget][route] PUT /api/budget - Supabase client created");
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser();
-    console.log("[budget][route] PUT /api/budget - User authentication checked", { authError, user });
-    if (authError || !user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  const start = performance.now();
 
-    console.log("[budget][route] PUT /api/budget - User authenticated successfully", { userId: user.id });
+  return runWithSpan(
+    "api.budget.put",
+    { "http.method": "PUT", "http.route": "/api/budget" },
+    async () => {
+      const supabase = await createClient();
 
-    const body: BudgetConfigPayload = await request.json();
+      const {
+        data: { user },
+        error: authError,
+      } = await supabase.auth.getUser();
 
-    // Create repositories and controller
-    const repositories = await createRepositories();
-    const controller = new BudgetController(
-      repositories.budgetRepository,
-      repositories.incomeRepository,
-      repositories.expenseRepository,
-      repositories.creditCardRepository,
-      repositories.dailyExpenseRepository,
-      repositories.installmentExpenseRepository,
-      repositories.creditCardInvoiceRepository,
-    );
+      if (authError || !user) {
+        logger.warn("budget_put_unauthorized", {
+          hasAuthError: Boolean(authError),
+        });
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
 
-    const response = await controller.updateBudget(user.id, body);
-    console.info("[budget][route] PUT /api/budget", {
-      userId: user.id,
-      status: response.status,
-    });
-    return response;
+      const body: BudgetConfigPayload = await request.json();
+      const controller = await createBudgetController();
+      const response = await controller.updateBudget(user.id, body);
+
+      logger.info("budget_put_completed", {
+        userId: user.id,
+        durationMs: Math.round(performance.now() - start),
+        status: response.status,
+      });
+
+      return response;
+    },
+  );
 }
