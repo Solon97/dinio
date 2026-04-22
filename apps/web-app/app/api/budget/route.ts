@@ -9,7 +9,6 @@ import { BudgetController } from "./presentation/controllers/BudgetController";
  * Returns budget configuration for a specific month
  */
 export async function GET(request: Request) {
-  try {
     const supabase = await createClient();
 
     const {
@@ -38,13 +37,6 @@ export async function GET(request: Request) {
     );
 
     return await controller.getBudget(user.id, month, year);
-  } catch (error) {
-    console.error("Budget GET error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
-  }
 }
 
 /**
@@ -53,7 +45,7 @@ export async function GET(request: Request) {
  */
 export async function POST(request: Request) {
   const start = performance.now();
-  try {
+  
     const supabase = await createClient();
 
     const {
@@ -86,13 +78,6 @@ export async function POST(request: Request) {
       status: response.status,
     });
     return response;
-  } catch (error) {
-    console.error("Budget POST error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
-  }
 }
 
 /**
@@ -101,9 +86,8 @@ export async function POST(request: Request) {
  * Handles soft deletes for expenses marked for deletion
  */
 export async function PUT(request: Request) {
-  try {
     const supabase = await createClient();
-
+    
     const {
       data: { user },
       error: authError,
@@ -128,11 +112,4 @@ export async function PUT(request: Request) {
     );
 
     return await controller.updateBudget(user.id, body);
-  } catch (error) {
-    console.error("Budget PUT error:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 },
-    );
-  }
 }
