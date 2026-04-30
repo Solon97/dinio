@@ -11,6 +11,7 @@ import {
   appendToHistory,
   clearOperationState,
   getSession,
+  normalizeHistoryRoles,
   saveSession,
 } from "../session/chatSessionStore";
 import { buildIntentContext } from "../session/contextBuilder";
@@ -106,7 +107,9 @@ export async function routeMessage(
     return;
   }
 
+  const botReplies: string[] = []
   const reply = async (text: string): Promise<void> => {
+    botReplies.push(text)
     await sendTextMessage(message.phone, text);
   };
 
@@ -114,6 +117,7 @@ export async function routeMessage(
   // Session: single read before any processing
   // -------------------------------------------------------------------------
   const session = await getSession(message.phone);
+  normalizeHistoryRoles(session);
 
   // -------------------------------------------------------------------------
   // Relevance Filter: quick check before LLM processing.
@@ -194,9 +198,12 @@ export async function routeMessage(
   log.info({ messageId: message.messageId }, "response sent");
 
   // -------------------------------------------------------------------------
-  // Session: append turn and save — single write after processing
+  // Session: append user message then all bot responses, single write after
   // -------------------------------------------------------------------------
-  appendToHistory(session, message.text);
+  appendToHistory(session, 'user', message.text);
+  for (const botText of botReplies) {
+    appendToHistory(session, 'assistant', botText);
+  }
 
   await saveSession(message.phone, session);
 }

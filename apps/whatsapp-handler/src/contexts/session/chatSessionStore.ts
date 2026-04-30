@@ -104,12 +104,41 @@ export async function saveSession(
 }
 
 /**
+ * Normalises legacy history entries that were persisted before the `role`
+ * field was introduced. Treats any entry without `role` as `'user'`.
+ *
+ * Mutates the session in place — safe to call before any read of history roles.
+ */
+export function normalizeHistoryRoles(session: ChatSession): void {
+  for (const entry of session.history) {
+    if (!entry.role) {
+      entry.role = 'user'
+    }
+  }
+}
+
+/**
  * Appends a message to the session history, enforcing the sliding window limit.
+ *
+ * @param role - `'user'` for inbound messages, `'assistant'` for bot responses.
+ * @param text - Raw message text. Bot responses longer than 400 characters are
+ *   truncated before storage to avoid consuming disproportionate context space.
+ *   The text sent to WhatsApp is never affected.
  *
  * Mutates the session in place — call `saveSession()` afterwards to persist.
  */
-export function appendToHistory(session: ChatSession, text: string): void {
-  session.history.push({ text, ts: Date.now() })
+export function appendToHistory(
+  session: ChatSession,
+  role: 'user' | 'assistant',
+  text: string,
+): void {
+  const MAX_ASSISTANT_TEXT = 400
+  const storedText =
+    role === 'assistant' && text.length > MAX_ASSISTANT_TEXT
+      ? text.slice(0, MAX_ASSISTANT_TEXT)
+      : text
+
+  session.history.push({ role, text: storedText, ts: Date.now() })
   if (session.history.length > MAX_HISTORY_SIZE) {
     session.history = session.history.slice(-MAX_HISTORY_SIZE)
   }

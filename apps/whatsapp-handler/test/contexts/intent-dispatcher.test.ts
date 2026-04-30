@@ -68,36 +68,42 @@ describe('handleRegisterMultipleExpenses', () => {
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const apiClientModule = require('../../src/contexts/dinio/dinio-api-client') as Record<string, unknown>
   // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const { handleRegisterMultipleExpenses } = require('../../src/contexts/intents/handlers/register-multiple-expenses.handler') as typeof import('../../src/contexts/intents/handlers/register-multiple-expenses.handler')
+  const whatsappClientModule = require('../../src/contexts/whatsapp/whatsapp-client') as Record<string, unknown>
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { handleRegisterMultipleExpenses, handleBulkExpenseConfirmation } = require('../../src/contexts/intents/handlers/register-multiple-expenses.handler') as typeof import('../../src/contexts/intents/handlers/register-multiple-expenses.handler')
 
   const originals = {
     registerExpense: apiClientModule.registerExpense,
     getCreditCards: apiClientModule.getCreditCards,
+    sendButtonMessage: whatsappClientModule.sendButtonMessage,
   }
 
-  let throwOnRegisterExpense = false
   let registerExpenseCallCount = 0
+  let sendButtonMessageCallCount = 0
 
   before(() => {
     apiClientModule.registerExpense = async () => {
-      if (throwOnRegisterExpense) throw new Error('API error')
       registerExpenseCallCount++
       return { ...DEFAULT_REGISTER_RESULT }
     }
     apiClientModule.getCreditCards = async () => []
+    whatsappClientModule.sendButtonMessage = async () => {
+      sendButtonMessageCallCount++
+    }
   })
 
   after(() => {
     apiClientModule.registerExpense = originals.registerExpense
     apiClientModule.getCreditCards = originals.getCreditCards
+    whatsappClientModule.sendButtonMessage = originals.sendButtonMessage
   })
 
   beforeEach(() => {
-    throwOnRegisterExpense = false
     registerExpenseCallCount = 0
+    sendButtonMessageCallCount = 0
   })
 
-  it('registers all expenses and shows a summary with all items checked', async () => {
+  it('stores all valid items in session and sends confirmation button', async () => {
     const intents: ParsedIntent[] = [
       makeExpenseIntent({ description: 'uber', amount: 28 }),
       makeExpenseIntent({ description: 'pizza', amount: 45, category: 'restaurantes' }),
@@ -108,15 +114,14 @@ describe('handleRegisterMultipleExpenses', () => {
 
     await handleRegisterMultipleExpenses(intents, context, reply)
 
-    assert.strictEqual(registerExpenseCallCount, 3, 'should call registerExpense for each intent')
-    assert.strictEqual(calls.length, 1, 'should send one combined reply')
-    assert.ok(calls[0].includes('Uber'), 'summary should include Uber')
-    assert.ok(calls[0].includes('Pizza'), 'summary should include Pizza')
-    assert.ok(calls[0].includes('Mercado'), 'summary should include Mercado')
-    assert.ok(calls[0].includes('✅'), 'should use checkmarks for successful items')
+    assert.strictEqual(registerExpenseCallCount, 0, 'should not register immediately — awaiting confirmation')
+    assert.strictEqual(sendButtonMessageCallCount, 1, 'should send confirmation button')
+    assert.strictEqual(calls.length, 0, 'should not call reply directly')
+    const items = (context.session.operation?.data as { items: unknown[] })?.items
+    assert.strictEqual(items?.length, 3, 'should store all 3 items in session')
   })
 
-  it('skips intents with invalid amounts and reports them as failed', async () => {
+  it('skips intents with invalid amounts (≤ 0)', async () => {
     const intents: ParsedIntent[] = [
       makeExpenseIntent({ description: 'uber', amount: 28 }),
       makeExpenseIntent({ description: 'sem valor', amount: 0 }),
@@ -126,12 +131,14 @@ describe('handleRegisterMultipleExpenses', () => {
 
     await handleRegisterMultipleExpenses(intents, context, reply)
 
-    assert.strictEqual(registerExpenseCallCount, 1, 'should only register the valid expense')
-    assert.ok(calls[0].includes('✅'), 'should check successful item')
-    assert.ok(calls[0].includes('❌'), 'should mark failed item')
+    assert.strictEqual(registerExpenseCallCount, 0, 'should not register immediately')
+    assert.strictEqual(sendButtonMessageCallCount, 1, 'should send confirmation button for the valid item')
+    assert.strictEqual(calls.length, 0, 'should not call reply directly')
+    const items = (context.session.operation?.data as { items: unknown[] })?.items
+    assert.strictEqual(items?.length, 1, 'should only store the valid item in session')
   })
 
-  it('handles API failure gracefully and reports partial success', async () => {
+  it('handles API failure gracefully and reports partial success on confirmation', async () => {
     let callCount = 0
     apiClientModule.registerExpense = async () => {
       callCount++
@@ -139,15 +146,19 @@ describe('handleRegisterMultipleExpenses', () => {
       return { ...DEFAULT_REGISTER_RESULT }
     }
 
-    const intents: ParsedIntent[] = [
-      makeExpenseIntent({ description: 'uber', amount: 28 }),
-      makeExpenseIntent({ description: 'pizza', amount: 45 }),
-      makeExpenseIntent({ description: 'mercado', amount: 120 }),
+    const items = [
+      { description: 'Uber', amountInReais: 28, category: 'Transporte', date: '2026-01-10', paymentType: 'debito', isRefund: false },
+      { description: 'Pizza', amountInReais: 45, category: 'Restaurantes', date: '2026-01-10', paymentType: 'debito', isRefund: false },
+      { description: 'Mercado', amountInReais: 120, category: 'Mercado', date: '2026-01-10', paymentType: 'debito', isRefund: false },
     ]
-    const context = makeContext()
+    const context = makeContext({
+      previousState: { intent: 'register_expense', step: 'bulk_awaiting_confirmation' },
+      previousOperation: { type: 'register_expense', data: { items } },
+      interactiveReplyId: 'confirm_expense',
+    })
     const { fn: reply, calls } = makeReply()
 
-    await handleRegisterMultipleExpenses(intents, context, reply)
+    await handleBulkExpenseConfirmation(context, reply)
 
     assert.ok(calls[0].includes('✅'), 'should report successful items')
     assert.ok(calls[0].includes('❌'), 'should report failed items')
@@ -189,6 +200,12 @@ describe('dispatchIntent', () => {
   })
 
   it('routes multiple register_expense intents to the bulk handler', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const whatsappClientModule = require('../../src/contexts/whatsapp/whatsapp-client') as Record<string, unknown>
+    const origSendButton = whatsappClientModule.sendButtonMessage
+    let sendButtonCalled = false
+    whatsappClientModule.sendButtonMessage = async () => { sendButtonCalled = true }
+
     const intents: ParsedIntent[] = [
       makeExpenseIntent({ description: 'uber', amount: 28 }),
       makeExpenseIntent({ description: 'pizza', amount: 45 }),
@@ -198,8 +215,13 @@ describe('dispatchIntent', () => {
 
     await dispatchIntent(intents, context, reply)
 
-    assert.strictEqual(registerExpenseCallCount, 2, 'both expenses should be registered')
-    assert.strictEqual(calls.length, 1, 'should produce one combined reply')
+    assert.strictEqual(registerExpenseCallCount, 0, 'should not register immediately — awaiting confirmation')
+    assert.ok(sendButtonCalled, 'should send confirmation button for bulk expenses')
+    assert.strictEqual(calls.length, 0, 'reply should not be called directly')
+    const items = (context.session.operation?.data as { items: unknown[] })?.items
+    assert.strictEqual(items?.length, 2, 'should store both items in session')
+
+    whatsappClientModule.sendButtonMessage = origSendButton
   })
 
   it('routes a single unknown intent to the unknown handler', async () => {

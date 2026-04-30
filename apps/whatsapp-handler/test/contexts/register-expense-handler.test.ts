@@ -432,7 +432,7 @@ describe('handleRegisterExpense', () => {
     const savedExpense = session.operation?.data as unknown as PendingExpenseData
     assert.strictEqual(savedExpense.paymentType, 'debito')
     assert.strictEqual(savedExpense.amountInReais, 28)
-    assert.strictEqual(savedExpense.description, 'uber')
+    assert.strictEqual(savedExpense.description, 'Uber')
     assert.strictEqual(savedExpense.date, '2026-03-12')
   })
 
@@ -632,7 +632,7 @@ describe('handleRegisterExpense', () => {
 
     assert.strictEqual(registerExpenseMock.mock.callCount(), 1, 'should call registerExpense')
     assert.strictEqual(calls.length, 1, 'should reply with success message')
-    assert.ok(calls[0].includes('28') || calls[0].includes('Pronto') || calls[0].includes('uber'))
+    assert.ok(calls[0].includes('Anotado'), 'reply should include Anotado')
 
     const callArgs = (registerExpenseMock.mock.calls[0] as unknown as { arguments: unknown[] }).arguments[0] as Record<string, unknown>
     assert.strictEqual(callArgs.userId, 'user-123')
@@ -709,7 +709,7 @@ describe('handleRegisterExpense', () => {
 
     const savedExpense = session.operation?.data as unknown as PendingExpenseData
     assert.strictEqual(savedExpense.amountInReais, 35, 'should use updated amount from new intent')
-    assert.strictEqual(savedExpense.description, 'uber', 'should use description from new intent')
+    assert.strictEqual(savedExpense.description, 'Uber', 'should use description from new intent')
   })
 
   it('starts a fresh debit flow (no card data) when LLM returns a debit intent during awaiting_confirmation', async () => {

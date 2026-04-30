@@ -72,7 +72,7 @@ export function formatContextForPrompt(ctx: IntentDetectionContext): string {
 
   if (ctx.history.length > 0) {
     const historyLines = ctx.history
-      .map((m) => m.text)
+      .map((m) => `${m.role === 'assistant' ? 'dinio' : 'user'}: ${m.text}`)
       .join('\n')
     parts.push(`[Histórico da conversa]\n${historyLines}`)
   }

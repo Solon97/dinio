@@ -1,11 +1,13 @@
 /** Maximum number of messages retained in the sliding history window. */
-export const MAX_HISTORY_SIZE = 15
+export const MAX_HISTORY_SIZE = 20
 
 /** Session TTL in seconds (24 hours). */
 export const SESSION_TTL_SECONDS = 24 * 60 * 60
 
 /** A single entry in the conversation history window. */
 export interface HistoryMessage {
+  /** Who sent this message. */
+  role: 'user' | 'assistant'
   /** Raw message text. */
   text: string
   /** Unix timestamp (ms). Stored as compact field name `ts` to reduce payload size. */
