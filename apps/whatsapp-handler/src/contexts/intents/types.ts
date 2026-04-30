@@ -9,6 +9,8 @@ export type IntentType =
   | 'check_agenda_month'
   | 'check_agenda_overdue'
   | 'answer_from_history'
+  | 'cancel_operation'
+  | 'clear_conversation_context'
   | 'unknown'
 
 export interface ParsedIntent {

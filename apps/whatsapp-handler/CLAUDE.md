@@ -109,6 +109,11 @@ All memory operations are deterministic (append, slice, clear).
 Intent detection input is built by `formatContextForPrompt(context)`, which
 formats history + active state + current message into a structured string.
 
+### Control intents
+
+- `cancel_operation`: aborts an in-progress multi-turn flow. The handler replies with confirmation; if there is no active flow, it replies that there is nothing to cancel.
+- `clear_conversation_context`: clears `session.history` and any active operation state so the next turn starts from a clean context.
+
 ---
 
 ## Adding a New Intent

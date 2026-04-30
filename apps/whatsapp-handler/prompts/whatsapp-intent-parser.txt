@@ -16,7 +16,15 @@ Você DEVE responder APENAS com JSON válido, sem nenhum texto adicional, sem ma
 - check_agenda_month: o usuário quer saber quais são seus compromissos ou vencimentos financeiros do mês
 - check_agenda_overdue: o usuário quer saber quais são seus compromissos ou vencimentos que estão em atraso (já venceram e não foram pagos)
 - answer_from_history: o usuário faz uma pergunta sobre o histórico recente da conversa (ex: qual foi meu último gasto, o que eu registrei agora)
+- cancel_operation: o usuário quer cancelar a operação atual (ex: "cancelar", "cancela", "pare", "desistir")
+- clear_conversation_context: o usuário quer limpar o contexto da conversa e começar do zero (ex: "limpar contexto", "apagar histórico", "reiniciar conversa")
 - unknown: qualquer outra intenção não relacionada às anteriores
+
+## Regras para cancelamento e limpeza de contexto
+
+- Classifique como `cancel_operation` quando o usuário pedir para cancelar, desistir, interromper ou parar a operação atual.
+- Classifique como `clear_conversation_context` quando o usuário pedir para limpar histórico, apagar contexto, reiniciar/recomeçar a conversa do zero.
+- Para essas duas intenções, mantenha todos os outros campos como `null` (description, amount, category, answer, expenseDate, paymentType, cardNameMention, isRefund).
 
 ## Regras para simulate_expense
 
@@ -61,7 +69,7 @@ Quando o usuário mencionar que um gasto é agendado, futuro, ou usar expressõe
 {
   "operations": [
     {
-      "intent": "register_expense" | "simulate_expense" | "check_daily_allowance" | "check_month_balance" | "check_today_spending" | "check_agenda" | "check_agenda_week" | "check_agenda_month" | "check_agenda_overdue" | "answer_from_history" | "unknown",
+      "intent": "register_expense" | "simulate_expense" | "check_daily_allowance" | "check_month_balance" | "check_today_spending" | "check_agenda" | "check_agenda_week" | "check_agenda_month" | "check_agenda_overdue" | "answer_from_history" | "cancel_operation" | "clear_conversation_context" | "unknown",
       "description": string | null,
       "amount": number | null,
       "category": string | null,
@@ -109,6 +117,8 @@ Quando o usuário mencionar que um gasto é agendado, futuro, ou usar expressõe
 "tenho compromissos em atraso?" → {"operations": [{"intent": "check_agenda_overdue", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}]}
 "oi, tudo bem?" → {"operations": [{"intent": "unknown", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null}]}
 "qual foi meu último gasto?" → {"operations": [{"intent": "answer_from_history", "description": null, "amount": null, "category": null, "answer": "Seu último gasto foi [descrição] de R$ [valor].", "expenseDate": null, "paymentType": null, "cardNameMention": null}]}
+"cancelar" → {"operations": [{"intent": "cancel_operation", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null, "isRefund": null}]}
+"limpar contexto da conversa" → {"operations": [{"intent": "clear_conversation_context", "description": null, "amount": null, "category": null, "answer": null, "expenseDate": null, "paymentType": null, "cardNameMention": null, "isRefund": null}]}
 "tenho um gasto agendado para 20/03 de 150 no mercado" → {"operations": [{"intent": "register_expense", "description": "mercado", "amount": 150, "category": "mercado", "answer": null, "expenseDate": "2026-03-20", "paymentType": "debito", "cardNameMention": null}]}
 "gastei 25 no uber" → {"intent": "register_expense", "description": "uber", "amount": 25, "category": "transporte", "answer": null, "expenseDate": "hoje", "paymentType": "debito", "cardNameMention": null}
 "almocei 35 reais" → {"intent": "register_expense", "description": "almoço", "amount": 35, "category": "restaurantes", "answer": null, "expenseDate": "hoje", "paymentType": "debito", "cardNameMention": null}

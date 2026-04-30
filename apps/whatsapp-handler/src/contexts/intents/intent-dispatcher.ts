@@ -8,6 +8,8 @@ import {
 import { handleCheckDailyAllowance } from "./handlers/check-daily-allowance.handler";
 import { handleCheckMonthBalance } from "./handlers/check-month-balance.handler";
 import { handleCheckTodaySpending } from "./handlers/check-today-spending.handler";
+import { handleClearConversationContext } from "./handlers/clear-conversation-context.handler";
+import { handleCancelOperation } from "./handlers/cancel-operation.handler";
 import { handleRegisterExpense } from "./handlers/register-expense.handler";
 import {
   handleBulkExpenseConfirmation,
@@ -84,6 +86,10 @@ async function dispatchSingle(
       return handleCheckAgendaOverdue(context, reply);
     case "answer_from_history":
       return handleAnswerFromHistory(intent, reply);
+    case "cancel_operation":
+      return handleCancelOperation(context, reply);
+    case "clear_conversation_context":
+      return handleClearConversationContext(context, reply);
     case "unknown":
     default:
       return handleUnknown(reply);

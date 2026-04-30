@@ -248,6 +248,76 @@ describe('dispatchIntent', () => {
     assert.ok(calls[0].includes('Não consegui entender'), 'should reply with unknown message')
   })
 
+  it('cancels active operation when cancel_operation is detected', async () => {
+    const intents: ParsedIntent[] = [
+      {
+        intent: 'cancel_operation',
+        description: null,
+        amount: null,
+        category: null,
+        answer: null,
+        expenseDate: null,
+        paymentType: null,
+        cardNameMention: null,
+        isRefund: null,
+      },
+    ]
+    const context = makeContext({
+      previousState: { intent: 'register_expense', step: 'awaiting_confirmation' },
+      previousOperation: {
+        type: 'register_expense',
+        data: {
+          description: 'Uber',
+          amountInReais: 28,
+        },
+      },
+    })
+    const { fn: reply, calls } = makeReply()
+
+    await dispatchIntent(intents, context, reply)
+
+    assert.strictEqual(calls.length, 1, 'should send one reply')
+    assert.ok(calls[0].includes('Operacao cancelada'), 'should confirm cancellation')
+  })
+
+  it('clears conversation history when clear_conversation_context is detected', async () => {
+    const intents: ParsedIntent[] = [
+      {
+        intent: 'clear_conversation_context',
+        description: null,
+        amount: null,
+        category: null,
+        answer: null,
+        expenseDate: null,
+        paymentType: null,
+        cardNameMention: null,
+        isRefund: null,
+      },
+    ]
+    const context = makeContext({
+      session: makeSession({
+        history: [
+          { role: 'user', text: 'gastei 50', ts: Date.now() - 1000 },
+          { role: 'assistant', text: 'Anotado', ts: Date.now() - 900 },
+        ],
+        state: { intent: 'register_expense', step: 'awaiting_confirmation' },
+        operation: {
+          type: 'register_expense',
+          data: { description: 'Mercado', amountInReais: 120 },
+        },
+      }),
+    })
+    const { fn: reply, calls } = makeReply()
+
+    await dispatchIntent(intents, context, reply)
+
+    assert.strictEqual(calls.length, 1, 'should send one reply')
+    assert.ok(calls[0].includes('Contexto da conversa limpo'), 'should confirm cleanup')
+    assert.strictEqual(context.session.history.length, 0, 'should clear session history')
+    assert.strictEqual(context.session.state, null, 'should clear session state')
+    assert.strictEqual(context.session.operation, null, 'should clear session operation')
+  })
+
   it('uses single-intent handler for a single register_expense (preserves confirmation flow)', async () => {
     // A single expense should go through the normal flow (confirmation button),
     // NOT the bulk handler. We verify this by checking that registerExpense

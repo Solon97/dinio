@@ -38,6 +38,12 @@
   - likely category
 - This interpretation turns short natural language messages into structured actions in Dinio.
 
+### Conversation control intents
+- The parser also supports two control intents:
+  - `cancel_operation`: user asks to cancel/stop the current operation.
+  - `clear_conversation_context`: user asks to clear/reset chat context/history.
+- For both control intents, handlers must be deterministic and not call Dinio financial APIs.
+
 ## Relationship With The Main Dinio App
 - The main app remains the source of truth and complete financial management surface.
 - WhatsApp is a complementary channel focused on speed and convenience.

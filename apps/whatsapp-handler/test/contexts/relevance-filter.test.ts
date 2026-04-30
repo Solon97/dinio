@@ -21,6 +21,14 @@ describe('Relevance Filter', () => {
       assert.strictEqual(isMessageRelevant('tenho disponível quanto?', log), true)
     })
 
+    it('should accept cancel and context reset commands', () => {
+      assert.strictEqual(isMessageRelevant('cancelar', log), true)
+      assert.strictEqual(isMessageRelevant('cancela isso', log), true)
+      assert.strictEqual(isMessageRelevant('limpar contexto', log), true)
+      assert.strictEqual(isMessageRelevant('apagar historico da conversa', log), true)
+      assert.strictEqual(isMessageRelevant('reiniciar conversa', log), true)
+    })
+
     it('should accept messages with numbers (potential amounts)', () => {
       assert.strictEqual(isMessageRelevant('25', log), true)
       assert.strictEqual(isMessageRelevant('coleguei 150', log), true)

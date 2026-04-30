@@ -35,6 +35,12 @@ const DINIO_KEYWORDS = [
   "simula",
   "registr",
   "anot",
+  "cancel",
+  "limp",
+  "context",
+  "histor",
+  "reinici",
+  "reset",
   "sim",
   "não",
 ];
